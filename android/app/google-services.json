@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1098525514115",
+    "project_id": "targetace-app",
+    "storage_bucket": "targetace-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1098525514115:android:33b4b13614bda180617eb6",
+        "android_client_info": {
+          "package_name": "com.targetace.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDIXkXp_Gi_03xMey8d_giyyJUZlYuLX4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,30 @@
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:target_ace/app.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:target_ace/core/config/app_config.dart';
+import 'package:target_ace/core/logger/supabase_logging_client.dart';
+import 'package:target_ace/core/services/service_locator.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: AppConfig.supabaseUrl,
+    anonKey: AppConfig.supabaseAnonKey, // ignore: deprecated_member_use
+    httpClient: SupabaseLoggingClient(),
+  );
+
+  await init();
+
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
+  //
+  // await NotificationService.instance.initialize();
+
+  return runApp(DevicePreview(enabled: false, builder: (_) => const MyApp()));
+}
+
