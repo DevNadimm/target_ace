@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/features/battle/data/repos/battle_repo.dart';
-import 'package:target_ace/core/components/custom_cached_image.dart';
+import 'package:target_ace/core/components/leaderboard_row.dart';
 import 'package:target_ace/core/components/back_button.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
@@ -107,78 +107,29 @@ class _ExamLeaderboardPageState extends State<ExamLeaderboardPage> {
       ),
       child: SafeArea(
         top: false,
-        child: Row(
-          children: [
-            SizedBox(
-              width: 38,
-              child: Text(
-                '#$rank',
-                style: AppFonts.body(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
+        child: LeaderboardRow(
+          rank: rank,
+          name: name,
+          avatarUrl: avatarUrl,
+          isMe: true,
+          avatarSize: 38,
+          rankWidth: 38,
+          padding: EdgeInsets.zero,
+          subtitle: Text(
+            'Time Taken: ${timeTaken ~/ 60}m ${timeTaken % 60}s',
+            style: AppFonts.body(
+              fontSize: 11,
+              color: AppColors.textLight,
             ),
-            _buildAvatar(avatarUrl, name, 38, true),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          name,
-                          style: AppFonts.body(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          "YOU",
-                          style: AppFonts.body(
-                            fontSize: 8.5,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Time Taken: ${timeTaken ~/ 60}m ${timeTaken % 60}s',
-                    style: AppFonts.body(
-                      fontSize: 11,
-                      color: AppColors.textLight,
-                    ),
-                  ),
-                ],
-              ),
+          ),
+          trailing: Text(
+            '${score.round()}/100',
+            style: AppFonts.body(
+              fontSize: 14.5,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryLight,
             ),
-            Text(
-              '${score.round()}/100',
-              style: AppFonts.body(
-                fontSize: 14.5,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryLight,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -313,67 +264,29 @@ class _ExamLeaderboardPageState extends State<ExamLeaderboardPage> {
                   final timeTaken = item['time_taken_seconds'] as int? ?? 0;
                   final isMe = item['user_id'] == _userId;
 
-                  return Container(
+                  return LeaderboardRow(
+                    rank: rank,
+                    name: name,
+                    avatarUrl: avatarUrl,
+                    isMe: isMe,
+                    avatarSize: 36,
+                    rankWidth: 32,
+                    hasBottomBorder: true,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: AppColors.divider.withValues(alpha: 0.3),
-                          width: 0.8,
-                        ),
+                    subtitle: Text(
+                      'Time Taken: ${timeTaken ~/ 60}m ${timeTaken % 60}s',
+                      style: AppFonts.body(
+                        fontSize: 11,
+                        color: AppColors.textLight,
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        // Rank
-                        SizedBox(
-                          width: 32,
-                          child: Text(
-                            '#$rank',
-                            style: AppFonts.body(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textLight,
-                            ),
-                          ),
-                        ),
-                        // Avatar
-                        _buildAvatar(avatarUrl, name, 36, isMe),
-                        const SizedBox(width: 12),
-                        // Name & Stats
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                name,
-                                style: AppFonts.body(
-                                  fontSize: 14,
-                                  fontWeight: isMe ? FontWeight.bold : FontWeight.w500,
-                                  color: isMe ? AppColors.primary : AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Time Taken: ${timeTaken ~/ 60}m ${timeTaken % 60}s',
-                                style: AppFonts.body(
-                                  fontSize: 11,
-                                  color: AppColors.textLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Score
-                        Text(
-                          '${score.round()}/100',
-                          style: AppFonts.body(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryLight,
-                          ),
-                        ),
-                      ],
+                    trailing: Text(
+                      '${score.round()}/100',
+                      style: AppFonts.body(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryLight,
+                      ),
                     ),
                   );
                 },
@@ -408,43 +321,6 @@ class _ExamLeaderboardPageState extends State<ExamLeaderboardPage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildAvatar(String avatarUrl, String name, double size, bool isMe) {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isMe ? AppColors.primary : AppColors.divider.withValues(alpha: 0.5),
-          width: isMe ? 2.0 : 1.0,
-        ),
-      ),
-      child: avatarUrl.isNotEmpty
-          ? CustomCachedImage(
-              imageUrl: avatarUrl,
-              width: size,
-              height: size,
-              borderRadius: size / 2,
-            )
-          : Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                color: (isMe ? AppColors.primary : AppColors.grey).withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  name.isNotEmpty ? name[0].toUpperCase() : 'S',
-                  style: AppFonts.body(
-                    fontSize: size * 0.38,
-                    fontWeight: FontWeight.bold,
-                    color: isMe ? AppColors.primary : AppColors.textLight,
-                  ),
-                ),
-              ),
-            ),
     );
   }
 

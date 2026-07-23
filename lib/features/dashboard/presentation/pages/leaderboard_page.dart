@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:target_ace/core/components/custom_cached_image.dart';
+import 'package:target_ace/core/components/leaderboard_row.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
@@ -155,107 +155,52 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                 final handle = '@${name.replaceAll(' ', '').toLowerCase()}';
                 final avgScore = examsTaken > 0 ? (score / examsTaken) : 0.0;
 
-                return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
+                return LeaderboardRow(
+                  rank: rank,
+                  name: name,
+                  avatarUrl: avatarUrl,
+                  isMe: isMe,
+                  avatarSize: 36,
+                  rankWidth: 28,
+                  subtitle: Text(
+                    handle,
+                    style: AppFonts.body(
+                      fontSize: 11.5,
+                      color: AppColors.textLight,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  trailing: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        '#$rank',
-                        style: AppFonts.body(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: isMe ? AppColors.primary : AppColors.textPrimary,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      _buildAvatar(avatarUrl, name, 36, isMe),
-                      const SizedBox(width: 14),
-
-                      // User Info (Name & Generated Handle)
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    name,
-                                    style: AppFonts.body(
-                                      fontSize: 14.5,
-                                      fontWeight: isMe ? FontWeight.bold : FontWeight.w600,
-                                      color: isMe ? AppColors.primary : AppColors.textPrimary,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                if (isMe) ...[
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      "YOU",
-                                      style: AppFonts.body(
-                                        fontSize: 8.5,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ]
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              handle,
-                              style: AppFonts.body(
-                                fontSize: 11.5,
-                                color: AppColors.textLight,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Star points & average rating
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.star_rounded,
-                                color: AppColors.accentYellow,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${score.round()}',
-                                style: AppFonts.body(
-                                  fontSize: 14.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ],
+                          const Icon(
+                            Icons.star_rounded,
+                            color: AppColors.accentYellow,
+                            size: 16,
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(width: 4),
                           Text(
-                            '+${avgScore.toStringAsFixed(1)}%',
+                            '${score.round()}',
                             style: AppFonts.body(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.labelGreen,
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '+${avgScore.toStringAsFixed(1)}%',
+                        style: AppFonts.body(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.labelGreen,
+                        ),
                       ),
                     ],
                   ),
@@ -269,45 +214,6 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
           child: SizedBox(height: 80), // Bottom padding for navigation bar
         ),
       ],
-    );
-  }
-
-
-
-  Widget _buildAvatar(String avatarUrl, String name, double size, bool isMe) {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isMe ? AppColors.primary : AppColors.divider.withValues(alpha: 0.5),
-          width: isMe ? 2.0 : 1.2,
-        ),
-      ),
-      child: avatarUrl.isNotEmpty
-          ? CustomCachedImage(
-              imageUrl: avatarUrl,
-              width: size,
-              height: size,
-              borderRadius: size / 2,
-            )
-          : Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                color: (isMe ? AppColors.primary : AppColors.grey).withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  name.isNotEmpty ? name[0].toUpperCase() : 'S',
-                  style: AppFonts.body(
-                    fontSize: size * 0.4,
-                    fontWeight: FontWeight.bold,
-                    color: isMe ? AppColors.primary : AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
     );
   }
 
