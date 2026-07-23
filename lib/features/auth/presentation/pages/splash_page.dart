@@ -6,6 +6,7 @@ import 'package:target_ace/core/config/app_config.dart';
 import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
+import 'package:target_ace/core/services/service_locator.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/utils/helpers/subscription_navigation_helper.dart';
@@ -55,7 +56,7 @@ class _SplashPageState extends State<SplashPage> {
 
       if (goal.isEmpty || phone.isEmpty || gender.isEmpty) {
         // Sync/Refresh profile data from Supabase DB to check if they exist on server but not locally
-        await AuthRepo.syncProfile();
+        await sl<AuthRepo>().syncProfile();
         if (!mounted) return;
 
         final updatedGoal = await AppPreferences.getUserGoal();

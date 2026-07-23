@@ -5,6 +5,7 @@ import 'package:target_ace/core/services/crud_service.dart';
 import 'package:target_ace/core/services/supabase_crud_service.dart';
 // import 'package:target_ace/core/services/dio_crud_service.dart';
 import 'dio_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:target_ace/features/auth/data/repos/auth_repo.dart';
 
 final sl = GetIt.instance;
@@ -24,6 +25,9 @@ Future<void> _registerCore() async {
   // Register SupabaseClient
   sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
 
+  // Register GoogleSignIn
+  sl.registerLazySingleton<GoogleSignIn>(() => GoogleSignIn.instance);
+
   // Register CrudService (defaulted to Supabase, easy to switch to DioCrudService later)
   sl.registerLazySingleton<CrudService>(() {
     return SupabaseCrudService(sl<SupabaseClient>());
@@ -34,7 +38,10 @@ Future<void> _registerCore() async {
   sl.registerLazySingleton(() => ApiEndpoints());
 
   // Register AuthRepo singleton
-  sl.registerLazySingleton<AuthRepo>(() => AuthRepo());
+  sl.registerLazySingleton<AuthRepo>(() => AuthRepo(
+        client: sl<SupabaseClient>(),
+        googleSignIn: sl<GoogleSignIn>(),
+      ));
 }
 
 /// Usage inside Repository:

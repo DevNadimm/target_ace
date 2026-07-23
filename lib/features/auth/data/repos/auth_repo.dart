@@ -9,11 +9,18 @@ import 'package:target_ace/features/profile/data/repos/profile_repo.dart';
 import 'package:target_ace/features/subscription/data/repos/subscription_repo.dart';
 
 class AuthRepo {
-  static final SupabaseClient _client = Supabase.instance.client;
+  final SupabaseClient _client;
+  final GoogleSignIn _googleSignIn;
+
+  AuthRepo({
+    required SupabaseClient client,
+    required GoogleSignIn googleSignIn,
+  })  : _client = client,
+        _googleSignIn = googleSignIn;
 
   /// Google Sign-In: authenticates with Supabase and saves session/profile.
-  static Future<AuthModel> googleSignIn() async {
-    final googleSignIn = GoogleSignIn.instance;
+  Future<AuthModel> googleSignIn() async {
+    final googleSignIn = _googleSignIn;
     await googleSignIn.initialize(serverClientId: AppConfig.googleWebClientId);
 
     GoogleSignInAccount? googleUser;
@@ -149,7 +156,7 @@ class AuthRepo {
   }
 
   /// Logs the user out of Supabase and clears local preferences.
-  static Future<void> logout() async {
+  Future<void> logout() async {
     try {
       await NotificationService.instance.handleLogout();
     } catch (_) {}
@@ -160,7 +167,7 @@ class AuthRepo {
   }
 
   /// Synchronizes local preferences with user profile data in Supabase.
-  static Future<void> syncProfile() async {
+  Future<void> syncProfile() async {
     final user = _client.auth.currentUser;
     if (user == null) return;
 
@@ -228,4 +235,3 @@ class AuthRepo {
     } catch (_) {}
   }
 }
-

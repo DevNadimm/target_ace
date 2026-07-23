@@ -11,6 +11,8 @@ import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/utils/helpers/subscription_navigation_helper.dart';
 import 'package:target_ace/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
+import 'package:target_ace/core/services/service_locator.dart';
+import 'package:target_ace/features/auth/data/repos/auth_repo.dart';
 import 'package:target_ace/features/auth/presentation/pages/profile_setup_page.dart';
 
 class LoginPage extends StatelessWidget {
@@ -21,7 +23,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AuthBloc(),
+      create: (_) => AuthBloc(sl<AuthRepo>()),
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) async {
           if (state is AuthSuccess) {

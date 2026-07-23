@@ -8,7 +8,9 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc() : super(AuthInitial()) {
+  final AuthRepo _authRepo;
+
+  AuthBloc(this._authRepo) : super(AuthInitial()) {
     on<GoogleSignInRequested>(_onGoogleSignIn);
     on<LogoutRequested>(_onLogout);
   }
@@ -16,7 +18,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onGoogleSignIn(GoogleSignInRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final authModel = await AuthRepo.googleSignIn();
+      final authModel = await _authRepo.googleSignIn();
       emit(AuthSuccess(authModel));
     } on AuthException catch (e) {
       emit(AuthFailure(ErrorType.unknown, e.message));
@@ -26,7 +28,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLogout(LogoutRequested event, Emitter<AuthState> emit) async {
-    await AuthRepo.logout();
+    await _authRepo.logout();
     emit(LogoutSuccess());
   }
 
