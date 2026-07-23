@@ -9,6 +9,7 @@ import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/utils/helpers/subscription_navigation_helper.dart';
+import 'package:target_ace/features/auth/data/repos/auth_repo.dart';
 import 'package:target_ace/features/auth/presentation/pages/login_page.dart';
 import 'package:target_ace/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:target_ace/features/subscription/presentation/bloc/subscription_bloc.dart';
@@ -48,15 +49,34 @@ class _SplashPageState extends State<SplashPage> {
       Navigator.pushReplacement(context, LoginPage.route());
     } else {
       final goal = await AppPreferences.getUserGoal();
+      final phone = await AppPreferences.getUserPhone();
+      final gender = await AppPreferences.getUserGender();
       if (!mounted) return;
-      
-      if (goal.isEmpty) {
-        Navigator.pushReplacement(context, ProfileSetupPage.route());
-      } else {
-        context.read<SubscriptionBloc>().add(FetchSubscriptionStatus());
+
+      if (goal.isEmpty || phone.isEmpty || gender.isEmpty) {
+        // Sync/Refresh profile data from Supabase DB to check if they exist on server but not locally
+        await AuthRepo.syncProfile();
+        if (!mounted) return;
+
+        final updatedGoal = await AppPreferences.getUserGoal();
+        final updatedPhone = await AppPreferences.getUserPhone();
+        final updatedGender = await AppPreferences.getUserGender();
+
+        if (!mounted) return;
+        if (updatedGoal.isEmpty || updatedPhone.isEmpty || updatedGender.isEmpty) {
+          Navigator.pushReplacement(context, ProfileSetupPage.route());
+          return;
+        }
       }
+
+      if (!mounted) return;
+      context.read<SubscriptionBloc>().add(FetchSubscriptionStatus());
+
     }
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +97,8 @@ class _SplashPageState extends State<SplashPage> {
               state.subscription.status,
             );
           } else {
-            // On error, send back to login so user can re-authenticate
-            Navigator.pushReplacement(context, LoginPage.route());
+            // Even on subscription fetch error, grant full access to dashboard
+            SubscriptionNavigationHelper.navigateByStatus(context, 'active');
           }
         }
       },

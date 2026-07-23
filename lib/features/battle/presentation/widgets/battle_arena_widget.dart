@@ -71,37 +71,46 @@ class BattleArenaWidget extends StatelessWidget {
                             color: AppColors.textSecondary,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: questionSecondsRemaining <= 8 
-                                ? AppColors.error.withValues(alpha: 0.1) 
-                                : AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: questionSecondsRemaining <= 8 
-                                  ? AppColors.error.withValues(alpha: 0.3) 
-                                  : AppColors.primary.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              HugeIcon(
-                                icon: HugeIcons.strokeRoundedClock01,
-                                color: questionSecondsRemaining <= 8 ? AppColors.error : AppColors.primary,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '${questionSecondsRemaining}s',
-                                style: AppFonts.body(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: questionSecondsRemaining <= 8 ? AppColors.error : AppColors.primary,
+                        Builder(
+                          builder: (context) {
+                            final minutes = (questionSecondsRemaining ~/ 60).toString().padLeft(2, '0');
+                            final seconds = (questionSecondsRemaining % 60).toString().padLeft(2, '0');
+                            final timeStr = '$minutes:$seconds';
+                            final isTimeLow = questionSecondsRemaining <= 60;
+
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: isTimeLow 
+                                    ? AppColors.error.withValues(alpha: 0.1) 
+                                    : AppColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isTimeLow 
+                                      ? AppColors.error.withValues(alpha: 0.3) 
+                                      : AppColors.primary.withValues(alpha: 0.3),
                                 ),
                               ),
-                            ],
-                          ),
+                              child: Row(
+                                children: [
+                                  HugeIcon(
+                                    icon: HugeIcons.strokeRoundedClock01,
+                                    color: isTimeLow ? AppColors.error : AppColors.primary,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    timeStr,
+                                    style: AppFonts.body(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: isTimeLow ? AppColors.error : AppColors.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
                         ),
                       ],
                     ),

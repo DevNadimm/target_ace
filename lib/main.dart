@@ -1,4 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:target_ace/firebase_options.dart';
+import 'package:target_ace/core/services/notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/app.dart';
 import 'package:device_preview/device_preview.dart';
@@ -19,11 +22,11 @@ void main() async {
 
   await init();
 
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
-  //
-  // await NotificationService.instance.initialize();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await NotificationService.instance.initialize();
 
   return runApp(DevicePreview(enabled: false, builder: (_) => const MyApp()));
 }

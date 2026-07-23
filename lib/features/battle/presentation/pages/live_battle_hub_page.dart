@@ -46,8 +46,7 @@ class _LiveBattleHubPageState extends State<LiveBattleHubPage> {
       _isFetchingQuestions.value = false;
 
       if (mounted) {
-        final List<Map<String, dynamic>> userAnswers =
-            answers.map((a) => Map<String, dynamic>.from(a as Map)).toList();
+        final List<Map<String, dynamic>> userAnswers = answers.map((a) => Map<String, dynamic>.from(a as Map)).toList();
 
         Navigator.push(
           context,
@@ -72,15 +71,8 @@ class _LiveBattleHubPageState extends State<LiveBattleHubPage> {
         Scaffold(
           appBar: AppBar(
             title: Text(
-              'Live Battle Hub',
-              style: AppFonts.heading(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
+              'Live Battle Hub'
             ),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
             automaticallyImplyLeading: false,
           ),
           body: GradientBackground(
@@ -106,7 +98,7 @@ class _LiveBattleHubPageState extends State<LiveBattleHubPage> {
                     },
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -116,7 +108,7 @@ class _LiveBattleHubPageState extends State<LiveBattleHubPage> {
                               context.read<LiveBattleHubBloc>().add(LiveBattleHubFetchRequested(isSilent: true));
                             },
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 30),
                           UpcomingBattlesSection(
                             upcomingExams: state.upcomingExams,
                           ),
@@ -125,7 +117,7 @@ class _LiveBattleHubPageState extends State<LiveBattleHubPage> {
                             pastSubmissions: state.pastSubmissions,
                             onReviewTap: _navigateToReview,
                           ),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     ),

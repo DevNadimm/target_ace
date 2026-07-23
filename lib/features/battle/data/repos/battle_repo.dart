@@ -36,15 +36,59 @@ class BattleRepo {
   }
 
   /// Fetch leaderboard and details of a specific exam.
-  static Future<List<dynamic>> getExamLeaderboardData(String examId) async {
-    return Future.wait([
-      _client.from('exams').select().eq('id', examId).maybeSingle(),
-      _client
-          .from('exam_submissions')
-          .select('score, correct_count, wrong_count, user_id, profiles(name, avatar_url)')
-          .eq('exam_id', examId)
-          .order('score', ascending: false)
+  static Future<List<dynamic>> getExamLeaderboardData(String examId, {String? userId}) async {
+    final examQuery = _client.from('exams').select().eq('id', examId).maybeSingle();
+    
+    final leaderboardQuery = _client
+        .from('leaderboards')
+        .select('score, time_taken_seconds, rank, user_id, profiles(name, avatar_url)')
+        .eq('exam_id', examId)
+        .order('score', ascending: false)
+        .order('time_taken_seconds', ascending: true)
+        .limit(50);
+
+    final List<dynamic> results = await Future.wait([
+      examQuery,
+      leaderboardQuery,
+      if (userId != null && userId.isNotEmpty)
+        _client
+            .from('leaderboards')
+            .select('score, time_taken_seconds, rank, user_id, profiles(name, avatar_url)')
+            .eq('exam_id', examId)
+            .eq('user_id', userId)
+            .maybeSingle()
+      else
+        Future.value(null),
     ]);
+
+    final List<Map<String, dynamic>> top50 = List<Map<String, dynamic>>.from(results[1] as List);
+    Map<String, dynamic>? currentUserRecord = results[2] as Map<String, dynamic>?;
+
+    if (currentUserRecord != null) {
+      final containsUser = top50.any((element) => element['user_id'] == userId);
+      if (!containsUser) {
+        int rank = (currentUserRecord['rank'] as num?)?.toInt() ?? 0;
+        if (rank <= 0) {
+          final score = (currentUserRecord['score'] as num).toDouble();
+          final time = currentUserRecord['time_taken_seconds'] as int;
+          
+          final countResponse = await _client
+              .from('leaderboards')
+              .select('id')
+              .eq('exam_id', examId)
+              .or('score.gt.$score,and(score.eq.$score,time_taken_seconds.lt.$time)');
+          
+          rank = countResponse.length + 1;
+          currentUserRecord['rank'] = rank;
+        }
+      }
+    }
+
+    return [
+      results[0],
+      top50,
+      currentUserRecord,
+    ];
   }
 
   /// Check if the user has already submitted this exam.

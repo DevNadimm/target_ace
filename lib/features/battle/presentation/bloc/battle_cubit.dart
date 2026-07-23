@@ -133,14 +133,13 @@ class BattleCubit extends Cubit<BattleState> {
           );
         } else {
           // Live Battle Active
-          final int currentIndex = (elapsedSeconds / 30).floor().clamp(0, questions.length - 1);
-          final int secondsRemaining = 30 - (elapsedSeconds % 30);
+          final int secondsRemaining = totalExamSeconds - elapsedSeconds;
 
           emit(BattleActive(
             examId: examId,
             examTitle: examTitle,
             questions: questions,
-            currentIndex: currentIndex,
+            currentIndex: 0,
             selectedOption: '',
             questionSecondsRemaining: secondsRemaining,
             userAnswersList: [],
@@ -183,7 +182,7 @@ class BattleCubit extends Cubit<BattleState> {
     });
   }
 
-  // Active Gameplay Timer
+  // Active Gameplay Timer (Total Exam Countdown)
   void _startQuestionTimer() {
     _questionTimer?.cancel();
     _questionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -195,12 +194,28 @@ class BattleCubit extends Cubit<BattleState> {
           ));
         } else {
           _questionTimer?.cancel();
-          submitCurrentAnswerAndNext();
+          submitExamForcefully();
         }
       } else {
         _questionTimer?.cancel();
       }
     });
+  }
+
+  void submitExamForcefully() {
+    final currentState = state;
+    if (currentState is BattleActive) {
+      _finishAndStartAnalyzing(
+        examId: currentState.examId,
+        examTitle: currentState.examTitle,
+        examStartTime: currentState.examStartTime,
+        examDurationMinutes: currentState.examDurationMinutes,
+        questions: currentState.questions,
+        userAnswersList: currentState.userAnswersList,
+        perQuestionMark: currentState.perQuestionMark,
+        negativeMark: currentState.negativeMark,
+      );
+    }
   }
 
   void selectOption(String option) {
@@ -231,10 +246,9 @@ class BattleCubit extends Cubit<BattleState> {
         emit(currentState.copyWith(
           currentIndex: currentState.currentIndex + 1,
           selectedOption: '',
-          questionSecondsRemaining: 30,
+          questionSecondsRemaining: currentState.questionSecondsRemaining,
           userAnswersList: updatedAnswers,
         ));
-        _startQuestionTimer();
       } else {
         _finishAndStartAnalyzing(
           examId: currentState.examId,

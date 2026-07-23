@@ -145,10 +145,11 @@ class DashboardRepo {
     if (lastCompletedExam != null) {
       wave2Queries.add(
         _client
-            .from('exam_submissions')
+            .from('leaderboards')
             .select('score, user_id, profiles(name, avatar_url)')
             .eq('exam_id', lastCompletedExam.id)
             .order('score', ascending: false)
+            .order('time_taken_seconds', ascending: true)
             .limit(3)
       );
     } else {

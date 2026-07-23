@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/config/colors.dart';
@@ -24,14 +23,14 @@ class UpcomingBattlesSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
             'Upcoming Scheduled Battles',
-            style: AppFonts.body(
+            style: AppFonts.heading(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 6),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -47,35 +46,37 @@ class UpcomingBattlesSection extends StatelessWidget {
             }
 
             return CustomContainer(
-              margin: const EdgeInsets.only(bottom: 10),
-              child: Row(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const HugeIcon(
-                    icon: HugeIcons.strokeRoundedCalendar03,
-                    color: AppColors.primary,
-                    size: 20,
+                  Row(
+                    children: [
+                      Container(
+                        height: 16,
+                        width: 4,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        title,
+                        style: AppFonts.heading(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: AppFonts.heading(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          formattedDate,
-                          style: AppFonts.body(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
+                  SizedBox(height: 4),
+                  Text(
+                    formattedDate,
+                    style: AppFonts.body(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],

@@ -56,4 +56,16 @@ class ProfileRepo {
 
     return membershipResp['locked_until'] as String;
   }
+
+  /// Stores/upserts the FCM device token to public.user_device_tokens.
+  static Future<void> storeFcmToken({
+    required String userId,
+    required String token,
+  }) async {
+    await _client.from('user_device_tokens').upsert({
+      'user_id': userId,
+      'device_token': token,
+      'last_seen_at': DateTime.now().toUtc().toIso8601String(),
+    }, onConflict: 'user_id,device_token');
+  }
 }

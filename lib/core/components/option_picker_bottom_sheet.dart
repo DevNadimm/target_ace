@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
+import 'package:target_ace/core/shared/widgets/empty_state_widget.dart';
 
 class OptionPickerBottomSheet extends StatelessWidget {
   final List<String> options;
@@ -56,55 +58,74 @@ class OptionPickerBottomSheet extends StatelessWidget {
           ),
           if (options.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Center(
-                child: Text(
-                  "No items available",
-                  style: AppFonts.body(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
-                  ),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: EmptyStateWidget(
+                isCenter: false,
+                icon: Image.asset(
+                  Assets.noContent,
+                  height: 90,
+                  width: 90,
                 ),
+                title: 'No items available',
+                message: 'No options available to select right now. Please check back later or contact support if something seems missing',
               ),
             )
           else
             Flexible(
-              child: SingleChildScrollView(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  itemCount: options.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final item = options[index];
-                    final isSelected = controller.text == item;
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                itemCount: options.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final item = options[index];
+                  final isSelected = controller.text == item;
 
-                    return InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () => onOptionPicked(item),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 14,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => onOptionPicked(item),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: isSelected
+                            ? AppColors.primary.withValues(alpha: 0.1)
+                            : Colors.transparent,
+                        border: Border.all(
                           color: isSelected
-                              ? AppColors.primary.withValues(alpha: 0.1)
-                              : Colors.transparent,
-                          border: Border.all(
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.inputBorder,
-                            width: isSelected ? 1.5 : 1,
-                          ),
+                              ? AppColors.primary
+                              : AppColors.inputBorder,
+                          width: isSelected ? 1.5 : 1,
                         ),
                       ),
-                    );
-                  },
-                ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppFonts.body(
+                                fontSize: 14,
+                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          if (isSelected)
+                            const Icon(
+                              Icons.check_circle_rounded,
+                              color: AppColors.primary,
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
         ],

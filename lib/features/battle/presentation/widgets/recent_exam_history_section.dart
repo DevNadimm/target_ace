@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/custom_divider.dart';
+import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
+import 'package:target_ace/core/shared/widgets/empty_state_widget.dart';
 import 'package:target_ace/features/battle/presentation/pages/exam_leaderboard_page.dart';
 import 'package:target_ace/features/battle/presentation/pages/history_page.dart';
 
@@ -30,9 +33,9 @@ class RecentExamHistorySection extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
                 'Recent Exam History',
-                style: AppFonts.body(
+                style: AppFonts.heading(
                   fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
               ),
@@ -56,7 +59,7 @@ class RecentExamHistorySection extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 6),
         _buildHistoryList(context),
       ],
     );
@@ -64,11 +67,20 @@ class RecentExamHistorySection extends StatelessWidget {
 
   Widget _buildHistoryList(BuildContext context) {
     if (pastSubmissions.isEmpty) {
-      return CustomContainer(
-        child: Center(
-          child: Text(
-            'No exam submissions recorded yet.',
-            style: AppFonts.body(fontSize: 13, color: AppColors.textSecondary),
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: CustomContainer(
+          child: EmptyStateWidget(
+            icon: SvgPicture.asset(
+              Assets.archiveOutlined,
+              colorFilter: const ColorFilter.mode(
+                AppColors.primaryLight,
+                BlendMode.srcIn,
+              ),
+              height: 70,
+            ),
+            title: 'No History Yet',
+            message: 'Complete your first battle to start building your history.',
           ),
         ),
       );
@@ -116,7 +128,7 @@ class RecentExamHistorySection extends StatelessWidget {
         }
 
         return CustomContainer(
-          margin: const EdgeInsets.only(bottom: 14),
+          margin: const EdgeInsets.symmetric(vertical: 6),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

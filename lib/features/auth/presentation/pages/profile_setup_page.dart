@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:target_ace/core/components/custom_text_field.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
@@ -9,11 +8,16 @@ import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/utils/enums/message_type.dart';
+import 'package:target_ace/core/utils/helpers/date_formatter.dart';
 import 'package:target_ace/core/utils/helpers/subscription_navigation_helper.dart';
-import 'package:target_ace/core/utils/helpers/option_picker_bottom_sheet_helper.dart';
+import 'package:target_ace/features/auth/presentation/widgets/goal_selection_step.dart';
+import 'package:target_ace/features/auth/presentation/widgets/group_selection_step.dart';
+import 'package:target_ace/features/auth/presentation/widgets/step_progress_bar.dart';
+import 'package:target_ace/features/auth/presentation/widgets/user_info_setup_step.dart';
 
 class ProfileSetupPage extends StatefulWidget {
-  static Route route() => MaterialPageRoute(builder: (_) => const ProfileSetupPage());
+  static Route route() =>
+      MaterialPageRoute(builder: (_) => const ProfileSetupPage());
 
   const ProfileSetupPage({super.key});
 
@@ -22,26 +26,51 @@ class ProfileSetupPage extends StatefulWidget {
 }
 
 class _ProfileSetupPageState extends State<ProfileSetupPage> {
-  int _currentStep = 0; // 0: Goal Selection, 1: Sub-group Selection (if applicable), 2: Info (School/College & District)
+  int _currentStep = 0; // 0: Goal, 1: Sub-group (if exists), 2: User Info
   String _selectedGoal = '';
   String _selectedGroup = '';
+  String _rawDobIso = '';
+
+  String? _phoneError;
+  String? _genderError;
+  String? _dobError;
+  String? _institutionError;
+  String? _districtError;
+
   final TextEditingController _institutionController = TextEditingController();
   final TextEditingController _districtController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _genderController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
-  
+
   bool _isLoading = false;
   bool _isFetchingGoals = true;
   bool _isFetchingGroups = false;
 
   List<Map<String, dynamic>> _serverGoals = [];
-  List<Map<String, dynamic>> _serverGroups = []; // Dynamically loaded based on selected goal
+  List<Map<String, dynamic>> _serverGroups = [];
 
   final List<String> _districts = [
-    'Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Sylhet', 'Barishal', 'Rangpur', 
-    'Mymensingh', 'Cumilla', 'Jashore', 'Bogura', 'Cox\'s Bazar', 'Gazipur', 'Narayanganj',
-    'Narsingdi', 'Tangail', 'Feni', 'Noakhali', 'Chandpur', 'Brahmanbaria'
+    'Dhaka',
+    'Chattogram',
+    'Rajshahi',
+    'Khulna',
+    'Sylhet',
+    'Barishal',
+    'Rangpur',
+    'Mymensingh',
+    'Cumilla',
+    'Jashore',
+    'Bogura',
+    'Cox\'s Bazar',
+    'Gazipur',
+    'Narayanganj',
+    'Narsingdi',
+    'Tangail',
+    'Feni',
+    'Noakhali',
+    'Chandpur',
+    'Brahmanbaria',
   ];
 
   final List<String> _genders = ['Male', 'Female', 'Other'];
@@ -60,7 +89,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
     if (phone.isNotEmpty) _phoneController.text = phone;
     if (gender.isNotEmpty) _genderController.text = gender;
-    if (dob.isNotEmpty) _dobController.text = dob;
+    if (dob.isNotEmpty) {
+      _rawDobIso = DateFormatter.yyyyMMdd(dob);
+      _dobController.text = DateFormatter.readable(dob);
+    }
   }
 
   Future<void> _fetchGoalsFromServer() async {
@@ -69,7 +101,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           .from('onboarding_goals')
           .select()
           .order('created_at', ascending: true);
-      
+
       if (mounted) {
         setState(() {
           _serverGoals = List<Map<String, dynamic>>.from(response);
@@ -79,7 +111,11 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _isFetchingGoals = false);
-        AppNotifier.showSnackBar(context, 'Failed to load targets: $e', type: MessageType.error);
+        AppNotifier.showSnackBar(
+          context,
+          'Failed to load targets: $e',
+          type: MessageType.error,
+        );
       }
     }
   }
@@ -96,17 +132,31 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           .select()
           .eq('goal_id', goalId)
           .order('created_at', ascending: true);
-      
+
       if (mounted) {
+        final groups = List<Map<String, dynamic>>.from(response);
         setState(() {
-          _serverGroups = List<Map<String, dynamic>>.from(response);
+          _serverGroups = groups;
           _isFetchingGroups = false;
+          // Auto-select first group if available, else default to goalId for General stream
+          if (groups.isNotEmpty) {
+            _selectedGroup = groups.first['id'] as String? ?? goalId;
+          } else {
+            _selectedGroup = goalId;
+          }
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isFetchingGroups = false);
-        AppNotifier.showSnackBar(context, 'Failed to load groups: $e', type: MessageType.error);
+        setState(() {
+          _isFetchingGroups = false;
+          _selectedGroup = goalId;
+        });
+        AppNotifier.showSnackBar(
+          context,
+          'Failed to load groups: $e',
+          type: MessageType.error,
+        );
       }
     }
   }
@@ -121,7 +171,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     super.dispose();
   }
 
-  // Parses hex color string like #3B82F6 to Flutter Color
   Color _parseColor(String hex) {
     try {
       final cleanHex = hex.replaceAll('#', '');
@@ -131,7 +180,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     }
   }
 
-  // Maps DB icon_name to HugeIcon data list
   List<List<dynamic>> _mapIcon(String iconName) {
     switch (iconName) {
       case 'bookOpen':
@@ -160,26 +208,27 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   Future<void> _onNext() async {
     if (_currentStep == 0) {
       if (_selectedGoal.isEmpty) {
-        AppNotifier.showSnackBar(context, 'Please select a goal to proceed.', type: MessageType.error);
+        AppNotifier.showSnackBar(
+          context,
+          'Please select a goal to proceed.',
+          type: MessageType.error,
+        );
         return;
       }
-      
-      // Load groups for selected goal
-      await _fetchGroupsFromServer(_selectedGoal);
 
-      if (_requiresGroupSelection) {
-        setState(() => _currentStep = 1);
-      } else {
-        // If no subgroups exist in DB, default group is goalId (e.g. bcs)
-        setState(() {
-          _selectedGroup = _selectedGoal;
-          _currentStep = 2; // Jump to info
-        });
-      }
+      await _fetchGroupsFromServer(_selectedGoal);
+      setState(() => _currentStep = 1);
     } else if (_currentStep == 1) {
-      if (_selectedGroup.isEmpty) {
-        AppNotifier.showSnackBar(context, 'Please select your group/division.', type: MessageType.error);
+      if (_requiresGroupSelection && _selectedGroup.isEmpty) {
+        AppNotifier.showSnackBar(
+          context,
+          'Please select your group/division.',
+          type: MessageType.error,
+        );
         return;
+      }
+      if (!_requiresGroupSelection && _selectedGroup.isEmpty) {
+        _selectedGroup = _selectedGoal;
       }
       setState(() => _currentStep = 2);
     } else {
@@ -188,36 +237,42 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   }
 
   void _onBack() {
-    if (_currentStep == 2) {
-      if (_requiresGroupSelection) {
-        setState(() => _currentStep = 1);
-      } else {
-        setState(() => _currentStep = 0);
-      }
-    } else if (_currentStep == 1) {
-      setState(() => _currentStep = 0);
+    if (_currentStep > 0) {
+      setState(() => _currentStep--);
     }
   }
 
   Future<void> _submitData() async {
-    if (_phoneController.text.trim().isEmpty) {
-      AppNotifier.showSnackBar(context, 'Please enter your phone number.', type: MessageType.error);
-      return;
+    final phone = _phoneController.text.trim();
+    final gender = _genderController.text.trim();
+    final dob = _dobController.text.trim();
+    final institution = _institutionController.text.trim();
+    final district = _districtController.text.trim();
+
+    // Valid BD operators: 013 (GP), 014 (BL), 015 (Teletalk), 016 (Airtel), 017 (GP), 018 (Robi), 019 (BL)
+    final phoneRegex = RegExp(r'^01[3-9]\d{8}$');
+    String? phoneErrorMsg;
+    if (phone.isEmpty) {
+      phoneErrorMsg = 'Phone number is required';
+    } else if (phone.length != 11) {
+      phoneErrorMsg = 'Phone number must be exactly 11 digits';
+    } else if (!phoneRegex.hasMatch(phone)) {
+      phoneErrorMsg = 'Enter a valid 11-digit Bangladeshi number (e.g., 018..., 013...)';
     }
-    if (_genderController.text.trim().isEmpty) {
-      AppNotifier.showSnackBar(context, 'Please select your gender.', type: MessageType.error);
-      return;
-    }
-    if (_dobController.text.trim().isEmpty) {
-      AppNotifier.showSnackBar(context, 'Please select your date of birth.', type: MessageType.error);
-      return;
-    }
-    if (_institutionController.text.trim().isEmpty) {
-      AppNotifier.showSnackBar(context, 'Please enter your institution name.', type: MessageType.error);
-      return;
-    }
-    if (_districtController.text.trim().isEmpty) {
-      AppNotifier.showSnackBar(context, 'Please select your district.', type: MessageType.error);
+
+    setState(() {
+      _phoneError = phoneErrorMsg;
+      _genderError = gender.isEmpty ? 'Please select your gender' : null;
+      _dobError = dob.isEmpty ? 'Please select your date of birth' : null;
+      _institutionError = institution.isEmpty ? 'Institution name is required' : null;
+      _districtError = district.isEmpty ? 'Please select your district' : null;
+    });
+
+    if (_phoneError != null ||
+        _genderError != null ||
+        _dobError != null ||
+        _institutionError != null ||
+        _districtError != null) {
       return;
     }
 
@@ -229,20 +284,52 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         final district = _districtController.text.trim();
         final phone = _phoneController.text.trim();
         final gender = _genderController.text.trim();
-        final dob = _dobController.text.trim();
+        final dob = _rawDobIso.isNotEmpty ? _rawDobIso : DateFormatter.yyyyMMdd(_dobController.text.trim());
 
-        // Update user profile in Supabase profiles table
-        await Supabase.instance.client.from('profiles').update({
-          'goal': _selectedGoal,
-          'group_id': _selectedGroup,
-          'institution': _institutionController.text.trim(),
-          'district': district,
-          'phone': phone,
-          'gender': gender,
-          'dob': dob,
-        }).eq('id', user.id);
+        // Save phone, gender, dob and other details to auth metadata as they don't exist in public.profiles table
+        try {
+          await Supabase.instance.client.auth.updateUser(
+            UserAttributes(
+              data: {
+                'phone': phone,
+                'gender': gender,
+                'dob': dob,
+                'institution': _institutionController.text.trim(),
+                'district': district,
+              },
+            ),
+          );
+        } catch (_) {}
 
-        // Deactivate any existing active group memberships
+        try {
+          await Supabase.instance.client
+              .from('profiles')
+              .update({
+                'goal': _selectedGoal,
+                'group_id': _selectedGroup,
+                'institution': _institutionController.text.trim(),
+                'district': district,
+                'phone': phone,
+                'gender': gender,
+                'dob': dob,
+              })
+              .eq('id', user.id);
+        } catch (dbErr) {
+          // If a field like 'dob' or 'gender' is missing in Supabase schema cache, fallback to essential profile fields
+          try {
+            await Supabase.instance.client
+                .from('profiles')
+                .update({
+                  'goal': _selectedGoal,
+                  'group_id': _selectedGroup,
+                  'institution': _institutionController.text.trim(),
+                  'district': district,
+                })
+                .eq('id', user.id);
+          } catch (_) {}
+        }
+
+
         try {
           await Supabase.instance.client
               .from('group_memberships')
@@ -251,7 +338,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               .eq('is_active', true);
         } catch (_) {}
 
-        // Insert new active membership
         final membershipResp = await Supabase.instance.client
             .from('group_memberships')
             .insert({
@@ -264,20 +350,26 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
         final lockedUntil = membershipResp['locked_until'] as String;
 
-        // Resolve group display title
         String groupTitle = '';
         if (_requiresGroupSelection) {
-          final chosen = _serverGroups.firstWhere((g) => g['id'] == _selectedGroup, orElse: () => <String, dynamic>{});
+          final chosen = _serverGroups.firstWhere(
+            (g) => g['id'] == _selectedGroup,
+            orElse: () => <String, dynamic>{},
+          );
           groupTitle = chosen['title'] as String? ?? 'General';
         } else {
-          final chosen = _serverGoals.firstWhere((g) => g['id'] == _selectedGoal, orElse: () => <String, dynamic>{});
+          final chosen = _serverGoals.firstWhere(
+            (g) => g['id'] == _selectedGoal,
+            orElse: () => <String, dynamic>{},
+          );
           groupTitle = chosen['title'] as String? ?? 'General';
         }
 
-        // Update local preferences
         await AppPreferences.setUserGoal(_selectedGoal);
         await AppPreferences.setUserGroup(_selectedGroup);
-        await AppPreferences.setUserInstitution(_institutionController.text.trim());
+        await AppPreferences.setUserInstitution(
+          _institutionController.text.trim(),
+        );
         await AppPreferences.setUserDistrict(district);
         await AppPreferences.setUserPhone(phone);
         await AppPreferences.setUserGender(gender);
@@ -288,9 +380,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           lockedUntil: lockedUntil,
         );
 
-        // Success - Navigate to dashboard/subscription gate
         if (mounted) {
-          AppNotifier.showSnackBar(context, 'Profile set up successfully!', type: MessageType.success);
+          AppNotifier.showSnackBar(
+            context,
+            'Profile set up successfully!',
+            type: MessageType.success,
+          );
           final status = await AppPreferences.getSubscriptionStatus();
           if (mounted) {
             SubscriptionNavigationHelper.navigateByStatus(context, status);
@@ -299,49 +394,71 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
       }
     } catch (e) {
       if (mounted) {
-        AppNotifier.showSnackBar(context, 'Error saving profile: $e', type: MessageType.error);
+        AppNotifier.showSnackBar(
+          context,
+          'Error saving profile: $e',
+          type: MessageType.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  Future<void> _selectDob() async {
+    final now = DateTime.now();
+    final initialDate = DateTime.tryParse(_rawDobIso) ?? DateTime(2002, 1, 1);
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1950),
+      lastDate: now,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              surface: AppColors.card,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      _rawDobIso = DateFormatter.yyyyMMdd(pickedDate);
+      final formattedText = DateFormatter.readable(pickedDate);
+      if (mounted) {
+        setState(() {
+          _dobController.text = formattedText;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Total steps calculation
-    final totalSteps = _requiresGroupSelection ? 3 : 2;
-    final progressStep = _currentStep == 2 ? 2 : _currentStep;
-
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: GradientBackground(
         child: SafeArea(
           child: Stack(
             children: [
               Column(
                 children: [
-                  // Top progress indicator
+                  // Top progress indicator (Always 3 steps)
                   Padding(
                     padding: const EdgeInsets.all(24.0),
-                    child: Row(
-                      children: List.generate(totalSteps, (index) {
-                        final isActive = index <= progressStep;
-                        return Expanded(
-                          child: Container(
-                            height: 4,
-                            margin: const EdgeInsets.only(right: 8),
-                            decoration: BoxDecoration(
-                              color: isActive 
-                                  ? AppColors.primary 
-                                  : AppColors.primary.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        );
-                      }),
+                    child: StepProgressBar(
+                      currentStep: _currentStep,
+                      totalSteps: 3,
                     ),
                   ),
 
-                  // Main setup content
+                  // Main step content
                   Expanded(
                     child: (_isFetchingGoals || _isFetchingGroups)
                         ? const Center(child: Loader())
@@ -351,56 +468,82 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                           ),
                   ),
 
-                  // Footer actions
+                  // Footer navigation buttons
                   if (!_isFetchingGoals && !_isFetchingGroups)
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           if (_currentStep > 0)
-                            TextButton(
+                            OutlinedButton(
                               onPressed: _onBack,
-                              child: Text(
-                                'Back',
-                                style: AppFonts.body(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.textSecondary,
+                                side: BorderSide(
+                                  color: AppColors.inputBorder,
                                 ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const HugeIcon(
+                                    icon: HugeIcons.strokeRoundedArrowLeft01,
+                                    size: 18,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Back',
+                                    style: AppFonts.body(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
                               ),
                             )
                           else
                             const SizedBox.shrink(),
-                          
+
                           ElevatedButton(
                             onPressed: _onNext,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 10,
+                              ),
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16)),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               elevation: 0,
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  (_currentStep == 2 || (_currentStep == 1 && !_requiresGroupSelection)) 
-                                      ? 'Submit' 
-                                      : 'Next',
+                                  _currentStep == 2 ? 'Submit' : 'Next',
                                   style: AppFonts.body(
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 6),
                                 HugeIcon(
-                                  icon: (_currentStep == 2 || (_currentStep == 1 && !_requiresGroupSelection)) 
-                                      ? HugeIcons.strokeRoundedCheckmarkCircle02 
-                                      : HugeIcons.strokeRoundedArrowRight01, 
-                                  size: 20,
+                                  icon: _currentStep == 2
+                                      ? HugeIcons.strokeRoundedCheckmarkCircle02
+                                      : HugeIcons.strokeRoundedArrowRight01,
+                                  size: 18,
                                   color: Colors.white,
                                 ),
                               ],
@@ -425,340 +568,44 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   Widget _buildStepContent() {
     if (_currentStep == 0) {
-      return _buildGoalStep();
-    } else if (_currentStep == 1 && _requiresGroupSelection) {
-      return _buildGroupStep();
+      return GoalSelectionStep(
+        goals: _serverGoals,
+        selectedGoal: _selectedGoal,
+        onGoalSelected: (goalId) {
+          setState(() {
+            _selectedGoal = goalId;
+            _selectedGroup = '';
+          });
+        },
+        parseColor: _parseColor,
+        mapIcon: _mapIcon,
+      );
+    } else if (_currentStep == 1) {
+      return GroupSelectionStep(
+        groups: _serverGroups,
+        selectedGroup: _selectedGroup.isNotEmpty ? _selectedGroup : _selectedGoal,
+        onGroupSelected: (groupId) {
+          setState(() => _selectedGroup = groupId);
+        },
+        mapIcon: _mapIcon,
+      );
     } else {
-      return _buildInfoStep();
+      return UserInfoSetupStep(
+        key: ValueKey('user_info_step_${_dobController.text}_${_dobError ?? ""}'),
+        phoneController: _phoneController,
+        genderController: _genderController,
+        dobController: _dobController,
+        institutionController: _institutionController,
+        districtController: _districtController,
+        genders: _genders,
+        districts: _districts,
+        onSelectDob: _selectDob,
+        phoneErrorText: _phoneError,
+        genderErrorText: _genderError,
+        dobErrorText: _dobError,
+        institutionErrorText: _institutionError,
+        districtErrorText: _districtError,
+      );
     }
-  }
-
-  Widget _buildGoalStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 12),
-        Text(
-          'Choose your Target',
-          style: AppFonts.heading(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Select your primary goal. We will personalize your live battle exams and leaderboards accordingly.',
-          style: AppFonts.body(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 32),
-        if (_serverGoals.isEmpty)
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 40.0),
-              child: Text(
-                'No targets available at the moment.',
-                style: AppFonts.body(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          )
-        else
-          ..._serverGoals.map((goal) {
-            final isSelected = _selectedGoal == goal['id'];
-            final goalColor = _parseColor(goal['color_hex'] as String? ?? '#3B82F6');
-            final goalIcon = _mapIcon(goal['icon_name'] as String? ?? '');
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              child: InkWell(
-                onTap: () {
-                  setState(() {
-                    _selectedGoal = goal['id'] as String;
-                    _selectedGroup = ''; // Reset group when goal changes
-                  });
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.card,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected ? AppColors.primary : AppColors.divider,
-                      width: isSelected ? 2 : 1,
-                    ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.15),
-                              blurRadius: 16,
-                              offset: const Offset(0, 8),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: goalColor.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: HugeIcon(
-                          icon: goalIcon,
-                          color: goalColor,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              goal['title'] as String? ?? '',
-                              style: AppFonts.body(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              goal['subtitle'] as String? ?? '',
-                              style: AppFonts.body(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }),
-      ],
-    );
-  }
-
-  Widget _buildGroupStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 12),
-        Text(
-          'Select your Group',
-          style: AppFonts.heading(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Choose your scientific or academic stream. You will compete with peers studying the same subjects.',
-          style: AppFonts.body(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 32),
-        ..._serverGroups.map((group) {
-          final isSelected = _selectedGroup == group['id'];
-          final groupIcon = _mapIcon(group['icon_name'] as String? ?? '');
-
-          return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            child: InkWell(
-              onTap: () {
-                setState(() => _selectedGroup = group['id'] as String);
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.divider,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: HugeIcon(
-                        icon: groupIcon,
-                        color: AppColors.primary,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        group['title'] as String? ?? '',
-                        style: AppFonts.body(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
-  Widget _buildInfoStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 12),
-        Text(
-          'Tell us about you',
-          style: AppFonts.heading(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Provide your institution and district details to match you with peers in your region.',
-          style: AppFonts.body(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 36),
-
-        // Phone Number Input
-        CustomTextField(
-          label: 'Phone Number',
-          controller: _phoneController,
-          hintText: 'e.g., 01700000000',
-          isRequired: true,
-          keyboardType: TextInputType.phone,
-          prefixIcon: HugeIcons.strokeRoundedCall,
-        ),
-        const SizedBox(height: 24),
-
-        // Gender Selection (Read only, with picker)
-        CustomTextField(
-          label: 'Gender',
-          controller: _genderController,
-          hintText: 'Select your gender',
-          isRequired: true,
-          readOnly: true,
-          prefixIcon: HugeIcons.strokeRoundedUser,
-          suffixIcon: HugeIcons.strokeRoundedArrowDown01,
-          onTap: () {
-            OptionPickerBottomSheetHelper.show(
-              context: context,
-              options: _genders,
-              controller: _genderController,
-              title: 'Select Gender',
-            );
-          },
-        ),
-        const SizedBox(height: 24),
-
-        // Date of Birth Input (Read only, with DatePicker)
-        CustomTextField(
-          label: 'Date of Birth',
-          controller: _dobController,
-          hintText: 'Select your date of birth',
-          isRequired: true,
-          readOnly: true,
-          prefixIcon: HugeIcons.strokeRoundedCalendar01,
-          suffixIcon: HugeIcons.strokeRoundedCalendar02,
-          onTap: () async {
-            final now = DateTime.now();
-            final initialDate = DateTime(2002, 1, 1);
-            final pickedDate = await showDatePicker(
-              context: context,
-              initialDate: initialDate,
-              firstDate: DateTime(1950),
-              lastDate: now,
-              builder: (context, child) {
-                return Theme(
-                  data: Theme.of(context).copyWith(
-                    colorScheme: ColorScheme.dark(
-                      primary: AppColors.primary,
-                      onPrimary: Colors.white,
-                      surface: AppColors.card,
-                      onSurface: AppColors.textPrimary,
-                    ),
-                  ),
-                  child: child!,
-                );
-              },
-            );
-
-            if (pickedDate != null) {
-              final formatted = "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-              setState(() {
-                _dobController.text = formatted;
-              });
-            }
-          },
-        ),
-        const SizedBox(height: 24),
-
-        // Institution Input using CustomTextField
-        CustomTextField(
-          label: 'School / College / University',
-          controller: _institutionController,
-          hintText: 'e.g., BUET, Dhaka College',
-          isRequired: true,
-          prefixIcon: HugeIcons.strokeRoundedSchool,
-        ),
-        const SizedBox(height: 24),
-
-        // District Input using CustomTextField with read-only & OptionPickerBottomSheetHelper
-        CustomTextField(
-          label: 'District',
-          controller: _districtController,
-          hintText: 'Select your district',
-          isRequired: true,
-          readOnly: true,
-          prefixIcon: HugeIcons.strokeRoundedLocation01,
-          suffixIcon: HugeIcons.strokeRoundedArrowDown01,
-          onTap: () {
-            OptionPickerBottomSheetHelper.showSearchable(
-              context: context,
-              options: _districts,
-              controller: _districtController,
-              title: 'Select District',
-            );
-          },
-        ),
-        const SizedBox(height: 32),
-      ],
-    );
   }
 }

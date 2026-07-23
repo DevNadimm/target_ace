@@ -156,41 +156,18 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                 final avgScore = examsTaken > 0 ? (score / examsTaken) : 0.0;
 
                 return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: AppColors.divider.withValues(alpha: 0.3),
-                        width: 0.8,
-                      ),
-                    ),
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     children: [
-                      // Rank indicator with icon
-                      SizedBox(
-                        width: 44,
-                        child: Row(
-                          children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedAward01,
-                              color: AppColors.textLight.withValues(alpha: 0.6),
-                              size: 16,
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              '$rank',
-                              style: AppFonts.body(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: isMe ? AppColors.primary : AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
+                      Text(
+                        '#$rank',
+                        style: AppFonts.body(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isMe ? AppColors.primary : AppColors.textPrimary,
                         ),
                       ),
-
-                      // User Avatar
+                      SizedBox(width: 12),
                       _buildAvatar(avatarUrl, name, 36, isMe),
                       const SizedBox(width: 14),
 

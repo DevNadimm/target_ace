@@ -4,10 +4,10 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/components/custom_icon_button.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
-import 'package:target_ace/core/shared/pages/under_development_page.dart';
 import 'package:target_ace/core/utils/helpers/greeting_helper.dart';
 import 'package:target_ace/core/components/custom_cached_image.dart';
 import 'package:target_ace/features/profile/presentation/pages/profile_page.dart';
+import 'package:target_ace/features/notification/presentation/pages/notification_page.dart';
 
 class DashboardAppBar extends StatefulWidget implements PreferredSizeWidget {
   const DashboardAppBar({super.key});
@@ -142,7 +142,7 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
             ),
             tooltip: 'Notifications',
             onTap: () {
-              Navigator.push(context, UnderDevelopmentPage.route());
+              Navigator.push(context, NotificationPage.route());
             },
           ),
         ],

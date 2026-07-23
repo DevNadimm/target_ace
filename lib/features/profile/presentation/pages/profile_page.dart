@@ -22,6 +22,7 @@ import 'package:target_ace/core/utils/helpers/date_formatter.dart';
 import 'package:target_ace/features/auth/presentation/pages/login_page.dart';
 
 
+
 class ProfilePage extends StatefulWidget {
   static Route route() => MaterialPageRoute(builder: (_) => const ProfilePage());
 
@@ -54,6 +55,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _loadProfile() async {
+    await _updateUIFromPrefs();
+  }
+
+
+  Future<void> _updateUIFromPrefs() async {
     final name = await AppPreferences.getUserName();
     final email = await AppPreferences.getUserEmail();
     final phone = await AppPreferences.getUserPhone();
@@ -84,6 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
       _isLoading = false;
     });
   }
+
 
   String get _statusLabel {
     final expiryDate = DateTime.tryParse(_subscriptionExpiry);
@@ -311,8 +318,8 @@ Thank you.
                     SpringButton(
                       onPressed: () => _onLogout(context),
                       backgroundColor: AppColors.error,
-                      shadowColor: Colors.red.shade900,
-                      child: const Text('Log Out'),
+                      shadowColor: AppColors.errorDark,
+                      child: const Text('Log Out', style: TextStyle(color: AppColors.white),),
                     ),
                     const SizedBox(height: 24),
                   ],

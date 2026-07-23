@@ -1,4 +1,4 @@
-﻿import 'package:intl/intl.dart';
+import 'package:intl/intl.dart';
 
 class DateFormatter {
   DateFormatter._();
@@ -73,11 +73,14 @@ class DateFormatter {
     return DateFormat('dd/MM/yyyy').format(date);
   }
 
-  /// 2025-09-20  â€” always ASCII digits (safe for API calls)
+  /// 2025-09-20  — always ASCII digits (safe for API calls)
   static String yyyyMMdd(dynamic value) {
     final date = _parse(value);
     if (date == null) return value.toString();
-    return DateFormat('yyyy-MM-dd', 'en').format(date);
+    final y = date.year.toString().padLeft(4, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
   }
 
   /// Thu, 02 Apr

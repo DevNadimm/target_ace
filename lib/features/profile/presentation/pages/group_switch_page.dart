@@ -6,6 +6,7 @@ import 'package:target_ace/core/components/spring_button.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
+import 'package:target_ace/core/services/notification_service.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
@@ -225,6 +226,8 @@ class _GroupSwitchPageState extends State<GroupSwitchPage> {
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user != null) {
+        final oldGroupId = await AppPreferences.getActiveGroupId();
+
         final lockedUntil = await ProfileRepo.switchGroup(
           userId: user.id,
           goalId: _selectedGoal,
@@ -239,6 +242,9 @@ class _GroupSwitchPageState extends State<GroupSwitchPage> {
           groupTitle: groupTitle,
           lockedUntil: lockedUntil,
         );
+
+        // Update notification subscription
+        await NotificationService.instance.updateGroupSubscription(oldGroupId, _selectedGroup);
 
         if (mounted) {
           AppNotifier.showSnackBar(context, 'Group switched successfully!', type: MessageType.success);

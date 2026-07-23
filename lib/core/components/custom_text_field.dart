@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/config/colors.dart';
@@ -27,6 +28,8 @@ class CustomTextField extends StatelessWidget {
     this.errorText,
     this.labelActionText,
     this.onLabelActionTap,
+    this.inputFormatters,
+    this.maxLength,
   });
 
   final String label;
@@ -50,6 +53,8 @@ class CustomTextField extends StatelessWidget {
   final String? errorText;
   final String? labelActionText;
   final VoidCallback? onLabelActionTap;
+  final List<TextInputFormatter>? inputFormatters;
+  final int? maxLength;
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +120,8 @@ class CustomTextField extends StatelessWidget {
           onChanged: onChanged,
           obscureText: obscureText,
           maxLines: maxLines,
+          inputFormatters: inputFormatters,
+          maxLength: maxLength,
           validator: isRequired
               ? validator ??
                     (value) {
@@ -135,6 +142,7 @@ class CustomTextField extends StatelessWidget {
             hintText: effectiveHint,
             suffixText: suffixText,
             errorText: errorText,
+            counterText: '',
             border: const OutlineInputBorder(),
             prefixIcon: prefixIcon != null
                 ? Padding(

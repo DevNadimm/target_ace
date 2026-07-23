@@ -7,6 +7,7 @@ import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/features/battle/presentation/pages/live_battle_hub_page.dart';
 import 'package:target_ace/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:target_ace/features/dashboard/presentation/pages/leaderboard_page.dart';
+import 'package:target_ace/features/practice/presentation/pages/practice_page.dart';
 import 'package:target_ace/features/profile/presentation/pages/profile_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
@@ -32,7 +33,6 @@ class MainNavigationPageState extends State<MainNavigationPage> {
   }
 
   /// Lazily built pages — only initialized when the user first visits the tab.
-  /// This prevents all 4 tabs from firing their initState() and API calls on startup.
   final Map<int, Widget> _builtPages = {};
 
   @override
@@ -58,8 +58,10 @@ class MainNavigationPageState extends State<MainNavigationPage> {
         case 1:
           return const LiveBattleHubPage();
         case 2:
-          return const LeaderboardPage();
+          return const PracticePage();
         case 3:
+          return const LeaderboardPage();
+        case 4:
           return const ProfilePage();
         default:
           return const DashboardPage();
@@ -72,7 +74,7 @@ class MainNavigationPageState extends State<MainNavigationPage> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: List.generate(4, (index) {
+        children: List.generate(5, (index) {
           if (_builtPages.containsKey(index)) {
             return _builtPages[index]!;
           }
@@ -117,11 +119,16 @@ class MainNavigationPageState extends State<MainNavigationPage> {
                 ),
                 _buildNavItem(
                   index: 2,
+                  strokeIcon: Assets.bookOutlined,
+                  solidIcon: Assets.bookFilled,
+                ),
+                _buildNavItem(
+                  index: 3,
                   strokeIcon: Assets.awardOutlined,
                   solidIcon: Assets.awardFilled,
                 ),
                 _buildNavItem(
-                  index: 3,
+                  index: 4,
                   strokeIcon: Assets.profileOutlined,
                   solidIcon: Assets.profileFilled,
                 ),
@@ -153,8 +160,8 @@ class MainNavigationPageState extends State<MainNavigationPage> {
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-        child: index == 3
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        child: index == 4
             ? Container(
                 width: 28,
                 height: 28,

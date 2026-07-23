@@ -47,6 +47,7 @@ class AppColors {
   // ------------------- Status Colors -------------------
   static const Color success = Color(0xFF059669);   // Emerald
   static const Color error = Color(0xFFE11D48);     // Crimson
+  static const Color errorDark = Color(0xFFBE123C);     // Crimson
   static const Color warning = Color(0xFFD97706);   // Amber
   static const Color info = Color(0xFF3B82F6);      // Muted Blue
 

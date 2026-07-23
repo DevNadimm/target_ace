@@ -40,6 +40,7 @@ class _ExamLeaderboardPageState extends State<ExamLeaderboardPage> {
   String _userId = '';
   Map<String, dynamic>? _examDetails;
   List<Map<String, dynamic>> _submissions = [];
+  Map<String, dynamic>? _currentUserRecord;
 
   @override
   void initState() {
@@ -55,12 +56,13 @@ class _ExamLeaderboardPageState extends State<ExamLeaderboardPage> {
 
   Future<void> _fetchData() async {
     try {
-      final results = await BattleRepo.getExamLeaderboardData(widget.examId);
+      final results = await BattleRepo.getExamLeaderboardData(widget.examId, userId: _userId);
 
       if (mounted) {
         setState(() {
           _examDetails = results[0] as Map<String, dynamic>?;
           _submissions = List<Map<String, dynamic>>.from(results[1] as List);
+          _currentUserRecord = results[2] as Map<String, dynamic>?;
           _isLoading = false;
         });
       }
@@ -70,6 +72,116 @@ class _ExamLeaderboardPageState extends State<ExamLeaderboardPage> {
       }
       debugPrint('Error fetching exam leaderboard: $e');
     }
+  }
+
+  Widget? _buildMyRankPinnedBanner() {
+    if (_isLoading || _currentUserRecord == null) return null;
+    
+    final isInsideTop50 = _submissions.any((s) => s['user_id'] == _userId);
+    if (isInsideTop50) return null;
+
+    final rank = _currentUserRecord!['rank'] as int? ?? 0;
+    final profile = _currentUserRecord!['profiles'] as Map<String, dynamic>?;
+    final name = profile != null ? (profile['name'] as String? ?? 'Student') : 'Student';
+    final avatarUrl = profile != null ? (profile['avatar_url'] as String? ?? '') : '';
+    final score = (_currentUserRecord!['score'] as num?)?.toDouble() ?? 0.0;
+    final timeTaken = _currentUserRecord!['time_taken_seconds'] as int? ?? 0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        border: Border(
+          top: BorderSide(
+            color: AppColors.primary.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          )
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 38,
+              child: Text(
+                '#$rank',
+                style: AppFonts.body(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+            _buildAvatar(avatarUrl, name, 38, true),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          name,
+                          style: AppFonts.body(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          "YOU",
+                          style: AppFonts.body(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Time Taken: ${timeTaken ~/ 60}m ${timeTaken % 60}s',
+                    style: AppFonts.body(
+                      fontSize: 11,
+                      color: AppColors.textLight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              '${score.round()}/100',
+              style: AppFonts.body(
+                fontSize: 14.5,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryLight,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -96,6 +208,7 @@ class _ExamLeaderboardPageState extends State<ExamLeaderboardPage> {
                 ),
         ),
       ),
+      bottomNavigationBar: _buildMyRankPinnedBanner(),
     );
   }
 
@@ -197,8 +310,7 @@ class _ExamLeaderboardPageState extends State<ExamLeaderboardPage> {
                   final name = profile != null ? (profile['name'] as String? ?? 'Student') : 'Student';
                   final avatarUrl = profile != null ? (profile['avatar_url'] as String? ?? '') : '';
                   final score = (item['score'] as num?)?.toDouble() ?? 0.0;
-                  final correct = item['correct_count'] as int? ?? 0;
-                  final wrong = item['wrong_count'] as int? ?? 0;
+                  final timeTaken = item['time_taken_seconds'] as int? ?? 0;
                   final isMe = item['user_id'] == _userId;
 
                   return Container(
@@ -243,7 +355,7 @@ class _ExamLeaderboardPageState extends State<ExamLeaderboardPage> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Correct: $correct · Wrong: $wrong',
+                                'Time Taken: ${timeTaken ~/ 60}m ${timeTaken % 60}s',
                                 style: AppFonts.body(
                                   fontSize: 11,
                                   color: AppColors.textLight,

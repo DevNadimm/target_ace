@@ -5,6 +5,7 @@ import 'package:target_ace/features/auth/presentation/pages/splash_page.dart';
 import 'package:target_ace/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:target_ace/features/subscription/presentation/bloc/subscription_bloc.dart';
 import 'package:target_ace/features/battle/presentation/bloc/live_battle_hub_bloc.dart';
+import 'package:target_ace/features/notification/presentation/bloc/notification_bloc.dart';
 import 'package:target_ace/main.dart';
 
 class MyApp extends StatelessWidget {
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => DashboardBloc()),
         BlocProvider(create: (_) => SubscriptionBloc()),
         BlocProvider(create: (_) => LiveBattleHubBloc()),
+        BlocProvider(create: (_) => NotificationBloc()),
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey,

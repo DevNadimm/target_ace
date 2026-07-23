@@ -20,6 +20,7 @@ class Assets {
   static const String profileOutlined = '$_svgIconPath/profile_outlined.svg';
   static const String boltFilled = '$_svgIconPath/bolt_filled.svg';
   static const String boltOutlined = '$_svgIconPath/bolt_outlined.svg';
+  static const String archiveOutlined = '$_svgIconPath/archive_outlined.svg';
 
   /// ── Badges ────────────────────────────────────────────────────────────────
   static const String firstBadge = '$_iconPath/1st_badge.png';

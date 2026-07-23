@@ -17,7 +17,7 @@ class AppConfig {
   static const String privacyUrl = "$websiteUrl/privacy";
 
   /// Support
-  static const String supportPhone = "+8801897688712";
+  static const String supportPhone = "+8801841953404";
 
   static String supportWhatsAppUrl([String? message]) {
     if (message == null || message.isEmpty) {

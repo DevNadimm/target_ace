@@ -10,7 +10,6 @@ import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/utils/helpers/subscription_navigation_helper.dart';
 import 'package:target_ace/features/auth/presentation/bloc/auth/auth_bloc.dart';
-
 import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/features/auth/presentation/pages/profile_setup_page.dart';
 
@@ -27,15 +26,18 @@ class LoginPage extends StatelessWidget {
         listener: (context, state) async {
           if (state is AuthSuccess) {
             final goal = await AppPreferences.getUserGoal();
+            final phone = await AppPreferences.getUserPhone();
+            final gender = await AppPreferences.getUserGender();
             if (!context.mounted) return;
 
-            if (goal.isEmpty) {
+            if (goal.isEmpty || phone.isEmpty || gender.isEmpty) {
               Navigator.pushReplacement(context, ProfileSetupPage.route());
             } else {
               final status = state.authModel.subscription?.status ?? 'none';
               SubscriptionNavigationHelper.navigateByStatus(context, status);
             }
           }
+
         },
         builder: (context, state) {
           return Stack(

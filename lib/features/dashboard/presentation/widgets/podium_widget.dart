@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/components/custom_cached_image.dart';
+import 'package:target_ace/core/config/typography.dart';
 
 class PodiumUser {
   final String name;
@@ -97,7 +98,7 @@ class PodiumWidget extends StatelessWidget {
               ] else
                 const SizedBox(height: 118),
               const SizedBox(height: 16),
-              _build3DPodiumBlock("2", 80, AppColors.textSecondary),
+              _build3DPodiumBlock("2nd", 80, AppColors.textSecondary),
             ],
           ),
         ),
@@ -163,7 +164,7 @@ class PodiumWidget extends StatelessWidget {
               ] else
                 const SizedBox(height: 134),
               const SizedBox(height: 16),
-              _build3DPodiumBlock("1", 110, AppColors.primary),
+              _build3DPodiumBlock("1st", 110, AppColors.primary),
             ],
           ),
         ),
@@ -229,7 +230,7 @@ class PodiumWidget extends StatelessWidget {
               ] else
                 const SizedBox(height: 118),
               const SizedBox(height: 16),
-              _build3DPodiumBlock("3", 60, const Color(0xFFCD7F32)),
+              _build3DPodiumBlock("3rd", 60, const Color(0xFFCD7F32)),
             ],
           ),
         ),
@@ -297,9 +298,9 @@ class PodiumWidget extends StatelessWidget {
         child: Center(
           child: Text(
             rank,
-            style: GoogleFonts.poppins(
-              fontSize: rank == "1" ? 40 : (rank == "2" ? 32 : 26),
-              fontWeight: FontWeight.w900,
+            style: AppFonts.heading(
+              fontSize: rank == "1st" ? 34 : (rank == "2nd" ? 28 : 22),
+              fontWeight: rank == "1st" ? FontWeight.w900 : (rank == "2nd" ? FontWeight.w800 : FontWeight.w700),
               color: accentColor.withValues(alpha: 0.8),
             ),
           ),

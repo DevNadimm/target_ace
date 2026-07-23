@@ -14,7 +14,7 @@ class DOBPickerHelper {
       context: context,
       builder: (_) => Container(
         height: 260,
-        color: AppColors.white,
+        color: AppColors.card,
         child: CupertinoDatePicker(
           mode: CupertinoDatePickerMode.date,
           maximumDate: DateTime.now(),
