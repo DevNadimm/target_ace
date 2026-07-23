@@ -3,19 +3,18 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
+import 'package:target_ace/features/auth/presentation/helpers/profile_setup_helpers.dart';
 
 class GroupSelectionStep extends StatelessWidget {
   final List<Map<String, dynamic>> groups;
   final String selectedGroup;
   final ValueChanged<String> onGroupSelected;
-  final List<List<dynamic>> Function(String iconName) mapIcon;
 
   const GroupSelectionStep({
     super.key,
     required this.groups,
     required this.selectedGroup,
     required this.onGroupSelected,
-    required this.mapIcon,
   });
 
   @override
@@ -57,7 +56,7 @@ class GroupSelectionStep extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: HugeIcon(
-                    icon: mapIcon('target01'),
+                    icon: mapIconToHugeIcon('target01'),
                     color: AppColors.primary,
                     size: 28,
                   ),
@@ -94,7 +93,7 @@ class GroupSelectionStep extends StatelessWidget {
           ...groups.map((group) {
             final groupId = group['id'] as String? ?? '';
             final isSelected = selectedGroup == groupId;
-            final groupIcon = mapIcon(group['icon_name'] as String? ?? '');
+            final groupIcon = mapIconToHugeIcon(group['icon_name'] as String? ?? '');
 
             return CustomContainer(
               margin: const EdgeInsets.symmetric(vertical: 6),

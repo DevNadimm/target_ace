@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/config/colors.dart';
-import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
@@ -14,6 +12,7 @@ import 'package:target_ace/features/auth/presentation/widgets/goal_selection_ste
 import 'package:target_ace/features/auth/presentation/widgets/group_selection_step.dart';
 import 'package:target_ace/features/auth/presentation/widgets/step_progress_bar.dart';
 import 'package:target_ace/features/auth/presentation/widgets/user_info_setup_step.dart';
+import 'package:target_ace/features/auth/presentation/widgets/profile_setup_footer.dart';
 
 class ProfileSetupPage extends StatefulWidget {
   static Route route() =>
@@ -169,38 +168,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     _genderController.dispose();
     _dobController.dispose();
     super.dispose();
-  }
-
-  Color _parseColor(String hex) {
-    try {
-      final cleanHex = hex.replaceAll('#', '');
-      return Color(int.parse('FF$cleanHex', radix: 16));
-    } catch (_) {
-      return AppColors.primary;
-    }
-  }
-
-  List<List<dynamic>> _mapIcon(String iconName) {
-    switch (iconName) {
-      case 'bookOpen':
-        return HugeIcons.strokeRoundedBookOpen01;
-      case 'graduateCap':
-        return HugeIcons.strokeRoundedGraduateMale;
-      case 'school':
-        return HugeIcons.strokeRoundedSchool;
-      case 'atom':
-      case 'atom01':
-        return HugeIcons.strokeRoundedAtom01;
-      case 'chartAnalysing':
-      case 'chart':
-        return HugeIcons.strokeRoundedBarChart;
-      case 'tools':
-        return HugeIcons.strokeRoundedTools;
-      case 'dna':
-        return HugeIcons.strokeRoundedDna;
-      default:
-        return HugeIcons.strokeRoundedTarget01;
-    }
   }
 
   bool get _requiresGroupSelection => _serverGroups.isNotEmpty;
@@ -470,87 +437,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
                   // Footer navigation buttons
                   if (!_isFetchingGoals && !_isFetchingGroups)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (_currentStep > 0)
-                            OutlinedButton(
-                              onPressed: _onBack,
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.textSecondary,
-                                side: BorderSide(
-                                  color: AppColors.inputBorder,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 10,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const HugeIcon(
-                                    icon: HugeIcons.strokeRoundedArrowLeft01,
-                                    size: 18,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Back',
-                                    style: AppFonts.body(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          else
-                            const SizedBox.shrink(),
-
-                          ElevatedButton(
-                            onPressed: _onNext,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 10,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _currentStep == 2 ? 'Submit' : 'Next',
-                                  style: AppFonts.body(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                HugeIcon(
-                                  icon: _currentStep == 2
-                                      ? HugeIcons.strokeRoundedCheckmarkCircle02
-                                      : HugeIcons.strokeRoundedArrowRight01,
-                                  size: 18,
-                                  color: Colors.white,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    ProfileSetupFooter(
+                      currentStep: _currentStep,
+                      onBack: _onBack,
+                      onNext: _onNext,
                     ),
                 ],
               ),
@@ -577,8 +467,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             _selectedGroup = '';
           });
         },
-        parseColor: _parseColor,
-        mapIcon: _mapIcon,
       );
     } else if (_currentStep == 1) {
       return GroupSelectionStep(
@@ -587,7 +475,6 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         onGroupSelected: (groupId) {
           setState(() => _selectedGroup = groupId);
         },
-        mapIcon: _mapIcon,
       );
     } else {
       return UserInfoSetupStep(

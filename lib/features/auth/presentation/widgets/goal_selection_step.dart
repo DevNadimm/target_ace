@@ -3,21 +3,18 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
+import 'package:target_ace/features/auth/presentation/helpers/profile_setup_helpers.dart';
 
 class GoalSelectionStep extends StatelessWidget {
   final List<Map<String, dynamic>> goals;
   final String selectedGoal;
   final ValueChanged<String> onGoalSelected;
-  final Color Function(String hex) parseColor;
-  final List<List<dynamic>> Function(String iconName) mapIcon;
 
   const GoalSelectionStep({
     super.key,
     required this.goals,
     required this.selectedGoal,
     required this.onGoalSelected,
-    required this.parseColor,
-    required this.mapIcon,
   });
 
   @override
@@ -61,8 +58,8 @@ class GoalSelectionStep extends StatelessWidget {
           ...goals.map((goal) {
             final goalId = goal['id'] as String? ?? '';
             final isSelected = selectedGoal == goalId;
-            final goalColor = parseColor(goal['color_hex'] as String? ?? '#3B82F6');
-            final goalIcon = mapIcon(goal['icon_name'] as String? ?? '');
+            final goalColor = parseHexColor(goal['color_hex'] as String? ?? '#3B82F6');
+            final goalIcon = mapIconToHugeIcon(goal['icon_name'] as String? ?? '');
 
             return CustomContainer(
               margin: EdgeInsets.symmetric(vertical: 6),
