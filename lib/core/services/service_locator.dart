@@ -5,6 +5,7 @@ import 'package:target_ace/core/services/crud_service.dart';
 import 'package:target_ace/core/services/supabase_crud_service.dart';
 // import 'package:target_ace/core/services/dio_crud_service.dart';
 import 'dio_service.dart';
+import 'package:target_ace/features/auth/data/repos/auth_repo.dart';
 
 final sl = GetIt.instance;
 
@@ -31,6 +32,9 @@ Future<void> _registerCore() async {
   });
 
   sl.registerLazySingleton(() => ApiEndpoints());
+
+  // Register AuthRepo singleton
+  sl.registerLazySingleton<AuthRepo>(() => AuthRepo());
 }
 
 /// Usage inside Repository:
