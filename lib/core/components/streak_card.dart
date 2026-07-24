@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:lottie/lottie.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
+import 'package:target_ace/core/utils/helpers/helper_functions.dart';
 
 class StreakCard extends StatelessWidget {
   final int streakCount;
@@ -18,194 +17,191 @@ class StreakCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final daysOfWeek = const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    final int targetCount = highestStreak > streakCount
+        ? highestStreak
+        : (streakCount == 0 ? 7 : (streakCount < 7 ? 7 : ((streakCount ~/ 7) + 1) * 7));
+
+    final double progressRatio = targetCount > 0
+        ? (streakCount / targetCount).clamp(0.0, 1.0)
+        : 0.0;
+
+    final int activeDaysThisWeek = streakCount >= 7
+        ? 7
+        : (streakCount > 0 ? streakCount : 0);
+
     return CustomContainer(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      borderRadius: BorderRadius.circular(24),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "CURRENT STREAK",
-                    style: AppFonts.body(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        "$streakCount",
-                        style: AppFonts.heading(
-                          fontSize: 48,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                          height: 1.0,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        "🔥",
-                        style: AppFonts.heading(fontSize: 24),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Day${streakCount == 1 ? "" : "s"} Streak",
-                    style: AppFonts.body(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.15),
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                    ),
-                  ],
-                ),
-                child: Lottie.asset(
-                  Assets.flameAnim,
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const HugeIcon(
-                      icon: HugeIcons.strokeRoundedFire,
-                      color: AppColors.primary,
-                      size: 96,
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(7, (index) {
-              final isCompleted = index < streakCount;
-              return Expanded(
-                child: Container(
-                  height: 6,
-                  margin: EdgeInsets.only(
-                    left: index == 0 ? 0 : 4,
-                    right: index == 6 ? 0 : 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isCompleted
-                        ? AppColors.primary
-                        : AppColors.grey.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              );
-            }),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(7, (index) {
-              final isCompleted = index < streakCount;
-              final dayNum = index + 1;
-              return _buildCalendarDayBlock(dayNum, isCompleted);
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalendarDayBlock(int day, bool isCompleted) {
-    final activeColor = AppColors.primary;
-    final inactiveColor = AppColors.divider.withValues(alpha: 0.5);
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 3,
-              height: 7,
-              decoration: BoxDecoration(
-                color: isCompleted ? activeColor : AppColors.textLight.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(1.5),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Container(
-              width: 3,
-              height: 7,
-              decoration: BoxDecoration(
-                color: isCompleted ? activeColor : AppColors.textLight.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(1.5),
-              ),
-            ),
-          ],
-        ),
-        Transform.translate(
-          offset: const Offset(0, -3),
-          child: Container(
-            width: 36,
-            height: 38,
+          Container(
+            width: 120,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
             decoration: BoxDecoration(
-              color: AppColors.cardAlt,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: isCompleted ? activeColor.withValues(alpha: 0.5) : inactiveColor,
-                width: 1.0,
-              ),
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  height: 8,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: isCompleted ? activeColor : AppColors.grey.withValues(alpha: 0.3),
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
+                Image.asset(
+                  Assets.streakFlame,
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.contain,
+                  colorBlendMode: BlendMode.srcIn,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "$streakCount ${streakCount == 1 ? 'day' : 'days'}",
+                  style: AppFonts.heading(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                    height: 1.1,
                   ),
                 ),
-                Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 2),
-                      child: Text(
-                        "$day",
-                        style: AppFonts.body(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: isCompleted ? activeColor : AppColors.textLight,
-                        ),
-                      ),
-                    ),
+                const SizedBox(height: 4),
+                Text(
+                  "Daily streak",
+                  style: AppFonts.body(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      HelperFunctions.padNumber(streakCount),
+                      style: AppFonts.heading(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      " / ${HelperFunctions.padNumber(targetCount)}",
+                      style: AppFonts.heading(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textSecondary,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final maxWidth = constraints.maxWidth;
+                    final fillWidth = (maxWidth * progressRatio).clamp(
+                      progressRatio > 0 ? 12.0 : 0.0,
+                      maxWidth,
+                    );
+                    return Stack(
+                      children: [
+                        Container(
+                          height: 14,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: AppColors.background,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        if (fillWidth > 0)
+                          Container(
+                            height: 14,
+                            width: fillWidth,
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(6),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.white.withValues(alpha: 0.2),
+                                  blurRadius: 14,
+                                  spreadRadius: 1.5,
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: List.generate(7, (index) {
+                      final dayName = daysOfWeek[index];
+                      final isCompleted = index < activeDaysThisWeek;
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: isCompleted
+                                  ? AppColors.background
+                                  : AppColors.card,
+                              shape: BoxShape.circle,
+                            ),
+                            child: isCompleted
+                                ? Image.asset(
+                                    Assets.streakFlame,
+                                    fit: BoxFit.cover,
+                                    colorBlendMode: BlendMode.srcIn,
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            dayName,
+                            style: AppFonts.body(
+                              fontSize: 9.5,
+                              fontWeight: isCompleted
+                                  ? FontWeight.bold
+                                  : FontWeight.w400,
+                              color: isCompleted
+                                  ? AppColors.textPrimary
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
