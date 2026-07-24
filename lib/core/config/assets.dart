@@ -26,6 +26,7 @@ class Assets {
   static const String firstBadge = '$_iconPath/1st_badge.png';
   static const String secondBadge = '$_iconPath/2nd_badge.png';
   static const String thirdBadge = '$_iconPath/3rd_badge.png';
+  static const String knightMascot = '$_iconPath/knight_mascot.png';
 
   /// ── Flags ─────────────────────────────────────────────────────────────────
   static const String bnFlag = '$_flagPath/bn.png';
@@ -46,6 +47,7 @@ class Assets {
   static const String gorilla = '$_iconPath/gorilla.png';
   static const String premium = '$_iconPath/premium.png';
   static const String google = '$_iconPath/google.png';
+  static const String streakFlame = '$_iconPath/streak_flame.png';
 
   /// ── Logos ─────────────────────────────────────────────────────────────────
   static const String appLogo = '$_logoPath/app_logo.png';
