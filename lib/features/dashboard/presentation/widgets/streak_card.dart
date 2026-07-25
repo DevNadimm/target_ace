@@ -8,11 +8,13 @@ import 'package:target_ace/core/utils/helpers/helper_functions.dart';
 class StreakCard extends StatelessWidget {
   final int streakCount;
   final int highestStreak;
+  final List<String> weeklyActiveDays;
 
   const StreakCard({
     super.key,
     required this.streakCount,
     required this.highestStreak,
+    this.weeklyActiveDays = const [],
   });
 
   @override
@@ -148,7 +150,9 @@ class StreakCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: List.generate(7, (index) {
                     final dayName = daysOfWeek[index];
-                    final isCompleted = index < activeDaysThisWeek;
+                    final isCompleted = weeklyActiveDays.isNotEmpty
+                        ? weeklyActiveDays.contains(dayName)
+                        : index < activeDaysThisWeek;
 
                     return Column(
                       mainAxisSize: MainAxisSize.min,
