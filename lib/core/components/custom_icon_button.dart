@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:target_ace/core/config/colors.dart';
 
 class CustomIconButton extends StatelessWidget {
   final VoidCallback? onTap;
@@ -16,9 +18,9 @@ class CustomIconButton extends StatelessWidget {
     super.key,
     required this.icon,
     this.onTap,
-    this.size = 48,
-    this.iconSize = 24,
-    this.backgroundColor = Colors.white,
+    this.size = 44,
+    this.iconSize = 22,
+    this.backgroundColor = AppColors.card,
     this.splashColor,
     this.shape = const CircleBorder(),
     this.padding = const EdgeInsets.all(8),
@@ -28,6 +30,17 @@ class CustomIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget iconWidget = icon;
+    if (icon is HugeIcon) {
+      final huge = icon as HugeIcon;
+      iconWidget = HugeIcon(
+        icon: huge.icon,
+        color: huge.color,
+        size: iconSize,
+        strokeWidth: huge.strokeWidth,
+      );
+    }
+
     final button = Material(
       color: backgroundColor,
       shape: shape,
@@ -41,7 +54,7 @@ class CustomIconButton extends StatelessWidget {
           child: Center(
             child: IconTheme.merge(
               data: IconThemeData(size: iconSize),
-              child: icon,
+              child: iconWidget,
             ),
           ),
         ),
@@ -55,4 +68,3 @@ class CustomIconButton extends StatelessWidget {
     return button;
   }
 }
-
