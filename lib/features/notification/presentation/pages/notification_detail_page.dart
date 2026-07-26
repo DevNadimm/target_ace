@@ -2,197 +2,150 @@ import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/back_button.dart';
-import 'package:target_ace/core/components/custom_container.dart';
-import 'package:target_ace/core/components/spring_button.dart';
+import 'package:target_ace/core/components/custom_icon_button.dart';
+import 'package:target_ace/core/shared/widgets/app_confirmation_dialog.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
-import 'package:target_ace/core/shared/widgets/gradient_background.dart';
-import 'package:target_ace/features/notification/data/models/notification_model.dart';
+import 'package:target_ace/core/utils/helpers/date_formatter.dart';
+import 'package:target_ace/features/notification/domain/entities/notification_entity.dart';
 import 'package:target_ace/features/notification/presentation/bloc/notification_bloc.dart';
-import 'package:intl/intl.dart';
+import 'package:target_ace/features/notification/presentation/helpers/notification_helper.dart';
 
 class NotificationDetailPage extends StatelessWidget {
-  static Route route(NotificationModel notification) => MaterialPageRoute(
-        builder: (_) => NotificationDetailPage(notification: notification),
-      );
+  static Route route(NotificationEntity notification) => MaterialPageRoute(builder: (_) => NotificationDetailPage(notification: notification));
 
-  final NotificationModel notification;
+  final NotificationEntity notification;
 
   const NotificationDetailPage({super.key, required this.notification});
 
-  String _formatDateTime(DateTime dateTime) {
-    try {
-      return DateFormat('dd MMM yyyy, hh:mm a').format(dateTime);
-    } catch (_) {
-      return dateTime.toString();
-    }
-  }
-
-  List<List<dynamic>> _getTypeIcon(String type) {
-    switch (type) {
-      case 'exam_reminder':
-        return HugeIcons.strokeRoundedClock02;
-      case 'battle_invite':
-        return HugeIcons.strokeRoundedCrown;
-      case 'streak_alert':
-        return HugeIcons.strokeRoundedFire02;
-      case 'subscription':
-        return HugeIcons.strokeRoundedLegalDocument01;
-      default:
-        return HugeIcons.strokeRoundedNotification01;
-    }
-  }
-
-  String _getTypeLabel(String type) {
-    switch (type) {
-      case 'exam_reminder':
-        return 'Exam Reminder';
-      case 'battle_invite':
-        return 'Battle Invite';
-      case 'streak_alert':
-        return 'Streak Alert';
-      case 'subscription':
-        return 'Subscription';
-      default:
-        return 'General';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final typeIcon = _getTypeIcon(notification.type);
-    final typeLabel = _getTypeLabel(notification.type);
+    final typeIcon = NotificationHelper.getTypeIcon(notification.type);
+    final typeLabel = NotificationHelper.getTypeLabel(notification.type);
+    final typeColor = NotificationHelper.getTypeColor(notification.type);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(
-          'Notification Details',
-          style: AppFonts.heading(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        leading: const BackButton(),
-        automaticallyImplyLeading: false,
-      ),
-      body: GradientBackground(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: CustomContainer(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: AppColors.primary.withValues(alpha: 0.2),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    HugeIcon(
-                                      icon: typeIcon,
-                                      color: AppColors.primary,
-                                      size: 14,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      typeLabel.toUpperCase(),
-                                      style: AppFonts.body(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.primary,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                _formatDateTime(notification.createdAt),
-                                style: AppFonts.body(
-                                  fontSize: 11,
-                                  color: AppColors.textLight,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            notification.title,
-                            style: AppFonts.heading(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
-                            height: 1,
-                            color: AppColors.divider,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            notification.body,
-                            style: AppFonts.body(
-                              fontSize: 14,
-                              color: AppColors.textSecondary,
-                              height: 1.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SpringButton(
-                  backgroundColor: AppColors.error,
-                  onPressed: () {
-                    context.read<NotificationBloc>().add(DeleteSingleEvent(notification.id));
-                    Navigator.pop(context);
+        backgroundColor: Colors.transparent,
+        leading: BackButton(),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: CustomIconButton(
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedDelete02),
+              onTap: () {
+                AppConfirmationDialog.show(
+                  context,
+                  title: 'Delete Notification',
+                  message: 'Are you sure you want to delete this notification?',
+                  confirmText: 'Delete',
+                  cancelText: 'Cancel',
+                  isDestructive: true,
+                  onConfirm: () {
+                    context.read<NotificationBloc>().add(
+                      DeleteSingleEvent(notification.id),
+                    );
+                    if (context.mounted) Navigator.pop(context);
                   },
-                  child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const HugeIcon(
-                          icon: HugeIcons.strokeRoundedDelete02,
-                          color: Colors.white,
-                          size: 18,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 70, 24, 40),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [typeColor, typeColor.withValues(alpha: 0.75)],
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HugeIcon(
+                        icon: typeIcon,
+                        color: AppColors.white,
+                        size: 13,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        typeLabel.toUpperCase(),
+                        style: AppFonts.body(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.white,
+                          letterSpacing: 0.6,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Delete Notification',
-                          style: AppFonts.body(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
+                Text(
+                  notification.title,
+                  style: AppFonts.heading(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.white,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  DateFormatter.readableWithTime(notification.createdAt),
+                  style: AppFonts.body(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),
-        ),
+          Expanded(
+            child: Transform.translate(
+              offset: const Offset(0, -24),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+                  child: Text(
+                    notification.body,
+                    style: AppFonts.body(
+                      fontSize: 15,
+                      color: AppColors.textSecondary,
+                      height: 1.7,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
