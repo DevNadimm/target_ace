@@ -4,14 +4,13 @@ class GreetingHelper {
   static String getGreeting() {
     final hour = DateTime.now().hour;
 
-    if (hour >= 5 && hour < 12) {
-      return 'Good Morning';
-    } else if (hour >= 12 && hour < 17) {
-      return 'Good Afternoon';
-    } else if (hour >= 17 && hour < 21) {
-      return 'Good Evening';
-    } else {
-      return 'Good Night';
+    switch (hour) {
+      case >= 5 && < 12:
+        return 'Good Morning';
+      case >= 12 && < 17:
+        return 'Good Afternoon';
+      default:
+        return 'Good Evening';
     }
   }
 }
