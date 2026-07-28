@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart' hide BackButton;
+import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -11,16 +11,14 @@ import 'package:target_ace/core/components/spring_button.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/app_config.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
-import 'package:target_ace/core/shared/widgets/app_confirmation_dialog.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/inline_error_widget.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/utils/enums/message_type.dart';
-import 'package:target_ace/features/auth/presentation/pages/login_page.dart';
 import 'package:target_ace/core/utils/helpers/subscription_navigation_helper.dart';
 import 'package:target_ace/features/subscription/presentation/bloc/subscription_bloc.dart';
-import 'package:target_ace/features/subscription/utils/subscription_url_builder.dart';
+
 
 class SubscriptionActivationPage extends StatefulWidget {
   static Route route() => MaterialPageRoute(builder: (_) => const SubscriptionActivationPage());
@@ -52,13 +50,7 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
   }
 
   Future<void> _openWebsite() async {
-    final token = await AppPreferences.getAccessToken();
-    final url = buildSubscriptionUrl(
-      token: token,
-      sharedSecret: AppConfig.subscriptionSharedSecret,
-      baseUrl: AppConfig.subscriptionPlanUrl,
-    );
-    final uri = Uri.parse(url);
+    final uri = Uri.parse(AppConfig.subscriptionPlanUrl);
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
@@ -89,7 +81,10 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
     return BlocConsumer<SubscriptionBloc, SubscriptionState>(
       listener: (context, state) {
         if (state is SubscriptionLoaded) {
-          SubscriptionNavigationHelper.navigateByStatus(context, state.subscription.status);
+          final status = state.subscription.status;
+          if (status == 'active' || status == 'trial') {
+            SubscriptionNavigationHelper.navigateByStatus(context, status);
+          }
         }
       },
       builder: (context, state) {
@@ -98,9 +93,41 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
 
         if (state is SubscriptionError) {
           inlineError = state.message;
-        } else if (state is SubscriptionLoaded && state.subscription.status != 'active' && state.subscription.status != 'trial' && state.subscription.status != 'pending_verification' && state.subscription.status != 'expired' && state.subscription.status != 'cancelled') {
-          if (state.isManualCheck) {
-            inlineError = 'No active subscription found. Please visit the website to subscribe.';
+        } else if (state is SubscriptionLoaded) {
+          final status = state.subscription.status;
+          if (status != 'active' && status != 'trial' && status != 'pending_verification' && status != 'pending') {
+            if (status == 'expired') {
+              inlineError = 'Your subscription has expired. Please renew your plan.';
+            } else {
+              inlineError = 'No active subscription found. Please subscribe to gain full access.';
+            }
+          }
+        }
+
+        String headerTitle = 'Premium Access';
+        String headerSubtext = 'Visit our website to choose a plan, claim your 7-day Free Trial, or complete your subscription.';
+        String mainButtonText = 'Visit Website to Subscribe';
+        VoidCallback mainButtonAction = _openWebsite;
+        bool isPendingStatus = false;
+
+        if (state is SubscriptionLoaded) {
+          final status = state.subscription.status;
+          if (status == 'expired') {
+            headerTitle = 'Renew Your Subscription';
+            headerSubtext = 'Your subscription has ended. Renew now on our website to continue live battles and full analytics.';
+            mainButtonText = 'Renew Subscription on Website';
+            mainButtonAction = _openWebsite;
+          } else if (status == 'pending_verification' || status == 'pending') {
+            headerTitle = 'Payment Under Review';
+            headerSubtext = 'Your payment details are currently being verified by admin. Verification usually completes within 2 to 24 hours.';
+            mainButtonText = 'Check Verification Status';
+            mainButtonAction = _checkActivationStatus;
+            isPendingStatus = true;
+          } else if (status == 'cancelled') {
+            headerTitle = 'Reactivate Plan';
+            headerSubtext = 'Your subscription was cancelled. Visit our website anytime to reactivate your plan.';
+            mainButtonText = 'Reactivate Plan on Website';
+            mainButtonAction = _openWebsite;
           }
         }
 
@@ -109,32 +136,6 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
             Scaffold(
               appBar: AppBar(
                 leading: canPop ? const BackButton() : null,
-                actions: [
-                  IconButton(
-                    onPressed: () {
-                      AppConfirmationDialog.show(
-                        context,
-                        title: 'Log Out',
-                        message: 'Are you sure you want to log out?',
-                        confirmText: 'Log Out',
-                        isDestructive: true,
-                        onConfirm: () async {
-                          await AppPreferences.clearAll();
-                          if (!context.mounted) return;
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            LoginPage.route(), (_) => false,
-                          );
-                        },
-                      );
-                    },
-                    icon: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedLogout01,
-                      color: AppColors.error,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
               ),
               body: GradientBackground(
                 child: SingleChildScrollView(
@@ -143,7 +144,7 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Activate Your Account',
+                        headerTitle,
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -152,7 +153,7 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'To get started with Vara Khata, please visit our website to choose a plan and complete your subscription.',
+                        headerSubtext,
                         style: GoogleFonts.poppins(
                           fontSize: 13,
                           color: AppColors.textSecondary,
@@ -183,12 +184,6 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                               label: 'Activated within 24 hours',
                               value: 'Your account goes live after payment review',
                             ),
-                            const CustomDivider.dotted(),
-                            InfoRow(
-                              icon: HugeIcons.strokeRoundedStarAward02,
-                              label: '7-day money-back guarantee',
-                              value: 'No questions asked if you change your mind',
-                            ),
                           ],
                         ),
                       ),
@@ -216,19 +211,19 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                                 final plan = await AppPreferences.getSubscriptionPlanName();
 
                                 final message = '''
-à¦†à¦¸à¦¸à¦¾à¦²à¦¾à¦®à§ à¦†à¦²à¦¾à¦‡à¦•à§à¦®,
+Assalamu Alaikum,
 
-à¦†à¦®à¦¿ ${AppConfig.appName} à¦…à§à¦¯à¦¾à¦ª à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à¦›à¦¿à¥¤ à¦†à¦®à¦¾à¦° à¦à¦•à¦Ÿà¦¿ à¦¬à¦¿à¦·à¦¯à¦¼à§‡ à¦¸à¦¹à¦¾à¦¯à¦¼à¦¤à¦¾ à¦ªà§à¦°à¦¯à¦¼à§‹à¦œà¦¨à¥¤
+I am using ${AppConfig.appName} app. I need help regarding my subscription / account.
 
-â€¢ à¦¨à¦¾à¦®: $userName
-â€¢ User ID: $userId
-â€¢ à¦ªà§à¦²à§à¦¯à¦¾à¦¨: ${plan.isNotEmpty ? plan : 'No Active Plan'}
-â€¢ App Version: ${AppConfig.appVersion}
+• Name: $userName
+• User ID: $userId
+• Plan: ${plan.isNotEmpty ? plan : 'No Active Plan'}
+• App Version: ${AppConfig.appVersion}
 
-à¦†à¦®à¦¾à¦° à¦¸à¦®à¦¸à§à¦¯à¦¾à¦Ÿà¦¿:
-(à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦à¦–à¦¾à¦¨à§‡ à¦²à¦¿à¦–à§à¦¨)
+My issue:
+(Please write here)
 
-à¦§à¦¨à§à¦¯à¦¬à¦¾à¦¦à¥¤
+Thank you.
 ''';
 
                                 _launchURL(AppConfig.supportWhatsAppUrl(message));
@@ -254,23 +249,25 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                       const SizedBox(height: 28),
                       SpringButton(
                         width: double.infinity,
-                        onPressed: _openWebsite,
-                        child: Text('Visit Website to Subscribe'),
+                        onPressed: mainButtonAction,
+                        child: Text(mainButtonText),
                       ),
-                      const SizedBox(height: 12),
-                      Center(
-                        child: TextButton(
-                          onPressed: _checkActivationStatus,
-                          child: Text(
-                            'Already Subscribed? Check Status',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primaryLight,
+                      if (!isPendingStatus) ...[
+                        const SizedBox(height: 12),
+                        Center(
+                          child: TextButton(
+                            onPressed: _checkActivationStatus,
+                            child: Text(
+                              'Already Subscribed? Check Status',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primaryLight,
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                       const SizedBox(height: 24),
                     ],
                   ),
