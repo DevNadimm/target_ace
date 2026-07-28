@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
+import 'package:target_ace/core/utils/helpers/subscription_status_helper.dart';
 import 'package:target_ace/features/dashboard/data/models/dashboard_model.dart';
 
 abstract interface class DashboardRemoteDataSource {
@@ -466,19 +467,13 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
         final latestSubPlanId = latestSub?['plan_id'] as String?;
         final latestSubPlanName = latestSub?['plan_name'] as String?;
 
-        String subStatus = 'none';
-        final bool isExpired = expiryStr != null && DateTime.tryParse(expiryStr)?.isBefore(DateTime.now()) == true;
-
-        if (isPremiumFallback && !isExpired) {
-          final isTrial = latestSubPlanId == 'free_trial' || latestSubPlanName == 'Free Trial';
-          subStatus = isTrial ? 'trial' : 'active';
-        } else {
-          if (latestSubStatus == 'pending') {
-            subStatus = 'pending_verification';
-          } else if (isExpired) {
-            subStatus = 'expired';
-          }
-        }
+        final subStatus = SubscriptionStatusHelper.parse(
+          isPremium: isPremiumFallback,
+          expiryStr: expiryStr,
+          latestSubStatus: latestSubStatus,
+          latestSubPlanId: latestSubPlanId,
+          latestSubPlanName: latestSubPlanName,
+        );
 
         await AppPreferences.setSubscriptionStatus(subStatus);
         if (expiryStr != null) {

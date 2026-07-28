@@ -3,6 +3,7 @@ import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
+import 'package:target_ace/core/utils/helpers/subscription_status_helper.dart';
 import 'package:target_ace/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:target_ace/features/profile/data/models/profile_model.dart';
 import 'package:target_ace/features/profile/domain/entities/profile_entity.dart';
@@ -221,24 +222,18 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
             final isPremium = profileData['is_premium'] as bool? ?? false;
             final expiryStr = profileData['premium_expires_at'] as String?;
-            final bool isExpired = expiryStr != null && DateTime.tryParse(expiryStr)?.isBefore(DateTime.now()) == true;
 
             final latestSubStatus = latestSub?['status'] as String?;
             final latestSubPlanId = latestSub?['plan_id'] as String?;
             final latestSubPlanName = latestSub?['plan_name'] as String?;
 
-            String subStatus = 'none';
-
-            if (isPremium && !isExpired) {
-              final isTrial = latestSubPlanId == 'free_trial' || latestSubPlanName == 'Free Trial';
-              subStatus = isTrial ? 'trial' : 'active';
-            } else {
-              if (latestSubStatus == 'pending') {
-                subStatus = 'pending_verification';
-              } else if (isExpired) {
-                subStatus = 'expired';
-              }
-            }
+            final subStatus = SubscriptionStatusHelper.parse(
+              isPremium: isPremium,
+              expiryStr: expiryStr,
+              latestSubStatus: latestSubStatus,
+              latestSubPlanId: latestSubPlanId,
+              latestSubPlanName: latestSubPlanName,
+            );
 
             await AppPreferences.setSubscriptionStatus(subStatus);
             if (expiryStr != null) {

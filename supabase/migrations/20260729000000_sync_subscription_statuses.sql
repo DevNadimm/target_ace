@@ -88,7 +88,7 @@ BEGIN
         v_global_rank := public.get_user_global_rank(target_user_id);
 
         -- Streak Metrics & Premium Info
-        SELECT streak_count, highest_streak, is_premium, premium_expires_at, COALESCE(weekly_active_days, '[]'::jsonb)
+        SELECT streak_count, highest_streak, is_premium, premium_expires_at, COALESCE(to_jsonb(weekly_active_days), '[]'::jsonb)
         INTO v_streak_count, v_highest_streak, v_is_premium, v_premium_expires_at, v_weekly_active_days
         FROM public.profiles
         WHERE id = target_user_id;
