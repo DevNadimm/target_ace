@@ -15,8 +15,8 @@ description: TargetAce UI/UX Design System & Style Guide. Use this skill when cr
 | Attribute | Value |
 | :--- | :--- |
 | **App Name** | TargetAce |
-| **Theme** | Premium Dark Mode (Obsidian + Champagne Gold) |
-| **Mood** | Luxurious, Focused, Competitive, Minimalistic |
+| **Theme** | Premium Dark Mode (Obsidian + Logo Orange) |
+| **Mood** | Luxurious, Focused, Competitive, Minimalistic, Eye-friendly |
 | **Target Audience** | Bangladeshi students preparing for BCS, Admission, HSC |
 
 ---
@@ -29,27 +29,30 @@ description: TargetAce UI/UX Design System & Style Guide. Use this skill when cr
 
 | Token | Hex | Usage |
 | :--- | :--- | :--- |
-| `background` | `#09090B` | Scaffold, AppBar, BottomNav |
-| `surface` | `#18181B` | Elevated surfaces |
-| `card` | `#18181B` | Card backgrounds (same as surface) |
-| `cardAlt` | `#121214` | Deep matte card alternative |
+| `background` | `#0C0C0D` | Scaffold, AppBar, BottomNav |
+| `surface` | `#19191B` | Elevated surfaces |
+| `card` | `#19191B` | Card backgrounds (same as surface) |
+| `cardAlt` | `#141415` | Deep matte card alternative |
 
-### 2.2 Primary (Champagne Gold)
+### 2.2 Primary (Logo Orange)
+
+> **Design Principle**: Use the primary color *sparingly* as an accent to ensure an eye-friendly, premium experience (similar to how Facebook uses blue). Do not oversaturate the UI with orange.
 
 | Token | Hex | Usage |
 | :--- | :--- | :--- |
-| `primary` | `#C5A365` | CTA buttons, active states, badges, accents |
-| `primaryLight` | `#E2D1B3` | Subtle label text on dark backgrounds |
-| `primaryLight2` | `#27231B` | Transparent gold overlay |
-| `primaryDark` | `#967945` | Deep bronze for gradient start points |
+| `primary` | `#F97316` | CTA buttons, active states, badges, accents (use sparingly) |
+| `primaryLight` | `#FDBA74` | Soft Orange Glow |
+| `primaryLight2` | `#2A1B0D` | Soft dark transparent orange overlay |
+| `primaryDark` | `#C2570F` | Deep Burnt Orange |
+| `primary10` | `#1F150C` | 10% Opacity Orange |
 
 ### 2.3 Typography Colors
 
 | Token | Hex | Usage |
 | :--- | :--- | :--- |
-| `textPrimary` | `#F5F5F7` | Headings, names, primary content |
-| `textSecondary` | `#949499` | Subtitles, handles, secondary info |
-| `textLight` | `#71717A` | Muted hints, timestamps, placeholders |
+| `textPrimary` | `#F5F5F5` | Headings, names, primary content |
+| `textSecondary` | `#9A9A9C` | Subtitles, handles, secondary info |
+| `textLight` | `#6B6B6D` | Muted hints, timestamps, placeholders |
 
 ### 2.4 Status Colors
 
@@ -64,9 +67,9 @@ description: TargetAce UI/UX Design System & Style Guide. Use this skill when cr
 
 | Token | Hex | Usage |
 | :--- | :--- | :--- |
-| `grey` | `#27272A` | Borders, dividers, muted pill backgrounds |
-| `greyDark` | `#3F3F46` | Disabled button backgrounds |
-| `divider` / `inputBorder` | `#27272A` | Line separators, form field borders |
+| `grey` | `#28282A` | Borders, dividers, muted pill backgrounds |
+| `greyDark` | `#3E3E40` | Disabled button backgrounds |
+| `divider` / `inputBorder` | `#28282A` | Line separators, form field borders |
 
 ---
 

@@ -1,15 +1,14 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:target_ace/core/config/api_endpoints.dart';
 import 'package:target_ace/core/config/messages.dart';
-import 'package:target_ace/core/exceptions/api_exception.dart';
+import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/logger/app_logger.dart';
 import 'package:target_ace/core/logger/dio_logger_interceptor.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/core/utils/enums/error_type.dart';
 import 'package:target_ace/features/auth/presentation/pages/login_page.dart';
-import 'package:target_ace/features/subscription/presentation/pages/subscription_expired_page.dart';
 import 'package:target_ace/main.dart';
 
 class DioService {
@@ -30,7 +29,7 @@ class DioService {
     _dio.interceptors.addAll([DioLoggerInterceptor(), _authErrorInterceptor()]);
   }
 
-  // â”€â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ──────────────────────────────────────────────────────────────────────────
 
   /// Call once at app startup to restore saved token.
   Future<void> initAuthToken([String? token]) async {
@@ -45,22 +44,17 @@ class DioService {
 
   void clearAuthToken() => _dio.options.headers.remove('Authorization');
 
-  // â”€â”€â”€ Interceptors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ──────────────────────────────────────────────────────────────────────────
 
   InterceptorsWrapper _authErrorInterceptor() {
     return InterceptorsWrapper(
       onError: (DioException e, ErrorInterceptorHandler handler) async {
         if (e.response?.statusCode == 401) {
-          AppLogger.w('401 Unauthorized â€” clearing session & redirecting.');
+          AppLogger.w('401 Unauthorized — clearing session & redirecting.');
           clearAuthToken();
           await AppPreferences.clearAll();
           navigatorKey.currentState?.pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const LoginPage()), (_) => false,
-          );
-        } else if (e.response?.statusCode == 402) {
-          AppLogger.w('402 Subscription expired - redirecting');
-          navigatorKey.currentState?.pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const SubscriptionExpiredPage()), (_) => false,
           );
         }
         handler.next(e);
@@ -68,53 +62,58 @@ class DioService {
     );
   }
 
-  // â”€â”€â”€ Error Handling â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ──────────────────────────────────────────────────────────────────────────
 
   /// Priority:
-  ///   1. Backend message  â†’ preserves ErrorType from status code
-  ///   2. DioExceptionType â†’ maps to network / server / etc.
-  ///   3. fallbackMessage  â†’ caller-supplied
+  ///   1. Backend message  → preserves ErrorType from status code
+  ///   2. DioExceptionType → maps to network / server / etc.
+  ///   3. fallbackMessage  → caller-supplied
   ///   4. Generic message
-  ApiException _handleError(DioException e, {String? fallbackMessage}) {
+  ServerException _handleError(DioException e, {String? fallbackMessage}) {
     final statusCode = e.response?.statusCode;
 
     // Resolve ErrorType from status code first so backend messages
     // don't get mislabeled as ErrorType.server on a 404, etc.
     final errorType = _errorTypeFromStatus(statusCode);
 
-    // 1. Try backend message â€” keeps correct ErrorType from status code
+    // 1. Try backend message — keeps correct ErrorType from status code
     final backendMessage = _extractBackendMessage(e.response?.data);
     if (backendMessage != null) {
-      return ApiException(message: backendMessage, type: errorType);
+      return ServerException(message: backendMessage, type: errorType, statusCode: statusCode);
     }
 
     // 2. Map by DioExceptionType
     return switch (e.type) {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.sendTimeout ||
-      DioExceptionType.receiveTimeout => ApiException(
+      DioExceptionType.receiveTimeout => ServerException(
         message: AppMessages.timeoutErrorMessage,
         type: ErrorType.network,
+        statusCode: statusCode,
       ),
 
-      DioExceptionType.connectionError => ApiException(
+      DioExceptionType.connectionError => ServerException(
         message: AppMessages.networkErrorMessage,
         type: ErrorType.network,
+        statusCode: statusCode,
       ),
 
-      DioExceptionType.badResponse => ApiException(
+      DioExceptionType.badResponse => ServerException(
         message: _messageFromStatus(statusCode),
         type: errorType,
+        statusCode: statusCode,
       ),
 
-      DioExceptionType.cancel => ApiException(
+      DioExceptionType.cancel => ServerException(
         message: AppMessages.requestCancelledMessage,
         type: ErrorType.unknown,
+        statusCode: statusCode,
       ),
 
-      _ => ApiException(
+      _ => ServerException(
         message: fallbackMessage ?? AppMessages.errorMessage,
         type: ErrorType.unknown,
+        statusCode: statusCode,
       ),
     };
   }
@@ -200,7 +199,7 @@ class DioService {
       // Treat it as a server error so callers always get an ApiException.
       if (_isBotProtectionResponse(response)) {
         AppLogger.w('Bot-protection block detected (HTTP 200 spoofed as success).');
-        throw ApiException(
+        throw ServerException(
           title: AppMessages.botProtectionErrorTitle,
           message: AppMessages.botProtectionErrorMessage,
           type: ErrorType.botProtection,
@@ -208,7 +207,7 @@ class DioService {
       }
 
       return response;
-    } on ApiException {
+    } on ServerException {
       rethrow;
     } on DioException catch (e) {
       throw _handleError(e, fallbackMessage: errorMessage);

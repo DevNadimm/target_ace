@@ -53,6 +53,13 @@ class DateFormatter {
     return DateFormat('dd MMMM, yyyy hh:mm a').format(date);
   }
 
+  /// 20 Sep 2025  •  01:51 AM
+  static String readableShortWithTime(dynamic value) {
+    final date = _parse(value);
+    if (date == null) return value?.toString() ?? 'N/A';
+    return '${DateFormat('dd MMM yyyy').format(date)}  •  ${DateFormat('hh:mm a').format(date)}';
+  }
+
   static String readableWithTime12(dynamic value) {
     if (value == null || value.toString().trim().isEmpty) {
       return value.toString();
@@ -148,6 +155,55 @@ class DateFormatter {
       return str;
     } catch (_) {
       return str;
+    }
+  }
+
+  /// Returns relative time string like 'Just now', '5m ago', '2h ago', 'Yesterday', '3d ago', or 'dd MMM'
+  static String timeAgo(dynamic value) {
+    final dateTime = _parse(value);
+    if (dateTime == null) return '';
+
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inSeconds < 60) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays == 1) {
+      return 'Yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return DateFormat('dd MMM').format(dateTime);
+    }
+  }
+
+  /// Formats upcoming time (e.g., Live Now, Starts in 5 mins, Starts in 2 hours, or specific date)
+  static String formatUpcomingTime(dynamic value) {
+    final startStr = value?.toString() ?? '';
+    if (startStr.isEmpty) return '';
+    
+    try {
+      final start = _parse(value);
+      if (start == null) return startStr;
+      
+      final now = DateTime.now();
+      final diff = start.difference(now);
+
+      if (diff.isNegative) {
+        return "Live Now";
+      } else if (diff.inMinutes < 60) {
+        return "Starts in ${diff.inMinutes} mins";
+      } else if (diff.inHours < 24) {
+        return "Starts in ${diff.inHours} hours";
+      } else {
+        return DateFormat('EEE, dd MMM  •  hh:mm a').format(start);
+      }
+    } catch (_) {
+      return startStr;
     }
   }
 }

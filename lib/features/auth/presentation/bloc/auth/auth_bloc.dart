@@ -1,48 +1,61 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:target_ace/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:target_ace/core/usecase/usecase.dart';
 import 'package:target_ace/core/utils/enums/error_type.dart';
-import 'package:target_ace/features/auth/data/models/auth_model.dart';
-import 'package:target_ace/features/auth/data/repos/auth_repo.dart';
+import 'package:target_ace/features/auth/domain/entities/auth_result.dart';
+import 'package:target_ace/features/auth/domain/usecases/do_google_sign_in.dart';
+import 'package:target_ace/features/auth/domain/usecases/do_logout.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepo _authRepo;
+  final DoGoogleSignIn _doGoogleSignIn;
+  final DoLogout _doLogout;
+  final AppUserCubit _appUserCubit;
 
-  AuthBloc(this._authRepo) : super(AuthInitial()) {
+  AuthBloc({
+    required DoGoogleSignIn doGoogleSignIn,
+    required DoLogout doLogout,
+    required AppUserCubit appUserCubit,
+  })  : _doGoogleSignIn = doGoogleSignIn,
+        _doLogout = doLogout,
+        _appUserCubit = appUserCubit,
+        super(AuthInitial()) {
     on<GoogleSignInRequested>(_onGoogleSignIn);
     on<LogoutRequested>(_onLogout);
   }
 
   Future<void> _onGoogleSignIn(GoogleSignInRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    try {
-      final authModel = await _authRepo.googleSignIn();
-      emit(AuthSuccess(authModel));
-    } on AuthException catch (e) {
-      emit(AuthFailure(ErrorType.unknown, e.message));
-    } catch (e) {
-      emit(AuthFailure(ErrorType.server, _mapError(e)));
-    }
+    final res = await _doGoogleSignIn(const NoParams());
+
+    res.fold(
+      (failure) {
+        if (failure.message == 'CANCELED_BY_USER') {
+          emit(AuthInitial());
+        } else {
+          emit(AuthFailure(ErrorType.server, failure.message));
+        }
+      },
+      (authResult) {
+        // Update the global AppUserCubit auth state
+        _appUserCubit.updateUser(authResult.user);
+        emit(AuthSuccess(authResult));
+      },
+    );
   }
 
   Future<void> _onLogout(LogoutRequested event, Emitter<AuthState> emit) async {
-    await _authRepo.logout();
-    emit(LogoutSuccess());
-  }
-
-  String _mapError(Object e) {
-    final s = e.toString().toLowerCase();
-    if (s.contains('provider_disabled') || s.contains('not enabled') || s.contains('accounts.google.com')) {
-      return 'Google Sign-In is temporarily unavailable. Please contact support.';
-    }
-    if (s.contains('socketexception') || s.contains('network') || s.contains('clientexception')) {
-      return 'No internet connection. Please try again.';
-    }
-    if (s.contains('canceled') || s.contains('12501') || s.contains('sign_in_failed')) {
-      return 'Sign-in was cancelled.';
-    }
-    return 'An unexpected error occurred. Please try again.';
+    final res = await _doLogout(const NoParams());
+    
+    res.fold(
+      (failure) => emit(AuthFailure(ErrorType.server, failure.message)),
+      (_) {
+        // Clear global user state in cubit
+        _appUserCubit.logout();
+        emit(LogoutSuccess());
+      },
+    );
   }
 }

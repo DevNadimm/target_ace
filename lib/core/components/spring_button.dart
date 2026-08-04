@@ -1,7 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:target_ace/core/config/colors.dart';
+import 'package:target_ace/core/config/typography.dart';
 
 class SpringButton extends StatefulWidget {
   final Widget child;
@@ -80,31 +80,29 @@ class _SpringButtonState extends State<SpringButton> {
         : (widget.borderColor ?? AppColors.primary);
 
     final Color resolvedFaceColor = isDisabled
-        ? AppColors.grey
+        ? AppColors.cardAlt
         : widget.isOutlined
         ? (widget.backgroundColor ?? AppColors.surface)
         : (widget.backgroundColor ?? AppColors.primary);
 
     final Color resolvedShadowColor = isDisabled
-        ? AppColors.greyDark.withValues(alpha: 0.4)
-        : (widget.shadowColor ??
-              (widget.isOutlined
-                  ? resolvedBorderColor
-                  : AppColors.primaryDark));
+        ? AppColors.greyDark // solid lip color when disabled
+        : widget.shadowColor ??
+              (widget.isOutlined ? resolvedBorderColor : AppColors.primaryDark);
 
     final Color resolvedTextColor = isDisabled
         ? AppColors.textLight
-        : widget.isOutlined
-        ? resolvedBorderColor
-        : AppColors.textOnPrimary;
+        : (widget.isOutlined ? resolvedBorderColor : Colors.white);
 
-    final double activeDepth = isDisabled ? 0.0 : widget.depth;
+    final double activeDepth = widget.depth;
     final double translation = _isPressed ? activeDepth : 0.0;
 
-    // Border for outlined variant
+    // Border for outlined variant or disabled state
     final Border? faceBorder = widget.isOutlined
         ? Border.all(color: resolvedBorderColor, width: 2.0)
-        : null;
+        : isDisabled
+            ? null // Add side border when disabled
+            : null;
 
     return GestureDetector(
       onTapDown: _handleTapDown,
@@ -149,13 +147,11 @@ class _SpringButtonState extends State<SpringButton> {
                   border: faceBorder,
                 ),
                 child: DefaultTextStyle(
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                      color: resolvedTextColor,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                      height: 0,
-                    ),
+                  style: AppFonts.body(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: resolvedTextColor,
+                    letterSpacing: 1.0,
                   ),
                   child: widget.child,
                 ),

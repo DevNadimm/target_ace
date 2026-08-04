@@ -10,7 +10,14 @@ import 'package:target_ace/features/profile/presentation/pages/profile_page.dart
 import 'package:target_ace/features/notification/presentation/pages/notification_page.dart';
 
 class DashboardAppBar extends StatefulWidget implements PreferredSizeWidget {
-  const DashboardAppBar({super.key});
+  final int unreadNotificationsCount;
+  final bool isPremium;
+
+  const DashboardAppBar({
+    super.key,
+    required this.unreadNotificationsCount,
+    required this.isPremium,
+  });
 
   @override
   State<DashboardAppBar> createState() => _DashboardAppBarState();
@@ -84,16 +91,43 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          GreetingHelper.getGreeting(),
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
-                              height: 1.2,
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                GreetingHelper.getGreeting(),
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textSecondary,
+                                    height: 1.2,
+                                  ),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
+                            if (widget.isPremium) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'PRO',
+                                  style: TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -121,23 +155,46 @@ class _DashboardAppBarState extends State<DashboardAppBar> {
             size: 48,
             backgroundColor: AppColors.card,
             icon: Stack(
+              clipBehavior: Clip.none,
               children: [
                 const HugeIcon(
                   icon: HugeIcons.strokeRoundedNotification01,
                   color: AppColors.textPrimary,
                 ),
-                Positioned(
-                  right: 2,
-                  top: 2,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primary,
+                if (widget.unreadNotificationsCount > 0)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: AppColors.error,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        widget.unreadNotificationsCount > 9 ? '9+' : widget.unreadNotificationsCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
+                else
+                  Positioned(
+                    right: 2,
+                    top: 2,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
             tooltip: 'Notifications',

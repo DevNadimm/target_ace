@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart' hide BackButton;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:target_ace/features/profile/presentation/pages/group_switch_page.dart';
-import 'package:target_ace/core/components/custom_cached_image.dart';
+import 'package:target_ace/features/profile/presentation/pages/profile_setup_page.dart';
+import 'package:target_ace/features/profile/domain/enums/profile_step_type.dart';
 import 'package:target_ace/core/components/back_button.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/custom_divider.dart';
@@ -12,150 +13,174 @@ import 'package:target_ace/core/components/spring_button.dart';
 import 'package:target_ace/core/components/stat_card.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/app_config.dart';
-import 'package:target_ace/core/services/app_preferences.dart';
+import 'package:target_ace/core/services/service_locator.dart';
 import 'package:target_ace/core/shared/widgets/app_confirmation_dialog.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/utils/enums/message_type.dart';
 import 'package:target_ace/core/utils/helpers/date_formatter.dart';
-import 'package:target_ace/features/auth/presentation/pages/login_page.dart';
+import 'package:target_ace/features/auth/presentation/bloc/auth/auth_bloc.dart';
+import 'package:target_ace/features/launch/presentation/bloc/app_launch_bloc.dart';
+import 'package:target_ace/features/launch/presentation/pages/launch_page.dart';
+import 'package:target_ace/features/profile/presentation/bloc/profile/profile_cubit.dart';
+import 'package:target_ace/features/profile/presentation/widgets/inactive_subscription_card.dart';
+import 'package:target_ace/features/profile/presentation/widgets/profile_avatar_header.dart';
+import 'package:target_ace/main.dart';
 
-
-
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends StatelessWidget {
   static Route route() => MaterialPageRoute(builder: (_) => const ProfilePage());
 
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => sl<ProfileCubit>()..loadProfile(),
+      child: const ProfilePageView(),
+    );
+  }
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  bool _isLoading = true;
-
-  String _userName = '';
-  String _userEmail = '';
-  String _userPhone = '';
-  String _userGender = '';
-  String _userDob = '';
-  String _userInstitution = '';
-  String _userDistrict = '';
-  String _avatarUrl = '';
-  String _subscriptionPlanName = '';
-  String _subscriptionStatus = '';
-  String _subscriptionExpiry = '';
-  String _activeGroupTitle = '';
+class ProfilePageView extends StatefulWidget {
+  const ProfilePageView({super.key});
 
   @override
-  void initState() {
-    super.initState();
-    _loadProfile();
-  }
+  State<ProfilePageView> createState() => _ProfilePageViewState();
+}
 
-  Future<void> _loadProfile() async {
-    await _updateUIFromPrefs();
-  }
-
-
-  Future<void> _updateUIFromPrefs() async {
-    final name = await AppPreferences.getUserName();
-    final email = await AppPreferences.getUserEmail();
-    final phone = await AppPreferences.getUserPhone();
-    final gender = await AppPreferences.getUserGender();
-    final dob = await AppPreferences.getUserDob();
-    final institution = await AppPreferences.getUserInstitution();
-    final district = await AppPreferences.getUserDistrict();
-    final avatarUrl = await AppPreferences.getUserAvatarUrl();
-    final planName = await AppPreferences.getSubscriptionPlanName();
-    final status = await AppPreferences.getSubscriptionStatus();
-    final expiry = await AppPreferences.getSubscriptionExpiryDate();
-    final groupTitle = await AppPreferences.getActiveGroupTitle();
-
-    if (!mounted) return;
-    setState(() {
-      _userName = name;
-      _userEmail = email;
-      _userPhone = phone;
-      _userGender = gender;
-      _userDob = dob;
-      _userInstitution = institution;
-      _userDistrict = district;
-      _avatarUrl = avatarUrl;
-      _subscriptionPlanName = planName;
-      _subscriptionStatus = status;
-      _subscriptionExpiry = expiry ?? '';
-      _activeGroupTitle = groupTitle.isNotEmpty ? groupTitle : 'Not Selected';
-      _isLoading = false;
-    });
-  }
-
-
-  String get _statusLabel {
-    final expiryDate = DateTime.tryParse(_subscriptionExpiry);
-    if (expiryDate != null) {
-      final now = DateTime.now();
-      if (expiryDate.isBefore(now)) {
-        return 'Expired';
-      }
-    }
-
-    switch (_subscriptionStatus) {
-      case 'active':
-        return 'Active';
-      case 'expired':
-        return 'Expired';
-      case 'cancelled':
-        return 'Cancelled';
-      case 'pending_verification':
-        return 'Pending Verification';
-      case 'trial':
-        return 'Trial';
-      default:
-        return 'No Plan';
-    }
-  }
-
+class _ProfilePageViewState extends State<ProfilePageView> {
   @override
   Widget build(BuildContext context) {
-    final displayPlanName = _subscriptionPlanName.isNotEmpty ? _subscriptionPlanName : 'No Active Plan';
-
     return Scaffold(
-      appBar: AppBar(leading: const BackButton()),
+      appBar: AppBar(
+        title: Text('My Profile'),
+        leading: ModalRoute.of(context)?.canPop == true ? const BackButton() : null,
+      ),
       body: GradientBackground(
-        child: _isLoading
-            ? const Loader()
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+        child: BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            debugPrint("ProfilePageView AuthBloc state changed: $state");
+            if (state is AuthInitial || state is LogoutSuccess) {
+              debugPrint("Navigating to LaunchPage via navigatorKey");
+              // Reset the launch coordinator state machine without splash delay
+              sl<AppLaunchBloc>().add(const AppLaunchStarted(skipDelay: true));
+              
+              navigatorKey.currentState?.pushAndRemoveUntil(
+                LaunchPage.route(),
+                (route) => false,
+              );
+            } else if (state is AuthFailure) {
+              debugPrint("Logout failed: ${state.message}");
+              AppNotifier.showSnackBar(context, state.message ?? 'An error occurred', type: MessageType.error);
+            }
+          },
+          child: BlocBuilder<ProfileCubit, ProfileState>(
+            buildWhen: (prev, curr) {
+              // Skip rebuild if data hasn't actually changed
+              if (prev is ProfileLoaded && curr is ProfileLoaded) {
+                return prev.profileData != curr.profileData;
+              }
+              return true;
+            },
+            builder: (context, state) {
+              if (state is ProfileLoading || state is ProfileInitial) {
+                return const Center(child: Loader());
+              }
+
+              if (state is ProfileFailure) {
+                return Center(
+                  child: Text(
+                    state.error,
+                    style: AppFonts.body(color: AppColors.error),
+                  ),
+                );
+              }
+
+              final data = (state as ProfileLoaded).profileData;
+              final String userName = data.name;
+              final String userEmail = data.email;
+              final String userPhone = data.phone;
+              final String userGender = data.gender;
+              final String userDob = data.dob;
+              final String userInstitution = data.institution;
+              final String userDistrict = data.district;
+              final String avatarUrl = data.avatarUrl;
+              final String planName = data.subscriptionPlanName;
+              final String subStatus = data.subscriptionStatus;
+              final String subExpiry = data.subscriptionExpiry;
+              final String activeGroup = data.activeGroupTitle;
+
+              final displayPlanName = planName.isNotEmpty ? planName : (subStatus == 'active' ? 'Premium Plan' : 'Free Member');
+
+              String statusLabel() {
+                final expiryDate = DateTime.tryParse(subExpiry);
+                if (expiryDate != null && expiryDate.isBefore(DateTime.now())) {
+                  return 'Expired';
+                }
+                switch (subStatus) {
+                  case 'active':
+                    return 'Active';
+                  case 'expired':
+                    return 'Expired';
+                  case 'cancelled':
+                    return 'Cancelled';
+                  case 'pending_verification':
+                  case 'pending':
+                    return 'Pending';
+                  case 'trial':
+                    return 'Active';
+                  default:
+                    return 'Inactive';
+                }
+              }
+
+              final isPremium = subStatus == 'active' || subStatus == 'trial';
+
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeIn,
+                switchOutCurve: Curves.easeOut,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: SingleChildScrollView(
+                  key: ValueKey(data.hashCode),
+                  padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _ProfileAvatarHeader(
-                      userName: _userName,
-                      userEmail: _userEmail,
-                      avatarUrl: _avatarUrl,
+                    ProfileAvatarHeader(
+                      userName: userName,
+                      userEmail: userEmail,
+                      avatarUrl: avatarUrl,
+                      isPremium: isPremium,
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        StatCard(
-                          label: 'Plan',
-                          value: displayPlanName,
-                          icon: HugeIcons.strokeRoundedDiamond02,
-                          color: AppColors.primary,
-                          isRaw: true,
-                        ),
-                        const SizedBox(width: 10),
-                        StatCard(
-                          label: 'Status',
-                          value: _statusLabel,
-                          icon: _subscriptionStatus == 'active' ? HugeIcons.strokeRoundedCheckmarkSquare02 : HugeIcons.strokeRoundedAlertSquare,
-                          color: _subscriptionStatus == 'active' ? AppColors.success : AppColors.error,
-                          isRaw: true,
-                        ),
-                      ],
-                    ),
+                    if (isPremium)
+                      Row(
+                        children: [
+                          StatCard(
+                            label: 'Plan',
+                            value: displayPlanName,
+                            icon: HugeIcons.strokeRoundedDiamond02,
+                            color: AppColors.primary,
+                            isRaw: true,
+                          ),
+                          const SizedBox(width: 10),
+                          StatCard(
+                            label: 'Status',
+                            value: statusLabel(),
+                            icon: (subStatus == 'active' || subStatus == 'trial')
+                                ? HugeIcons.strokeRoundedCheckmarkSquare02
+                                : HugeIcons.strokeRoundedAlertSquare,
+                            color: (subStatus == 'active' || subStatus == 'trial') ? AppColors.success : AppColors.error,
+                            isRaw: true,
+                          ),
+                        ],
+                      )
+                    else
+                      InactiveSubscriptionCard(status: subStatus),
                     const SizedBox(height: 24),
                     Text(
                       'My Information',
@@ -171,49 +196,57 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Column(
                         children: [
                           InfoRow(
-                            icon: HugeIcons.strokeRoundedCall,
+                            icon: HugeIcons.strokeRoundedCall02,
                             label: 'Phone',
-                            value: _userPhone.isNotEmpty ? _userPhone : 'N/A',
+                            value: userPhone.isNotEmpty ? userPhone : 'N/A',
                           ),
                           const CustomDivider.dotted(),
                           InfoRow(
                             icon: HugeIcons.strokeRoundedMail01,
                             label: 'Email',
-                            value: _userEmail.isNotEmpty ? _userEmail : 'N/A',
+                            value: userEmail.isNotEmpty ? userEmail : 'N/A',
                           ),
                           const CustomDivider.dotted(),
                           InfoRow(
-                            icon: HugeIcons.strokeRoundedUser,
+                            icon: HugeIcons.strokeRoundedUser03,
                             label: 'Gender',
-                            value: _userGender.isNotEmpty ? _userGender : 'N/A',
+                            value: userGender.isNotEmpty ? userGender : 'N/A',
                           ),
                           const CustomDivider.dotted(),
                           InfoRow(
-                            icon: HugeIcons.strokeRoundedCalendar01,
+                            icon: HugeIcons.strokeRoundedCalendar04,
                             label: 'Date of Birth',
-                            value: _userDob.isNotEmpty ? DateFormatter.readable(_userDob) : 'N/A',
+                            value: userDob.isNotEmpty ? DateFormatter.readable(userDob) : 'N/A',
                           ),
                           const CustomDivider.dotted(),
                           InfoRow(
-                            icon: HugeIcons.strokeRoundedSchool,
+                            icon: HugeIcons.strokeRoundedUniversity,
                             label: 'Institution',
-                            value: _userInstitution.isNotEmpty ? _userInstitution : 'N/A',
+                            value: userInstitution.isNotEmpty ? userInstitution : 'N/A',
                           ),
                           const CustomDivider.dotted(),
                           InfoRow(
                             icon: HugeIcons.strokeRoundedLocation01,
                             label: 'District',
-                            value: _userDistrict.isNotEmpty ? _userDistrict : 'N/A',
+                            value: userDistrict.isNotEmpty ? userDistrict : 'N/A',
                           ),
                           const CustomDivider.dotted(),
                           InfoRow(
                             icon: HugeIcons.strokeRoundedTarget01,
                             label: 'Battle Group',
-                            value: _activeGroupTitle,
+                            value: activeGroup,
                             onTap: () async {
-                              final didSwitch = await Navigator.push(context, GroupSwitchPage.route());
-                              if (didSwitch == true) {
-                                _loadProfile();
+                              final didSwitch = await Navigator.push(
+                                context,
+                                ProfileSetupPage.route(
+                                  customSteps: [
+                                    ProfileStepType.goal,
+                                    ProfileStepType.group,
+                                  ],
+                                ),
+                              );
+                              if (didSwitch == true && context.mounted) {
+                                context.read<ProfileCubit>().loadProfile();
                               }
                             },
                           ),
@@ -243,19 +276,18 @@ class _ProfilePageState extends State<ProfilePage> {
                           InfoRow(
                             icon: HugeIcons.strokeRoundedCheckmarkSquare02,
                             label: 'Status',
-                            value: _statusLabel,
+                            value: statusLabel(),
                           ),
                           const CustomDivider.dotted(),
                           InfoRow(
                             icon: HugeIcons.strokeRoundedCalendar04,
                             label: 'Expires On',
-                            value: _subscriptionExpiry.isNotEmpty ? DateFormatter.readable(_subscriptionExpiry) : 'N/A',
+                            value: subExpiry.isNotEmpty ? DateFormatter.readable(subExpiry) : 'N/A',
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const SizedBox(height: 4),
                     Text(
                       'Support & Legal',
                       style: AppFonts.body(
@@ -273,19 +305,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             icon: HugeIcons.strokeRoundedWhatsapp,
                             label: 'Contact Support',
                             value: 'Chat on WhatsApp',
-                            onTap: () async {
-                              final userName = await AppPreferences.getUserName();
-                              final userId = await AppPreferences.getUserId();
-                              final plan = await AppPreferences.getSubscriptionPlanName();
-
+                            onTap: () {
                               final message = '''
 Assalamu Alaikum,
 
 I am using ${AppConfig.appName} app. I need help with something.
 
 • Name: $userName
-• User ID: $userId
-• Plan: $plan
+• Plan: $planName
 • App Version: ${AppConfig.appVersion}
 
 My issue:
@@ -293,7 +320,6 @@ My issue:
 
 Thank you.
 ''';
-
                               _launchURL(AppConfig.supportWhatsAppUrl(message));
                             },
                           ),
@@ -318,13 +344,17 @@ Thank you.
                     SpringButton(
                       onPressed: () => _onLogout(context),
                       backgroundColor: AppColors.error,
-                      shadowColor: AppColors.errorDark,
-                      child: const Text('Log Out', style: TextStyle(color: AppColors.white),),
+                      shadowColor: AppColors.error.withAlpha(120),
+                      child: const Text('Log Out', style: TextStyle(color: AppColors.white)),
                     ),
                     const SizedBox(height: 24),
                   ],
                 ),
-              ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -335,105 +365,26 @@ Thank you.
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       debugPrint('Error launching URL: $e');
-      if (mounted) {
-        AppNotifier.showSnackBar(context, 'Could not open link: $urlString', type: MessageType.error);
-      }
     }
   }
 
   void _onLogout(BuildContext context) {
+    debugPrint("Show Logout Confirmation Dialog");
     AppConfirmationDialog.show(
       context,
       title: 'Log Out',
       message: 'Are you sure you want to log out?',
       confirmText: 'Log Out',
       isDestructive: true,
-      onConfirm: () async {
-        await AppPreferences.clearAll();
-        if (!context.mounted) return;
-        Navigator.pushAndRemoveUntil(context, LoginPage.route(), (_) => false);
+      onConfirm: () {
+        debugPrint("Logout confirmed. Dispatching LogoutRequested to AuthBloc.");
+        final globalContext = navigatorKey.currentContext;
+        if (globalContext != null) {
+          globalContext.read<AuthBloc>().add(LogoutRequested());
+        } else {
+          context.read<AuthBloc>().add(LogoutRequested());
+        }
       },
     );
   }
 }
-
-class _ProfileAvatarHeader extends StatelessWidget {
-  final String userName;
-  final String userEmail;
-  final String avatarUrl;
-
-  const _ProfileAvatarHeader({
-    required this.userName,
-    required this.userEmail,
-    required this.avatarUrl,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        avatarUrl.isNotEmpty
-            ? CustomCachedImage(
-                imageUrl: avatarUrl,
-                width: 60,
-                height: 60,
-                borderRadius: 30,
-              )
-            : Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.2),
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                    style: AppFonts.body(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-              ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                userName,
-                style: AppFonts.body(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                  height: 1.2,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (userEmail.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  userEmail,
-                  style: AppFonts.body(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-

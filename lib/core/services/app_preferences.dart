@@ -363,6 +363,48 @@ class AppPreferences {
     await prefs.clear();
   }
 
+  // ────────────────────────────────────────────────────────────────────────
+  // Notification Syncing
+  // ────────────────────────────────────────────────────────────────────────
+
+  static Future<String?> getLastSyncedFcmToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('last_synced_fcm_token');
+  }
+
+  static Future<void> setLastSyncedFcmToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_synced_fcm_token', token);
+  }
+
+  static Future<List<String>> getSyncedTopics() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('synced_notification_topics') ?? [];
+  }
+
+  static Future<void> addSyncedTopic(String topic) async {
+    final prefs = await SharedPreferences.getInstance();
+    final topics = prefs.getStringList('synced_notification_topics') ?? [];
+    if (!topics.contains(topic)) {
+      topics.add(topic);
+      await prefs.setStringList('synced_notification_topics', topics);
+    }
+  }
+
+  static Future<void> removeSyncedTopic(String topic) async {
+    final prefs = await SharedPreferences.getInstance();
+    final topics = prefs.getStringList('synced_notification_topics') ?? [];
+    if (topics.contains(topic)) {
+      topics.remove(topic);
+      await prefs.setStringList('synced_notification_topics', topics);
+    }
+  }
+
+  static Future<void> clearSyncedTopics() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('synced_notification_topics');
+  }
+
   // ─────────────────────────────────────────────
   // Exam Questions Caching
   // ─────────────────────────────────────────────

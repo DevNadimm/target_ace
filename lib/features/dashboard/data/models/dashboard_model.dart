@@ -1,28 +1,23 @@
-class DashboardModel {
-  final DashboardExam? activeExam;
-  final bool hasSubmittedActiveExam;
-  final DashboardStats stats;
-  final List<LeaderboardItem> leaderboard;
-  final int groupRank;
-  final int globalRank;
-  final String? lastExamTitle;
-  final String? lastExamId;
+import 'package:target_ace/features/dashboard/domain/entities/dashboard_entity.dart';
 
-  DashboardModel({
-    this.activeExam,
-    this.hasSubmittedActiveExam = false,
-    required this.stats,
-    required this.leaderboard,
-    this.groupRank = 0,
-    this.globalRank = 0,
-    this.lastExamTitle,
-    this.lastExamId,
+class DashboardModel extends DashboardEntity {
+  const DashboardModel({
+    super.activeExam,
+    super.hasSubmittedActiveExam = false,
+    required super.stats,
+    required super.leaderboard,
+    super.groupRank = 0,
+    super.globalRank = 0,
+    super.lastExamTitle,
+    super.lastExamId,
+    super.latestPerformance,
+    super.isPremium = false,
   });
 
   factory DashboardModel.empty() {
-    return DashboardModel(
+    return const DashboardModel(
       hasSubmittedActiveExam: false,
-      stats: DashboardStats(
+      stats: DashboardStatsModel(
         totalBattles: 0,
         averageScore: 0.0,
         rank: 0,
@@ -32,39 +27,28 @@ class DashboardModel {
       leaderboard: [],
       lastExamTitle: null,
       lastExamId: null,
+      isPremium: false,
     );
   }
 }
 
-class DashboardExam {
-  final String id;
-  final String title;
-  final String goalId;
-  final String groupId;
-  final DateTime startTime;
-  final int durationMinutes;
-  final int totalQuestions;
-  final String? examDate;
-  final String status;
-  final double perQuestionMark;
-  final double negativeMark;
-
-  DashboardExam({
-    required this.id,
-    required this.title,
-    required this.goalId,
-    this.groupId = '',
-    required this.startTime,
-    required this.durationMinutes,
-    required this.totalQuestions,
-    this.examDate,
-    this.status = 'scheduled',
-    this.perQuestionMark = 1.0,
-    this.negativeMark = 0.25,
+class DashboardExamModel extends DashboardExamEntity {
+  const DashboardExamModel({
+    required super.id,
+    required super.title,
+    required super.goalId,
+    super.groupId = '',
+    required super.startTime,
+    required super.durationMinutes,
+    required super.totalQuestions,
+    super.examDate,
+    super.status = 'scheduled',
+    super.perQuestionMark = 1.0,
+    super.negativeMark = 0.25,
   });
 
-  factory DashboardExam.fromJson(Map<String, dynamic> json) {
-    return DashboardExam(
+  factory DashboardExamModel.fromJson(Map<String, dynamic> json) {
+    return DashboardExamModel(
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? 'Live Mock Exam',
       goalId: json['goal_id'] as String? ?? '',
@@ -78,49 +62,41 @@ class DashboardExam {
       negativeMark: (json['negative_mark'] as num?)?.toDouble() ?? 0.25,
     );
   }
-
-  bool get isLive {
-    final now = DateTime.now();
-    final endTime = startTime.add(Duration(minutes: durationMinutes));
-    return now.isAfter(startTime) && now.isBefore(endTime);
-  }
-
-  bool get isCompleted => status == 'completed';
-  bool get isScheduled => status == 'scheduled';
 }
 
-class DashboardStats {
-  final int totalBattles;
-  final double averageScore;
-  final int rank;
-  final int totalCorrect;
-  final int totalWrong;
-  final int streakCount;
-  final int highestStreak;
-
-  DashboardStats({
-    required this.totalBattles,
-    required this.averageScore,
-    required this.rank,
-    this.totalCorrect = 0,
-    this.totalWrong = 0,
-    this.streakCount = 0,
-    this.highestStreak = 0,
+class DashboardStatsModel extends DashboardStatsEntity {
+  const DashboardStatsModel({
+    required super.totalBattles,
+    required super.averageScore,
+    required super.rank,
+    super.totalCorrect = 0,
+    super.totalWrong = 0,
+    super.streakCount = 0,
+    super.highestStreak = 0,
+    super.weeklyActiveDays = const [],
+    super.unreadNotificationsCount = 0,
   });
 }
 
-class LeaderboardItem {
-  final int rank;
-  final String name;
-  final double score;
-  final String? avatarUrl;
-  final bool isCurrentUser;
+class LeaderboardItemModel extends LeaderboardItemEntity {
+  const LeaderboardItemModel({
+    required super.rank,
+    required super.name,
+    required super.score,
+    super.avatarUrl,
+    super.isCurrentUser = false,
+  });
+}
 
-  LeaderboardItem({
-    required this.rank,
-    required this.name,
-    required this.score,
-    this.avatarUrl,
-    this.isCurrentUser = false,
+class LatestPerformanceModel extends LatestPerformanceEntity {
+  const LatestPerformanceModel({
+    required super.examTitle,
+    required super.completedAt,
+    required super.score,
+    required super.scoreOutOf,
+    required super.accuracy,
+    required super.rank,
+    required super.totalParticipants,
+    required super.timeTaken,
   });
 }

@@ -32,4 +32,11 @@ class PreferenceKeys {
   static const subscriptionStatus = 'subscription-status';
   static const subscriptionStartDate = 'subscription-start-date';
   static const subscriptionExpiryDate = 'subscription-expiry-date';
+
+  /// Notification
+  static const hasPromptedNotificationSuffix = 'has_prompted_notification';
+
+  static String userScoped(String userId, String key) {
+    return '${userId}_$key';
+  }
 }

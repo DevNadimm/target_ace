@@ -1,7 +1,7 @@
-﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/config/colors.dart';
+import 'package:target_ace/core/config/typography.dart';
 
 class InfoRow extends StatelessWidget {
   final List<List<dynamic>> icon;
@@ -42,7 +42,7 @@ class InfoRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.poppins(
+                  style: AppFonts.body(
                     fontSize: 13,
                     color: AppColors.textSecondary,
                     height: 1.2,
@@ -52,7 +52,7 @@ class InfoRow extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     value!,
-                    style: GoogleFonts.poppins(
+                    style: AppFonts.body(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,

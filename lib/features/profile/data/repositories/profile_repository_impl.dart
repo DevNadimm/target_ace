@@ -2,13 +2,11 @@ import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
-import 'package:target_ace/core/services/app_preferences.dart';
-import 'package:target_ace/core/utils/helpers/subscription_status_helper.dart';
+import 'package:target_ace/core/services/user_local_datasource.dart';
 import 'package:target_ace/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:target_ace/features/profile/data/models/profile_model.dart';
 import 'package:target_ace/features/profile/domain/entities/profile_entity.dart';
 import 'package:target_ace/features/profile/domain/repository/profile_repository.dart';
-
 import 'package:target_ace/features/profile/domain/entities/onboarding_goal_entity.dart';
 import 'package:target_ace/features/profile/domain/entities/battle_group_entity.dart';
 import 'package:target_ace/features/profile/data/models/onboarding_goal_model.dart';
@@ -58,69 +56,70 @@ class ProfileRepositoryImpl implements ProfileRepository {
     required String phone,
     required String gender,
     required String dob,
+    String howDidYouHear = '',
+    String dailyGoal = '',
+    List<String> learningModes = const [],
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
         return left(Failure(message: 'No internet connection. Please check your network.'));
       }
 
-      // 1. Update Auth metadata
-      try {
-        await remoteDataSource.updateAuthUserMetadata({
-          'phone': phone,
-          'gender': gender,
-          'dob': dob,
-          'institution': institution,
-          'district': district,
-        });
-      } catch (_) {}
+      // 1. Build metadata map for Supabase Auth (only include non-empty values)
+      final Map<String, dynamic> metadataMap = {};
+      if (phone.isNotEmpty) metadataMap['phone'] = phone;
+      if (gender.isNotEmpty) metadataMap['gender'] = gender;
+      if (dob.isNotEmpty) metadataMap['dob'] = dob;
+      if (institution.isNotEmpty) metadataMap['institution'] = institution;
+      if (district.isNotEmpty) metadataMap['district'] = district;
+      if (howDidYouHear.isNotEmpty) metadataMap['how_did_you_hear'] = howDidYouHear;
+      if (dailyGoal.isNotEmpty) metadataMap['daily_goal'] = dailyGoal;
+      if (learningModes.isNotEmpty) metadataMap['learning_modes'] = learningModes;
 
-      // 2. Fetch profile single and Upsert profiles table
-      try {
-        final existingProfile = await remoteDataSource.fetchProfileSingle(userId);
-        
-        // Supabase client instance reference mapping fallback
-        // We will fetch from client as we are in data layer implementation
-        final name = existingProfile?['name'] as String? ?? 'Student';
-        final email = existingProfile?['email'] as String? ?? '';
-        final avatarUrl = existingProfile?['avatar_url'] as String?;
+      // 2. Run Auth metadata update & Atomic Database RPC concurrently
+      final results = await Future.wait([
+        if (metadataMap.isNotEmpty)
+          remoteDataSource.updateAuthUserMetadata(metadataMap).catchError((_) {})
+        else
+          Future.value(null),
+        remoteDataSource.completeProfileSetup({
+          'p_user_id': userId,
+          'p_goal': goalId,
+          'p_group_id': groupId,
+          'p_institution': institution.isEmpty ? null : institution,
+          'p_district': district.isEmpty ? null : district,
+          'p_phone': phone.isEmpty ? null : phone,
+          'p_gender': gender.isEmpty ? null : gender,
+          'p_dob': dob.isEmpty ? null : dob,
+          'p_how_did_you_hear': howDidYouHear.isEmpty ? null : howDidYouHear,
+          'p_daily_goal': dailyGoal.isEmpty ? null : dailyGoal,
+          'p_learning_modes': learningModes.isEmpty ? null : learningModes,
+        }),
+      ]);
 
-        await remoteDataSource.upsertProfile({
-          'id': userId,
-          'name': name,
-          'email': email,
-          'avatar_url': avatarUrl,
-          'goal': goalId,
-          'group_id': groupId,
-          'institution': institution,
-          'district': district,
-          'phone': phone,
-          'gender': gender,
-          'dob': dob,
-        });
-      } catch (_) {
-        await remoteDataSource.upsertProfile({
-          'id': userId,
-          'goal': goalId,
-          'group_id': groupId,
-          'institution': institution,
-          'district': district,
-        });
-      }
+      final rpcResult = results[1] as Map<String, dynamic>;
+      final lockedUntil = rpcResult['locked_until'] as String;
 
-      // 3. Deactivate previous memberships
-      try {
-        await remoteDataSource.deactivateActiveMemberships(userId);
-      } catch (_) {}
-
-      // 4. Insert new active group membership
-      final membership = await remoteDataSource.insertGroupMembership({
-        'user_id': userId,
+      // 3. Update local cache (only include non-empty values)
+      final Map<String, dynamic> localUpdates = {
+        'goal': goalId,
         'group_id': groupId,
-        'is_active': true,
-      });
+        'group_locked_until': lockedUntil,
+      };
+      if (institution.isNotEmpty) localUpdates['institution'] = institution;
+      if (district.isNotEmpty) localUpdates['district'] = district;
+      if (phone.isNotEmpty) localUpdates['phone'] = phone;
+      if (gender.isNotEmpty) localUpdates['gender'] = gender;
+      if (dob.isNotEmpty) localUpdates['dob'] = dob;
+      if (howDidYouHear.isNotEmpty) localUpdates['how_did_you_hear'] = howDidYouHear;
+      if (dailyGoal.isNotEmpty) localUpdates['daily_goal'] = dailyGoal;
+      if (learningModes.isNotEmpty) localUpdates['learning_modes'] = learningModes;
 
-      return right(membership['locked_until'] as String);
+      try {
+        await UserLocalDataSource.updateFields(localUpdates);
+      } catch (_) {}
+
+      return right(lockedUntil);
     } on ServerException catch (e) {
       return left(Failure(message: e.message));
     }
@@ -159,103 +158,43 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   Future<ProfileEntity> _readLocalProfile() async {
-    final name = await AppPreferences.getUserName();
-    final email = await AppPreferences.getUserEmail();
-    final phone = await AppPreferences.getUserPhone();
-    final gender = await AppPreferences.getUserGender();
-    final dob = await AppPreferences.getUserDob();
-    final institution = await AppPreferences.getUserInstitution();
-    final district = await AppPreferences.getUserDistrict();
-    final avatarUrl = await AppPreferences.getUserAvatarUrl();
-    final planName = await AppPreferences.getSubscriptionPlanName();
-    final status = await AppPreferences.getSubscriptionStatus();
-    final expiry = await AppPreferences.getSubscriptionExpiryDate();
-    final groupTitle = await AppPreferences.getActiveGroupTitle();
+    final cachedUser = await UserLocalDataSource.readUser();
 
-    final displayPlan = planName.isNotEmpty ? planName : (status == 'active' ? 'TargetAce+ Pro' : 'Free Member');
+    final name = cachedUser?.name ?? 'User';
+    final email = cachedUser?.email ?? '';
+    final planName = cachedUser?.subscriptionPlanName ?? '';
+    final status = cachedUser?.subscriptionStatus ?? 'none';
+    final displayPlan = planName.isNotEmpty
+        ? planName
+        : (status == 'active' ? 'Premium Plan' : 'Free Member');
+    final groupTitle = cachedUser?.groupTitle ?? '';
 
     return ProfileModel(
       name: name,
       email: email,
-      phone: phone,
-      gender: gender,
-      dob: dob,
-      institution: institution,
-      district: district,
-      avatarUrl: avatarUrl,
+      phone: cachedUser?.phone ?? '',
+      gender: cachedUser?.gender ?? '',
+      dob: cachedUser?.dob ?? '',
+      institution: cachedUser?.institution ?? '',
+      district: cachedUser?.district ?? '',
+      avatarUrl: cachedUser?.avatarUrl ?? '',
       subscriptionPlanName: displayPlan,
       subscriptionStatus: status,
-      subscriptionExpiry: expiry ?? '',
-      activeGroupTitle: (groupTitle != null && groupTitle.isNotEmpty) ? groupTitle : 'Not Selected',
+      subscriptionExpiry: cachedUser?.subscriptionExpiryDate ?? '',
+      activeGroupTitle: groupTitle.isNotEmpty ? groupTitle : 'Not Selected',
     );
   }
 
   @override
   Stream<Either<Failure, ProfileEntity>> getProfileData() async* {
-    // 1. Yield local cached data immediately
+    // Read-only: yield local cached data immediately.
+    // Network sync is handled at explicit sync points only
+    // (Splash, Login, Profile Update, Manual Refresh).
     try {
       final cachedProfile = await _readLocalProfile();
       yield right(cachedProfile);
     } catch (e) {
       yield left(Failure(message: e.toString()));
-    }
-
-    // 2. Perform background network sync
-    try {
-      final userId = await AppPreferences.getUserId();
-      if (userId.isNotEmpty) {
-        final payload = await remoteDataSource.fetchProfileWithSubscription(userId);
-        if (payload != null) {
-          final profileData = payload['profile'] as Map<String, dynamic>?;
-          final latestSub = payload['subscription'] as Map<String, dynamic>?;
-
-          if (profileData != null) {
-            // Save updated profile fields to Local DB (AppPreferences)
-            if (profileData['name'] != null) await AppPreferences.setUserName(profileData['name'] as String);
-            if (profileData['email'] != null) await AppPreferences.setUserEmail(profileData['email'] as String);
-            if (profileData['phone'] != null) await AppPreferences.setUserPhone(profileData['phone'] as String);
-            if (profileData['gender'] != null) await AppPreferences.setUserGender(profileData['gender'] as String);
-            if (profileData['dob'] != null) await AppPreferences.setUserDob(profileData['dob'] as String);
-            if (profileData['institution'] != null) await AppPreferences.setUserInstitution(profileData['institution'] as String);
-            if (profileData['district'] != null) await AppPreferences.setUserDistrict(profileData['district'] as String);
-            if (profileData['avatar_url'] != null) await AppPreferences.setUserAvatarUrl(profileData['avatar_url'] as String);
-
-            final isPremium = profileData['is_premium'] as bool? ?? false;
-            final expiryStr = profileData['premium_expires_at'] as String?;
-
-            final latestSubStatus = latestSub?['status'] as String?;
-            final latestSubPlanId = latestSub?['plan_id'] as String?;
-            final latestSubPlanName = latestSub?['plan_name'] as String?;
-
-            final subStatus = SubscriptionStatusHelper.parse(
-              isPremium: isPremium,
-              expiryStr: expiryStr,
-              latestSubStatus: latestSubStatus,
-              latestSubPlanId: latestSubPlanId,
-              latestSubPlanName: latestSubPlanName,
-            );
-
-            await AppPreferences.setSubscriptionStatus(subStatus);
-            if (expiryStr != null) {
-              await AppPreferences.setSubscriptionExpiryDate(expiryStr);
-            } else {
-              await AppPreferences.setSubscriptionExpiryDate('');
-            }
-          }
-
-          if (latestSub != null && latestSub['plan_name'] != null) {
-            await AppPreferences.setSubscriptionPlanName(latestSub['plan_name'] as String);
-          } else {
-            await AppPreferences.setSubscriptionPlanName('Free Member');
-          }
-
-          // Yield the updated data
-          final updatedProfile = await _readLocalProfile();
-          yield right(updatedProfile);
-        }
-      }
-    } catch (_) {
-      // Ignore background sync failure to avoid breaking offline experience
     }
   }
 }

@@ -7,7 +7,6 @@ import 'package:target_ace/core/config/typography.dart';
 class SelectionCard extends StatefulWidget {
   final String title;
   final String? image;
-  final String? trailingText;
   final bool isSelected;
   final bool isMultiSelect;
   final VoidCallback onTap;
@@ -16,7 +15,6 @@ class SelectionCard extends StatefulWidget {
     super.key,
     required this.title,
     this.image,
-    this.trailingText,
     required this.isSelected,
     this.isMultiSelect = false,
     required this.onTap,
@@ -96,17 +94,6 @@ class _SelectionCardState extends State<SelectionCard> {
       );
     }
 
-    if (widget.trailingText != null && widget.trailingText!.isNotEmpty) {
-      return Text(
-        widget.trailingText!,
-        style: AppFonts.body(
-          fontSize: 13,
-          fontWeight: widget.isSelected ? FontWeight.bold : FontWeight.w500,
-          color: widget.isSelected ? AppColors.primary : AppColors.textSecondary,
-        ),
-      );
-    }
-
     return null;
   }
 
@@ -115,8 +102,7 @@ class _SelectionCardState extends State<SelectionCard> {
     final leading = _buildLeadingImage();
     final trailing = _buildTrailing();
 
-    const double depth = 3;
-    const double cardHeight = 56.0;
+    const double depth = 3.0;
     final double translation = _isPressed ? depth : 0.0;
 
     // Color definitions for Duolingo 3D style
@@ -143,13 +129,11 @@ class _SelectionCardState extends State<SelectionCard> {
         onTapDown: _handleTapDown,
         onTapUp: _handleTapUp,
         onTapCancel: _handleTapCancel,
-        child: SizedBox(
-          height: cardHeight + depth,
-          width: double.infinity,
+        child: IntrinsicHeight(
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              // 1. Bottom 3D Lip Base (Solid color, NO inner borders)
+              // 1. Bottom 3D Lip Base (Fills stack background with top depth offset)
               Positioned(
                 left: 0,
                 right: 0,
@@ -163,16 +147,17 @@ class _SelectionCardState extends State<SelectionCard> {
                 ),
               ),
 
-              // 2. Top Face Container (Animated spring translation layer)
-              AnimatedPositioned(
+              // 2. Animated Top Face Container (Defines dynamic stack height with minHeight: 56.0)
+              AnimatedPadding(
                 duration: const Duration(milliseconds: 60),
                 curve: Curves.easeOutQuad,
-                left: 0,
-                right: 0,
-                top: translation,
-                bottom: depth - translation,
+                padding: EdgeInsets.only(
+                  top: translation,
+                  bottom: depth - translation,
+                ),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  constraints: const BoxConstraints(minHeight: 56.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(
                     color: resolvedFaceColor,
                     borderRadius: BorderRadius.circular(16),
@@ -192,9 +177,7 @@ class _SelectionCardState extends State<SelectionCard> {
                           widget.title,
                           style: AppFonts.body(
                             fontSize: 15,
-                            fontWeight: widget.isSelected
-                                ? FontWeight.bold
-                                : FontWeight.w600,
+                            fontWeight: FontWeight.w600,
                             color: resolvedTextColor,
                           ),
                         ),

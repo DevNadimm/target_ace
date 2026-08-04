@@ -1,8 +1,8 @@
-﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/config/colors.dart';
+import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/utils/helpers/helper_functions.dart';
 
 class StatCard extends StatelessWidget {
@@ -27,6 +27,7 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: CustomContainer(
+        width: double.infinity,
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +45,7 @@ class StatCard extends StatelessWidget {
               isRaw
                   ? value
                   : HelperFunctions.padNumber(int.tryParse(value) ?? 0),
-              style: GoogleFonts.poppins(
+              style: AppFonts.heading(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
                 color: AppColors.textPrimary,
@@ -56,10 +57,10 @@ class StatCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               label,
-              style: GoogleFonts.poppins(
-                fontSize: 11,
+              style: AppFonts.body(
+                fontSize: 13,
                 color: AppColors.textSecondary,
-                height: 1,
+                height: 1.2,
               ),
             ),
           ],

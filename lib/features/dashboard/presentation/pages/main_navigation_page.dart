@@ -4,13 +4,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:target_ace/core/components/custom_cached_image.dart';
 import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
-import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/core/shared/widgets/app_confirmation_dialog.dart';
-import 'package:target_ace/features/battle/presentation/pages/live_battle_hub_page.dart';
+import 'package:target_ace/features/battle/presentation/pages/battle_arena_page.dart';
 import 'package:target_ace/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:target_ace/features/dashboard/presentation/pages/leaderboard_page.dart';
-import 'package:target_ace/features/practice/presentation/pages/practice_page.dart';
+import 'package:target_ace/features/practice/presentation/pages/practice_dashboard_page.dart';
 import 'package:target_ace/features/profile/presentation/pages/profile_page.dart';
+import 'package:target_ace/core/services/user_local_datasource.dart';
 
 class MainNavigationPage extends StatefulWidget {
   static Route route() => MaterialPageRoute(builder: (_) => const MainNavigationPage());
@@ -44,7 +44,7 @@ class MainNavigationPageState extends State<MainNavigationPage> {
   }
 
   Future<void> _loadUserAvatar() async {
-    final url = await AppPreferences.getUserAvatarUrl();
+    final url = await UserLocalDataSource.getUserAvatarUrl();
     if (mounted) {
       setState(() {
         _avatarUrl = url;
@@ -58,9 +58,9 @@ class MainNavigationPageState extends State<MainNavigationPage> {
         case 0:
           return const DashboardPage();
         case 1:
-          return const LiveBattleHubPage();
+          return const BattleArenaPage();
         case 2:
-          return const PracticePage();
+          return const PracticeDashboardPage();
         case 3:
           return const LeaderboardPage();
         case 4:

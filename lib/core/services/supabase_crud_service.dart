@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/services/crud_service.dart';
-import 'package:target_ace/core/exceptions/api_exception.dart';
+import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/utils/enums/error_type.dart';
 
 class SupabaseCrudService implements CrudService {
@@ -49,7 +49,7 @@ class SupabaseCrudService implements CrudService {
       final response = await _client.from(table).insert(data).select();
       return response;
     } catch (e) {
-      throw ApiException(
+      throw ServerException(
         message: errorMessage ?? e.toString(),
         type: ErrorType.server,
       );
@@ -78,7 +78,7 @@ class SupabaseCrudService implements CrudService {
       final response = await query;
       return response;
     } catch (e) {
-      throw ApiException(
+      throw ServerException(
         message: errorMessage ?? e.toString(),
         type: ErrorType.server,
       );
@@ -97,7 +97,7 @@ class SupabaseCrudService implements CrudService {
       final table = _toTableName(endpointOrTable);
       final id = data is Map ? data['id'] : null;
       if (id == null) {
-        throw ApiException(
+        throw ServerException(
           message: "Update operation requires an 'id' field in the data payload.",
           type: ErrorType.unknown,
         );
@@ -105,7 +105,7 @@ class SupabaseCrudService implements CrudService {
       final response = await _client.from(table).update(data).eq('id', id).select();
       return response;
     } catch (e) {
-      throw ApiException(
+      throw ServerException(
         message: errorMessage ?? e.toString(),
         type: ErrorType.server,
       );
@@ -123,7 +123,7 @@ class SupabaseCrudService implements CrudService {
       final table = _toTableName(endpointOrTable);
       final id = data is Map ? data['id'] : data;
       if (id == null) {
-        throw ApiException(
+        throw ServerException(
           message: "Delete operation requires an 'id' payload or value.",
           type: ErrorType.unknown,
         );
@@ -131,7 +131,7 @@ class SupabaseCrudService implements CrudService {
       final response = await _client.from(table).delete().eq('id', id).select();
       return response;
     } catch (e) {
-      throw ApiException(
+      throw ServerException(
         message: errorMessage ?? e.toString(),
         type: ErrorType.server,
       );

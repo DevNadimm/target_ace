@@ -1,22 +1,15 @@
-class NotificationModel {
-  final String id;
-  final String userId;
-  final String title;
-  final String body;
-  final String type; // general, exam_reminder, battle_invite, streak_alert, subscription
-  final bool isRead;
-  final Map<String, dynamic> payload;
-  final DateTime createdAt;
+import 'package:target_ace/features/notification/domain/entities/notification_entity.dart';
 
+class NotificationModel extends NotificationEntity {
   NotificationModel({
-    required this.id,
-    required this.userId,
-    required this.title,
-    required this.body,
-    required this.type,
-    required this.isRead,
-    required this.payload,
-    required this.createdAt,
+    required super.id,
+    required super.userId,
+    required super.title,
+    required super.body,
+    required super.type,
+    required super.isRead,
+    required super.payload,
+    required super.createdAt,
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
@@ -45,6 +38,7 @@ class NotificationModel {
     };
   }
 
+  @override
   NotificationModel copyWith({
     String? id,
     String? userId,

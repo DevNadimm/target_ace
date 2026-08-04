@@ -1,23 +1,19 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
+import 'package:target_ace/core/components/section_header.dart';
+import 'package:target_ace/core/components/spring_button.dart';
 import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:target_ace/core/components/spring_button.dart';
 import 'package:target_ace/features/battle/presentation/pages/live_battle_page.dart';
-import 'package:target_ace/features/dashboard/data/models/dashboard_model.dart';
+import 'package:target_ace/features/dashboard/domain/entities/dashboard_entity.dart';
+import 'package:target_ace/features/subscription/presentation/widgets/subscription_paywall_bottom_sheet.dart';
+import 'package:target_ace/core/services/user_local_datasource.dart';
 
-/// "Knight Arena" card — the gold-knight mascot bleeds off the right edge
-/// over a dark radial glow, with exam info + a compact XP-ring stat and
-/// CTA on the left. Public API (exam / hasSubmitted / userGoal) unchanged
-/// so DashboardPage doesn't need to change.
-///
-/// NOTE: `Assets.knightMascot` must be a PNG with a TRANSPARENT background
-/// — otherwise you'll get a white box instead of the glow bleeding through.
 class ActiveExamCard extends StatefulWidget {
-  final DashboardExam? exam;
+  final DashboardExamEntity? exam;
   final bool hasSubmitted;
   final String? userGoal;
 
@@ -77,53 +73,55 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: CustomContainer(
-        borderRadius: BorderRadius.zero,
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.textSecondary.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
+    return CustomContainer(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.3),
+                width: 1,
               ),
+            ),
+            child: Center(
               child: HugeIcon(
                 icon: HugeIcons.strokeRoundedSword01,
-                color: AppColors.textSecondary,
+                color: AppColors.primary,
                 size: 20,
               ),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "No battle in the arena",
-                    style: AppFonts.heading(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "No battle in the arena",
+                  style: AppFonts.heading(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    "Sharpen your skills — the next one is coming.",
-                    style: AppFonts.body(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                      height: 1.3,
-                    ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  "Sharpen your skills — the next one is coming.",
+                  style: AppFonts.body(
+                    fontSize: 12.5,
+                    color: AppColors.textSecondary,
+                    height: 1.35,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -131,7 +129,7 @@ class _EmptyState extends StatelessWidget {
 
 /// Live / upcoming state — the knight arena card itself.
 class _ActiveState extends StatelessWidget {
-  final DashboardExam exam;
+  final DashboardExamEntity exam;
   final bool hasSubmitted;
   final String? userGoal;
   final AnimationController pulseController;
@@ -142,6 +140,16 @@ class _ActiveState extends StatelessWidget {
     required this.userGoal,
     required this.pulseController,
   });
+
+  Future<void> _onExamTap(BuildContext context) async {
+    final status = await UserLocalDataSource.getSubscriptionStatus();
+    if (!context.mounted) return;
+    if (status != 'active' && status != 'trial') {
+      SubscriptionPaywallBottomSheet.show(context, status: status);
+    } else {
+      Navigator.push(context, LiveBattlePage.route());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -168,9 +176,9 @@ class _ActiveState extends StatelessWidget {
       ringProgress = remaining <= windowSeconds
           ? (1 - remaining / windowSeconds).clamp(0.0, 1.0)
           : 0.0;
-      final hours = difference.inHours.toString().padLeft(2, '0');
-      final minutes = (difference.inMinutes % 60).toString().padLeft(2, '0');
-      centerValue = "$hours:$minutes";
+      final hours = difference.inHours;
+      final minutes = difference.inMinutes % 60;
+      centerValue = hours > 0 ? "${hours}h+" : "${minutes}m";
       centerUnit = "LEFT";
     }
 
@@ -182,7 +190,6 @@ class _ActiveState extends StatelessWidget {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            // Radial glow behind the knight — green while live, gold otherwise.
             Positioned(
               right: -20,
               top: -30,
@@ -193,28 +200,27 @@ class _ActiveState extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      accentColor.withValues(alpha: 0.25),
+                      accentColor.withValues(alpha: 0.05),
                       accentColor.withValues(alpha: 0.0),
                     ],
                   ),
                 ),
               ),
             ),
-
-            // Knight mascot — bleeds off the right/bottom edge.
             Positioned(
-              right: -14,
-              bottom: -10,
+              right: 0,
+              bottom: 0,
               top: 6,
-              child: Image.asset(
-                Assets.knightMascot,
-                height: 176,
-                fit: BoxFit.contain,
-                alignment: Alignment.bottomRight,
+              child: Opacity(
+                opacity: 0.75,
+                child: Image.asset(
+                  Assets.knightMascot,
+                  height: 176,
+                  fit: BoxFit.contain,
+                  alignment: Alignment.bottomRight,
+                ),
               ),
             ),
-
-            // Diagonal corner ribbon.
             Positioned(
               top: 12,
               right: -26,
@@ -223,62 +229,15 @@ class _ActiveState extends StatelessWidget {
                 color: accentColor,
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 128, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      AnimatedBuilder(
-                        animation: pulseController,
-                        builder: (context, child) {
-                          final scale = isLive ? 1.0 + (pulseController.value * 0.6) : 1.0;
-                          final opacity = isLive ? (1 - pulseController.value * 0.7) : 1.0;
-                          return Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              if (isLive)
-                                Transform.scale(
-                                  scale: scale,
-                                  child: Opacity(
-                                    opacity: opacity.clamp(0.0, 1.0),
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: accentColor,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  color: accentColor,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 7),
-                      Expanded(
-                        child: Text(
-                          isLive ? "BATTLE IN PROGRESS" : "NEXT BATTLE",
-                          style: AppFonts.body(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: accentColor,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ),
-                    ],
+                  SectionHeader(
+                    title: isLive ? "BATTLE IN PROGRESS" : "NEXT BATTLE",
+                    isAnimated: true,
+                    dotColor: accentColor,
                   ),
                   const SizedBox(height: 8),
                   if (userGoal != null && userGoal!.isNotEmpty) ...[
@@ -299,7 +258,6 @@ class _ActiveState extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      // Compact XP-ring stat.
                       SizedBox(
                         width: 46,
                         height: 46,
@@ -343,14 +301,16 @@ class _ActiveState extends StatelessWidget {
                           depth: 3,
                           onPressed: (hasSubmitted || !canEnter)
                               ? null
-                              : () => Navigator.push(context, LiveBattlePage.route()),
-                          child: Text(
-                            hasSubmitted
-                                ? "Submitted"
-                                : (isLive ? "Enter Arena" : "Get Ready"),
-                            style: AppFonts.body(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.bold,
+                              : () => _onExamTap(context),
+                          child: Center(
+                            child: Text(
+                              hasSubmitted
+                                  ? "Submitted"
+                                  : (isLive ? "Enter Arena" : "Get Ready"),
+                              style: AppFonts.body(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -367,7 +327,6 @@ class _ActiveState extends StatelessWidget {
   }
 }
 
-/// Circular gauge — track ring + progress arc, drawn from 12 o'clock.
 class _RingGaugePainter extends CustomPainter {
   final double progress;
   final Color trackColor;
@@ -387,13 +346,13 @@ class _RingGaugePainter extends CustomPainter {
     final trackPaint = Paint()
       ..color = trackColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 5
+      ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
 
     final fillPaint = Paint()
       ..color = fillColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 5
+      ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
 
     canvas.drawCircle(center, radius, trackPaint);
@@ -415,8 +374,6 @@ class _RingGaugePainter extends CustomPainter {
   }
 }
 
-/// Diagonal corner ribbon — folded-banner look, sits over the top-right
-/// corner of the card.
 class _CornerRibbon extends StatelessWidget {
   final String label;
   final Color color;
@@ -430,14 +387,14 @@ class _CornerRibbon extends StatelessWidget {
       child: Container(
         width: 92,
         padding: const EdgeInsets.symmetric(vertical: 4),
-        color: color,
+        color: color.withValues(alpha: 0.15),
         alignment: Alignment.center,
         child: Text(
           label,
           style: AppFonts.body(
             fontSize: 9.5,
             fontWeight: FontWeight.bold,
-            color: AppColors.white,
+            color: color,
             letterSpacing: 1.0,
           ),
         ),
@@ -446,7 +403,6 @@ class _CornerRibbon extends StatelessWidget {
   }
 }
 
-/// Small rounded "pill" label.
 class _TagPill extends StatelessWidget {
   final String text;
   final Color color;
@@ -458,8 +414,12 @@ class _TagPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
+        color: AppColors.cardAlt,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: AppColors.grey,
+          width: 0.5,
+        ),
       ),
       child: Text(
         text,
@@ -468,7 +428,7 @@ class _TagPill extends StatelessWidget {
         style: AppFonts.body(
           fontSize: 10,
           fontWeight: FontWeight.w600,
-          color: color,
+          color: AppColors.textSecondary,
         ),
       ),
     );

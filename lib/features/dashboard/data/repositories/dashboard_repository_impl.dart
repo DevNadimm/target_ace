@@ -2,10 +2,10 @@ import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
-import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/features/dashboard/data/datasources/dashboard_remote_datasource.dart';
 import 'package:target_ace/features/dashboard/domain/entities/dashboard_entity.dart';
 import 'package:target_ace/features/dashboard/domain/repository/dashboard_repository.dart';
+import 'package:target_ace/core/services/user_local_datasource.dart';
 
 class DashboardRepositoryImpl implements DashboardRepository {
   final DashboardRemoteDataSource remoteDataSource;
@@ -23,12 +23,12 @@ class DashboardRepositoryImpl implements DashboardRepository {
         return left(Failure(message: 'No internet connection. Please check your network.'));
       }
 
-      final goalId = await AppPreferences.getUserGoal();
-      String groupId = await AppPreferences.getActiveGroupId();
-      final userId = await AppPreferences.getUserId();
+      final goalId = await UserLocalDataSource.getUserGoal();
+      String groupId = await UserLocalDataSource.getUserGroupId();
+      final userId = await UserLocalDataSource.getUserId();
 
       if (groupId.isEmpty) {
-        groupId = await AppPreferences.getUserGroup();
+        groupId = await UserLocalDataSource.getUserGroupId();
       }
 
       final dashboard = await remoteDataSource.getDashboard(

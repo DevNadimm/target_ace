@@ -1,20 +1,14 @@
-﻿class SubscriptionModel {
-  final String status;
-  final String? planId;
-  final String? planName;
-  final String? startDate;
-  final String? endDate;
-  final int? daysRemaining;
-  final bool isTrial;
+import 'package:target_ace/features/subscription/domain/entities/subscription_entity.dart';
 
-  SubscriptionModel({
-    required this.status,
-    this.planId,
-    this.planName,
-    this.startDate,
-    this.endDate,
-    this.daysRemaining,
-    this.isTrial = false,
+class SubscriptionModel extends SubscriptionEntity {
+  const SubscriptionModel({
+    required super.status,
+    super.planId,
+    super.planName,
+    super.startDate,
+    super.endDate,
+    super.daysRemaining,
+    super.isTrial = false,
   });
 
   factory SubscriptionModel.fromJson(Map<String, dynamic> json) {
@@ -29,4 +23,3 @@
     );
   }
 }
-

@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/error/server_exception.dart';
-import 'package:target_ace/core/services/app_preferences.dart';
-import 'package:target_ace/core/utils/helpers/subscription_status_helper.dart';
+import 'package:target_ace/core/services/user_local_datasource.dart';
 import 'package:target_ace/features/dashboard/data/models/dashboard_model.dart';
 
 abstract interface class DashboardRemoteDataSource {
@@ -117,21 +116,24 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
           final planName = resp['plan_name'] as String? ?? 'Free Member';
           final subStatus = resp['subscription_status'] as String? ?? 'none';
           final expiryStr = resp['premium_expires_at'] as String?;
+          final groupLockedUntilStr = resp['group_locked_until'] as String?;
 
-          await AppPreferences.setSubscriptionPlanName(planName);
-          await AppPreferences.setSubscriptionStatus(subStatus);
-          if (expiryStr != null) {
-            await AppPreferences.setSubscriptionExpiryDate(expiryStr);
-          } else {
-            await AppPreferences.setSubscriptionExpiryDate('');
+          final Map<String, dynamic> localUpdates = {
+            'subscription_plan_name': planName,
+            'subscription_status': subStatus,
+            'subscription_expiry_date': expiryStr ?? '',
+          };
+          if (groupLockedUntilStr != null && groupLockedUntilStr.isNotEmpty) {
+            localUpdates['group_locked_until'] = groupLockedUntilStr;
           }
+
+          await UserLocalDataSource.updateFields(localUpdates);
 
           final totalBattles = (resp['total_battles'] as num? ?? 0).toInt();
           final averageScore = (resp['average_score'] as num? ?? 0.0).toDouble();
           final totalCorrect = (resp['total_correct'] as num? ?? 0).toInt();
           final totalWrong = (resp['total_wrong'] as num? ?? 0).toInt();
           final groupRank = (resp['group_rank'] as num? ?? 0).toInt();
-          final globalRank = (resp['global_rank'] as num? ?? 0).toInt();
           final streakCount = (resp['streak_count'] as num? ?? 0).toInt();
           final highestStreak = (resp['highest_streak'] as num? ?? 0).toInt();
           final weeklyActiveDaysList = (resp['weekly_active_days'] as List?)?.map((e) => e.toString()).toList() ?? [];
@@ -165,6 +167,36 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
             );
           }
 
+          final lastCompletedExamMap = resp['last_completed_exam'] as Map<String, dynamic>?;
+          final lastCompletedExam = lastCompletedExamMap != null ? DashboardExamModel.fromJson(lastCompletedExamMap) : null;
+
+          final leaderboardList = resp['leaderboard'] as List? ?? [];
+          final List<LeaderboardItemModel> leaderboard = [];
+          for (int i = 0; i < leaderboardList.length; i++) {
+            final item = leaderboardList[i];
+            final name = item['name'] as String? ?? 'Student';
+            final avatarUrl = item['avatar_url'] as String?;
+            final subUserId = item['user_id'] as String? ?? '';
+            leaderboard.add(
+              LeaderboardItemModel(
+                rank: i + 1,
+                name: name,
+                score: (item['score'] as num? ?? 0).toDouble(),
+                avatarUrl: avatarUrl,
+                isCurrentUser: subUserId == userId,
+              ),
+            );
+          }
+
+          // Local mock if leaderboard is empty
+          if (leaderboard.isEmpty) {
+            leaderboard.addAll([
+              LeaderboardItemModel(rank: 1, name: 'Rafiq Ahmed', score: 98),
+              LeaderboardItemModel(rank: 2, name: 'Sadia Islam', score: 95),
+              LeaderboardItemModel(rank: 3, name: 'Tanvir Hasan', score: 91),
+            ]);
+          }
+
           return DashboardModel(
             activeExam: activeExam,
             hasSubmittedActiveExam: hasSubmittedActive,
@@ -179,373 +211,26 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
               weeklyActiveDays: weeklyActiveDaysList,
               unreadNotificationsCount: unreadNotificationsCount,
             ),
-            leaderboard: [],
+            leaderboard: leaderboard,
             groupRank: groupRank,
-            globalRank: globalRank,
+            lastExamTitle: lastCompletedExam?.title,
+            lastExamId: lastCompletedExam?.id,
             latestPerformance: latestPerformance,
             isPremium: isPremium,
           );
-        }
-      } catch (_) {
-        // Fallback to parallel wave queries if RPC is not run in Supabase yet
-      }
-
-      // ── Wave 1: Fire exam fetch AND exam-independent queries in parallel ──
-      final nowUtc = DateTime.now().toUtc();
-
-      final wave1Results = await Future.wait([
-        // Index 0: Exam fetch
-        supabaseClient
-            .from('exams')
-            .select()
-            .eq('group_id', targetGroupId)
-            .order('start_time', ascending: true),
-
-        // Index 1: User overall statistics
-        supabaseClient
-            .from('exam_submissions')
-            .select('score, correct_count, wrong_count')
-            .eq('user_id', userId),
-
-        // Index 2: Group Rank RPC
-        userId.isNotEmpty
-            ? supabaseClient.rpc('get_user_group_rank', params: {
-                'target_user_id': userId,
-                'target_group_id': targetGroupId,
-              })
-            : Future.value(0),
-
-        // Index 3: Global Rank RPC
-        userId.isNotEmpty
-            ? supabaseClient.rpc('get_user_global_rank', params: {
-                'target_user_id': userId,
-              })
-            : Future.value(0),
-
-        // Index 4: Streak metrics & is_premium & premium_expires_at
-        userId.isNotEmpty
-            ? supabaseClient
-                .from('profiles')
-                .select('streak_count, highest_streak, weekly_active_days, is_premium, premium_expires_at, name, email, phone, gender, dob, institution, district, avatar_url, group_id')
-                .eq('id', userId)
-                .maybeSingle()
-            : Future.value(null),
-
-        // Index 5: Fetch recent exams that have started
-        supabaseClient
-            .from('exams')
-            .select()
-            .eq('group_id', targetGroupId)
-            .lt('start_time', nowUtc.toIso8601String())
-            .order('start_time', ascending: false)
-            .limit(5),
-
-        // Index 6: Unread notifications count query
-        userId.isNotEmpty
-            ? supabaseClient
-                .from('notifications')
-                .select('id')
-                .eq('user_id', userId)
-                .eq('is_read', false)
-            : Future.value([]),
-
-        // Index 7: Fetch latest subscription
-        userId.isNotEmpty
-            ? supabaseClient
-                .from('subscriptions')
-                .select('status, plan_id, plan_name')
-                .eq('user_id', userId)
-                .order('created_at', ascending: false)
-                .limit(1)
-            : Future.value([]),
-      ]);
-
-      // ── Resolve active exam from Wave 1 results ──
-      final examResponse = wave1Results[0] as List;
-      DashboardExamModel? activeExam;
-
-      if (examResponse.isNotEmpty) {
-        for (final examMap in examResponse) {
-          final exam = DashboardExamModel.fromJson(examMap);
-          final startTime = exam.startTime.toUtc();
-          final endTime = startTime.add(Duration(minutes: exam.durationMinutes));
-
-          if (endTime.isAfter(nowUtc)) {
-            activeExam = exam;
-            break;
-          }
-        }
-        activeExam ??= DashboardExamModel.fromJson(examResponse.last);
-      } else {
-        final lastCompletedResponse = await supabaseClient
-            .from('exams')
-            .select()
-            .eq('group_id', targetGroupId)
-            .order('start_time', ascending: false)
-            .limit(1);
-        if (lastCompletedResponse.isNotEmpty) {
-          activeExam = DashboardExamModel.fromJson(lastCompletedResponse.first);
-        }
-      }
-
-      // ── Find the last completed exam from Index 5 ──
-      final pastExamsResponse = wave1Results[5] as List;
-      DashboardExamModel? lastCompletedExam;
-      if (pastExamsResponse.isNotEmpty) {
-        for (final examMap in pastExamsResponse) {
-          final exam = DashboardExamModel.fromJson(examMap);
-          final startTime = exam.startTime.toUtc();
-          final endTime = startTime.add(Duration(minutes: exam.durationMinutes));
-
-          if (endTime.isBefore(nowUtc)) {
-            lastCompletedExam = exam;
-            break;
-          }
-        }
-      }
-
-      // ── Wave 2: Exam-dependent queries ──
-      bool hasSubmittedActiveExam = false;
-      List<dynamic> lastCompletedLeaderboardData = [];
-
-      final List<Future<dynamic>> wave2Queries = [];
-
-      if (activeExam != null) {
-        wave2Queries.add(
-          supabaseClient
-              .from('exam_submissions')
-              .select('id')
-              .eq('exam_id', activeExam.id)
-              .eq('user_id', userId)
-              .limit(1)
-        );
-      } else {
-        wave2Queries.add(Future.value([]));
-      }
-
-      if (lastCompletedExam != null) {
-        wave2Queries.add(
-          supabaseClient
-              .from('leaderboards')
-              .select('score, user_id, profiles(name, avatar_url)')
-              .eq('exam_id', lastCompletedExam.id)
-              .order('score', ascending: false)
-              .order('time_taken_seconds', ascending: true)
-              .limit(3)
-        );
-      } else {
-        wave2Queries.add(Future.value([]));
-      }
-
-      if (userId.isNotEmpty) {
-        wave2Queries.add(
-          supabaseClient
-              .from('exam_submissions')
-              .select('*, exams(title)')
-              .eq('user_id', userId)
-              .order('completed_at', ascending: false)
-              .limit(1)
-        );
-      } else {
-        wave2Queries.add(Future.value([]));
-      }
-
-      final wave2Results = await Future.wait(wave2Queries);
-
-      if (activeExam != null) {
-        final submissionCheckData = wave2Results[0] as List;
-        hasSubmittedActiveExam = submissionCheckData.isNotEmpty;
-      }
-      lastCompletedLeaderboardData = wave2Results[1] as List;
-
-      LatestPerformanceModel? latestPerformance;
-      final latestSubData = wave2Results[2] as List;
-      if (latestSubData.isNotEmpty) {
-        final sub = latestSubData.first as Map<String, dynamic>;
-        final examData = sub['exams'] as Map<String, dynamic>?;
-        final examTitle = examData != null ? (examData['title'] as String? ?? 'Live Exam') : 'Live Exam';
-        final score = (sub['score'] as num? ?? 0).round();
-        final correctCount = (sub['correct_count'] as num? ?? 0).toInt();
-        final wrongCount = (sub['wrong_count'] as num? ?? 0).toInt();
-        final totalAttempted = correctCount + wrongCount;
-        final accuracy = totalAttempted > 0 ? (correctCount / totalAttempted) : 0.0;
-        final timeTakenSeconds = (sub['time_taken_seconds'] as num? ?? 0).toInt();
-        final completedAtStr = sub['completed_at'] as String? ?? sub['submitted_at'] as String?;
-        final completedAt = completedAtStr != null ? DateTime.parse(completedAtStr).toLocal() : DateTime.now();
-        final examId = sub['exam_id'] as String? ?? '';
-
-        int rank = 0;
-        int totalParticipants = 0;
-
-        if (examId.isNotEmpty) {
-          try {
-            final rankResults = await Future.wait<dynamic>([
-              supabaseClient
-                  .from('exam_submissions')
-                  .select('id')
-                  .eq('exam_id', examId),
-              supabaseClient
-                  .from('leaderboards')
-                  .select('rank')
-                  .eq('exam_id', examId)
-                  .eq('user_id', userId)
-                  .maybeSingle()
-            ]);
-            
-            final participantsList = rankResults[0] as List;
-            totalParticipants = participantsList.length;
-
-            final rankResp = rankResults[1] as Map<String, dynamic>?;
-            if (rankResp != null && rankResp['rank'] != null) {
-              rank = (rankResp['rank'] as num).toInt();
-            }
-
-            if (rank == 0 && totalParticipants > 0) {
-              final higherSubs = await supabaseClient
-                  .from('exam_submissions')
-                  .select('id')
-                  .eq('exam_id', examId)
-                  .gt('score', sub['score'] ?? 0);
-              rank = (higherSubs as List).length + 1;
-            }
-          } catch (_) {}
-        }
-
-        latestPerformance = LatestPerformanceModel(
-          examTitle: examTitle,
-          completedAt: completedAt,
-          score: score,
-          scoreOutOf: 100,
-          accuracy: accuracy,
-          rank: rank > 0 ? rank : 1,
-          totalParticipants: totalParticipants > 0 ? totalParticipants : 1,
-          timeTaken: Duration(seconds: timeTakenSeconds),
-        );
-      }
-
-      int totalBattles = 0;
-      double averageScore = 0.0;
-      int totalCorrect = 0;
-      int totalWrong = 0;
-
-      final statsData = wave1Results[1] as List;
-      if (statsData.isNotEmpty) {
-        totalBattles = statsData.length;
-        final sum = statsData.fold<double>(0.0, (prev, element) => prev + (element['score'] as num).toDouble());
-        averageScore = totalBattles > 0 ? sum / totalBattles : 0.0;
-        totalCorrect = statsData.fold<int>(0, (prev, element) => prev + (element['correct_count'] as int? ?? 0));
-        totalWrong = statsData.fold<int>(0, (prev, element) => prev + (element['wrong_count'] as int? ?? 0));
-      }
-
-      final int groupRank = (wave1Results[2] as num?)?.toInt() ?? 0;
-      final int globalRank = (wave1Results[3] as num?)?.toInt() ?? 0;
-
-      int streakCount = 0;
-      int highestStreak = 0;
-      bool isPremiumFallback = false;
-      List<String> weeklyActiveDaysList = [];
-      final profileResp = wave1Results[4] as Map<String, dynamic>?;
-      if (profileResp != null) {
-        streakCount = profileResp['streak_count'] as int? ?? 0;
-        highestStreak = profileResp['highest_streak'] as int? ?? 0;
-        isPremiumFallback = profileResp['is_premium'] as bool? ?? false;
-        weeklyActiveDaysList = (profileResp['weekly_active_days'] as List?)?.map((e) => e.toString()).toList() ?? [];
-
-        final expiryStr = profileResp['premium_expires_at'] as String?;
-        if (profileResp['name'] != null) await AppPreferences.setUserName(profileResp['name'] as String);
-        if (profileResp['phone'] != null) await AppPreferences.setUserPhone(profileResp['phone'] as String);
-        if (profileResp['gender'] != null) await AppPreferences.setUserGender(profileResp['gender'] as String);
-        if (profileResp['dob'] != null) await AppPreferences.setUserDob(profileResp['dob'] as String);
-        if (profileResp['institution'] != null) await AppPreferences.setUserInstitution(profileResp['institution'] as String);
-        if (profileResp['district'] != null) await AppPreferences.setUserDistrict(profileResp['district'] as String);
-        if (profileResp['avatar_url'] != null) await AppPreferences.setUserAvatarUrl(profileResp['avatar_url'] as String);
-
-        final subList = wave1Results[7] as List?;
-        final latestSub = (subList != null && subList.isNotEmpty) ? subList.first as Map<String, dynamic> : null;
-
-        final latestSubStatus = latestSub?['status'] as String?;
-        final latestSubPlanId = latestSub?['plan_id'] as String?;
-        final latestSubPlanName = latestSub?['plan_name'] as String?;
-
-        final subStatus = SubscriptionStatusHelper.parse(
-          isPremium: isPremiumFallback,
-          expiryStr: expiryStr,
-          latestSubStatus: latestSubStatus,
-          latestSubPlanId: latestSubPlanId,
-          latestSubPlanName: latestSubPlanName,
-        );
-
-        await AppPreferences.setSubscriptionStatus(subStatus);
-        if (expiryStr != null) {
-          await AppPreferences.setSubscriptionExpiryDate(expiryStr);
         } else {
-          await AppPreferences.setSubscriptionExpiryDate('');
+          throw const ServerException(message: 'Invalid dashboard response from server.');
         }
+      } on PostgrestException catch (e) {
+        throw ServerException(
+          message: e.message,
+          statusCode: int.tryParse(e.code ?? ''),
+        );
+      } catch (e) {
+        throw ServerException(message: e.toString());
       }
-
-      int unreadNotificationsCount = 0;
-      if (wave1Results.length > 6 && wave1Results[6] != null) {
-        final unreadList = wave1Results[6] as List?;
-        unreadNotificationsCount = unreadList?.length ?? 0;
-      }
-
-      List<LeaderboardItemModel> leaderboard = [];
-
-      if (lastCompletedExam != null && lastCompletedLeaderboardData.isNotEmpty) {
-        for (int i = 0; i < lastCompletedLeaderboardData.length; i++) {
-          final item = lastCompletedLeaderboardData[i];
-          final profile = item['profiles'] as Map<String, dynamic>?;
-          final name = profile != null ? (profile['name'] as String? ?? 'Student') : 'Student';
-          final avatarUrl = profile != null ? (profile['avatar_url'] as String?) : null;
-          final subUserId = item['user_id'] as String? ?? '';
-
-          leaderboard.add(
-            LeaderboardItemModel(
-              rank: i + 1,
-              name: name,
-              score: (item['score'] as num).toDouble(),
-              avatarUrl: avatarUrl,
-              isCurrentUser: subUserId == userId,
-            ),
-          );
-        }
-      }
-
-      if (leaderboard.isEmpty) {
-        leaderboard = [
-          LeaderboardItemModel(rank: 1, name: 'Rafiq Ahmed', score: 98),
-          LeaderboardItemModel(rank: 2, name: 'Sadia Islam', score: 95),
-          LeaderboardItemModel(rank: 3, name: 'Tanvir Hasan', score: 91),
-        ];
-      }
-
-      return DashboardModel(
-        activeExam: activeExam,
-        hasSubmittedActiveExam: hasSubmittedActiveExam,
-        stats: DashboardStatsModel(
-          totalBattles: totalBattles,
-          averageScore: averageScore,
-          rank: groupRank,
-          totalCorrect: totalCorrect,
-          totalWrong: totalWrong,
-          streakCount: streakCount,
-          highestStreak: highestStreak,
-          weeklyActiveDays: weeklyActiveDaysList,
-          unreadNotificationsCount: unreadNotificationsCount,
-        ),
-        leaderboard: leaderboard,
-        groupRank: groupRank,
-        globalRank: globalRank,
-        lastExamTitle: lastCompletedExam?.title,
-        lastExamId: lastCompletedExam?.id,
-        latestPerformance: latestPerformance,
-        isPremium: isPremiumFallback,
-      );
-    } on PostgrestException catch (e) {
-      throw ServerException(
-        message: e.message,
-        statusCode: int.tryParse(e.code ?? ''),
-      );
+    } on ServerException {
+      rethrow;
     } catch (e) {
       throw ServerException(message: e.toString());
     }

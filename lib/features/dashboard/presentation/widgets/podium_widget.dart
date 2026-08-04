@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/components/custom_cached_image.dart';
 import 'package:target_ace/core/config/typography.dart';
 
-class PodiumUser {
+class PodiumWidgetUser {
   final String name;
   final String avatarUrl;
   final double score;
   final bool isMe;
 
-  PodiumUser({
+  PodiumWidgetUser({
     required this.name,
     required this.avatarUrl,
     required this.score,
@@ -20,7 +19,7 @@ class PodiumUser {
 }
 
 class PodiumWidget extends StatelessWidget {
-  final List<PodiumUser?> users; // Exactly length 3: [1st, 2nd, 3rd]
+  final List<PodiumWidgetUser?> users; // Exactly length 3: [1st, 2nd, 3rd]
   final String scoreSuffix; // e.g. 'pts' or '/100'
 
   const PodiumWidget({
@@ -71,7 +70,7 @@ class PodiumWidget extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   user2.name.split(' ').first,
-                  style: GoogleFonts.poppins(
+                  style: AppFonts.body(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -88,7 +87,7 @@ class PodiumWidget extends StatelessWidget {
                   ),
                   child: Text(
                     '${user2.score.round()}$scoreSuffix',
-                    style: GoogleFonts.poppins(
+                    style: AppFonts.body(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primaryLight,
@@ -98,7 +97,7 @@ class PodiumWidget extends StatelessWidget {
               ] else
                 const SizedBox(height: 118),
               const SizedBox(height: 16),
-              _build3DPodiumBlock("2nd", 80, AppColors.textSecondary),
+              _build3DPodiumWidgetBlock("2nd", 80, AppColors.textSecondary),
             ],
           ),
         ),
@@ -137,7 +136,7 @@ class PodiumWidget extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   user1.name.split(' ').first,
-                  style: GoogleFonts.poppins(
+                  style: AppFonts.body(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -154,7 +153,7 @@ class PodiumWidget extends StatelessWidget {
                   ),
                   child: Text(
                     '${user1.score.round()}$scoreSuffix',
-                    style: GoogleFonts.poppins(
+                    style: AppFonts.body(
                       fontSize: 11.5,
                       fontWeight: FontWeight.bold,
                       color: AppColors.labelGreen,
@@ -164,7 +163,7 @@ class PodiumWidget extends StatelessWidget {
               ] else
                 const SizedBox(height: 134),
               const SizedBox(height: 16),
-              _build3DPodiumBlock("1st", 110, AppColors.primary),
+              _build3DPodiumWidgetBlock("1st", 110, AppColors.primary),
             ],
           ),
         ),
@@ -203,7 +202,7 @@ class PodiumWidget extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   user3.name.split(' ').first,
-                  style: GoogleFonts.poppins(
+                  style: AppFonts.body(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -220,7 +219,7 @@ class PodiumWidget extends StatelessWidget {
                   ),
                   child: Text(
                     '${user3.score.round()}$scoreSuffix',
-                    style: GoogleFonts.poppins(
+                    style: AppFonts.body(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: AppColors.accent,
@@ -230,7 +229,7 @@ class PodiumWidget extends StatelessWidget {
               ] else
                 const SizedBox(height: 118),
               const SizedBox(height: 16),
-              _build3DPodiumBlock("3rd", 60, const Color(0xFFCD7F32)),
+              _build3DPodiumWidgetBlock("3rd", 60, const Color(0xFFCD7F32)),
             ],
           ),
         ),
@@ -264,7 +263,7 @@ class PodiumWidget extends StatelessWidget {
               child: Center(
                 child: Text(
                   name.isNotEmpty ? name[0].toUpperCase() : 'S',
-                  style: GoogleFonts.poppins(
+                  style: AppFonts.body(
                     fontSize: size * 0.4,
                     fontWeight: FontWeight.bold,
                     color: isMe ? AppColors.primary : AppColors.textSecondary,
@@ -275,7 +274,7 @@ class PodiumWidget extends StatelessWidget {
     );
   }
 
-  Widget _build3DPodiumBlock(String rank, double height, Color accentColor) {
+  Widget _build3DPodiumWidgetBlock(String rank, double height, Color accentColor) {
     return Container(
       height: height,
       width: double.infinity,

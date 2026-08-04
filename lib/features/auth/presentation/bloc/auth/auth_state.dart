@@ -1,4 +1,4 @@
-﻿part of 'auth_bloc.dart';
+part of 'auth_bloc.dart';
 
 sealed class AuthState {}
 
@@ -7,8 +7,8 @@ class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 
 class AuthSuccess extends AuthState {
-  final AuthModel authModel;
-  AuthSuccess(this.authModel);
+  final AuthResult authResult;
+  AuthSuccess(this.authResult);
 }
 
 class AuthFailure extends AuthState {
@@ -18,4 +18,5 @@ class AuthFailure extends AuthState {
 }
 
 class LogoutSuccess extends AuthState {}
+
 

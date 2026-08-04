@@ -1,4 +1,4 @@
-﻿part of 'subscription_bloc.dart';
+part of 'subscription_bloc.dart';
 
 sealed class SubscriptionState {}
 
@@ -7,7 +7,7 @@ class SubscriptionInitial extends SubscriptionState {}
 class SubscriptionLoading extends SubscriptionState {}
 
 class SubscriptionLoaded extends SubscriptionState {
-  final SubscriptionModel subscription;
+  final SubscriptionEntity subscription;
   final bool isManualCheck;
   
   SubscriptionLoaded(this.subscription, {this.isManualCheck = false});
@@ -18,4 +18,3 @@ class SubscriptionError extends SubscriptionState {
   final String? message;
   SubscriptionError(this.errorType, this.message);
 }
-

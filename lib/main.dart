@@ -21,12 +21,15 @@ void main() async {
   );
 
   await init();
+  await sl.allReady();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await NotificationService.instance.initialize();
+  sl<NotificationService>().initialize().catchError((e) {
+    debugPrint("Notification initialization failed: $e");
+  });
 
   return runApp(DevicePreview(enabled: false, builder: (_) => const MyApp()));
 }

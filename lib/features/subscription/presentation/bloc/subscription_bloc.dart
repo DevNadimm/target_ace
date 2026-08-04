@@ -1,15 +1,20 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:target_ace/core/exceptions/api_exception.dart';
-import 'package:target_ace/core/services/app_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:target_ace/core/services/user_local_datasource.dart';
+import 'package:target_ace/core/usecase/usecase.dart';
 import 'package:target_ace/core/utils/enums/error_type.dart';
-import 'package:target_ace/features/subscription/data/models/subscription_model.dart';
-import 'package:target_ace/features/subscription/data/repos/subscription_repo.dart';
+import 'package:target_ace/features/subscription/domain/entities/subscription_entity.dart';
+import 'package:target_ace/features/subscription/domain/usecases/get_subscription_status.dart';
 
 part 'subscription_event.dart';
 part 'subscription_state.dart';
 
 class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
-  SubscriptionBloc() : super(SubscriptionInitial()) {
+  final GetSubscriptionStatus _getSubscriptionStatus;
+
+  SubscriptionBloc({
+    required GetSubscriptionStatus getSubscriptionStatus,
+  })  : _getSubscriptionStatus = getSubscriptionStatus,
+        super(SubscriptionInitial()) {
     on<FetchSubscriptionStatus>(_onFetchSubscriptionStatus);
   }
 
@@ -18,34 +23,25 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     Emitter<SubscriptionState> emit,
   ) async {
     emit(SubscriptionLoading());
-    try {
-      final sub = await SubscriptionRepo.fetchMySubscription();
-      if (sub == null) {
+    final res = await _getSubscriptionStatus(const NoParams());
+
+    await res.fold(
+      (failure) async {
         emit(SubscriptionError(
           ErrorType.unknown,
-          'Could not reach the server. Please check your internet connection and try again.',
+          failure.message,
         ));
-        return;
-      }
+      },
+      (sub) async {
+        // Persist the fresh subscription data
+        await UserLocalDataSource.updateFields({
+          'subscription_plan_name': sub.planName ?? '',
+          'subscription_status': sub.status,
+          'subscription_expiry_date': sub.endDate ?? '',
+        });
 
-      // Persist the fresh subscription data
-      await AppPreferences.saveSubscription(
-        planId: int.tryParse(sub.planId ?? '0') ?? 0,
-        planName: sub.planName ?? '',
-        startDate: sub.startDate ?? '',
-        expiryDate: sub.endDate ?? '',
-        status: sub.status,
-      );
-
-      emit(SubscriptionLoaded(sub, isManualCheck: event.isManualCheck));
-    } on ApiException catch (e) {
-      emit(SubscriptionError(e.type, e.message));
-    } catch (e) {
-      emit(SubscriptionError(
-        ErrorType.unknown,
-        'An unexpected error occurred. Please try again.',
-      ));
-    }
+        emit(SubscriptionLoaded(sub, isManualCheck: event.isManualCheck));
+      },
+    );
   }
 }
-

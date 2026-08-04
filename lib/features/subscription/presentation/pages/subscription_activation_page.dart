@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:target_ace/core/components/back_button.dart';
@@ -10,15 +9,15 @@ import 'package:target_ace/core/components/info_row.dart';
 import 'package:target_ace/core/components/spring_button.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/app_config.dart';
-import 'package:target_ace/core/services/app_preferences.dart';
+import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/inline_error_widget.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/utils/enums/message_type.dart';
-import 'package:target_ace/core/utils/helpers/subscription_navigation_helper.dart';
+import 'package:target_ace/features/dashboard/presentation/pages/main_navigation_page.dart';
 import 'package:target_ace/features/subscription/presentation/bloc/subscription_bloc.dart';
-
+import 'package:target_ace/core/services/user_local_datasource.dart';
 
 class SubscriptionActivationPage extends StatefulWidget {
   static Route route() => MaterialPageRoute(builder: (_) => const SubscriptionActivationPage());
@@ -83,7 +82,11 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
         if (state is SubscriptionLoaded) {
           final status = state.subscription.status;
           if (status == 'active' || status == 'trial') {
-            SubscriptionNavigationHelper.navigateByStatus(context, status);
+            Navigator.pushAndRemoveUntil(
+              context,
+              MainNavigationPage.route(),
+              (_) => false,
+            );
           }
         }
       },
@@ -145,7 +148,7 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                     children: [
                       Text(
                         headerTitle,
-                        style: GoogleFonts.poppins(
+                        style: AppFonts.heading(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -154,7 +157,7 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                       const SizedBox(height: 4),
                       Text(
                         headerSubtext,
-                        style: GoogleFonts.poppins(
+                        style: AppFonts.body(
                           fontSize: 13,
                           color: AppColors.textSecondary,
                         ),
@@ -162,7 +165,7 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                       const SizedBox(height: 24),
                       Text(
                         'Subscription Information',
-                        style: GoogleFonts.poppins(
+                        style: AppFonts.body(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textSecondary,
@@ -190,7 +193,7 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                       const SizedBox(height: 24),
                       Text(
                         'Support & Legal',
-                        style: GoogleFonts.poppins(
+                        style: AppFonts.body(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textSecondary,
@@ -206,9 +209,9 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                               label: 'Contact Support',
                               value: 'Chat with us on WhatsApp',
                               onTap: () async {
-                                final userName = await AppPreferences.getUserName();
-                                final userId = await AppPreferences.getUserId();
-                                final plan = await AppPreferences.getSubscriptionPlanName();
+                                final userName = await UserLocalDataSource.getUserName();
+                                final userId = await UserLocalDataSource.getUserId();
+                                final plan = await UserLocalDataSource.getSubscriptionPlanName();
 
                                 final message = '''
 Assalamu Alaikum,
@@ -227,7 +230,8 @@ Thank you.
 ''';
 
                                 _launchURL(AppConfig.supportWhatsAppUrl(message));
-                              },                          ),
+                              },
+                            ),
                             const CustomDivider.dotted(),
                             InfoRow(
                               icon: HugeIcons.strokeRoundedLegalDocument01,
@@ -259,7 +263,7 @@ Thank you.
                             onPressed: _checkActivationStatus,
                             child: Text(
                               'Already Subscribed? Check Status',
-                              style: GoogleFonts.poppins(
+                              style: AppFonts.body(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.primaryLight,
@@ -285,4 +289,3 @@ Thank you.
     );
   }
 }
-
