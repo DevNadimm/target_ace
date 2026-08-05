@@ -107,61 +107,8 @@ class ErrorStateWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
 
-            // Bot-protection: show "Contact Support" button (opens WhatsApp)
-            if (isBotProtection) ...[
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final userName = await AppPreferences.getUserName();
-                  final userId = await AppPreferences.getUserId();
-                  final myIP = await HelperFunctions.getPublicIp();
-                  final plan = await AppPreferences.getSubscriptionPlanName();
-                  final startDate = await AppPreferences.getSubscriptionStartDate();
-                  final expiryDate = await AppPreferences.getSubscriptionExpiryDate();
-
-                  final message = '''
-à¦†à¦¸à¦¸à¦¾à¦²à¦¾à¦®à§ à¦†à¦²à¦¾à¦‡à¦•à§à¦®,
-
-à¦†à¦®à¦¿ ${AppConfig.appName} à¦…à§à¦¯à¦¾à¦ª à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à¦›à¦¿à¥¤ à¦†à¦®à¦¾à¦° à¦…à§à¦¯à¦¾à¦•à¦¾à¦‰à¦¨à§à¦Ÿà§‡ Bot Protection-à¦à¦° à¦•à¦¾à¦°à¦£à§‡ à¦ªà§à¦°à¦¬à§‡à¦¶ à¦•à¦°à¦¤à§‡ à¦ªà¦¾à¦°à¦›à¦¿ à¦¨à¦¾à¥¤ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦¬à¦¿à¦·à¦¯à¦¼à¦Ÿà¦¿ à¦¯à¦¾à¦šà¦¾à¦‡ à¦•à¦°à§‡ à¦†à¦®à¦¾à¦° à¦…à§à¦¯à¦¾à¦•à¦¾à¦‰à¦¨à§à¦Ÿà¦Ÿà¦¿ à¦†à¦¨à¦¬à§à¦²à¦• à¦•à¦°à¦¤à§‡ à¦¸à¦¾à¦¹à¦¾à¦¯à§à¦¯ à¦•à¦°à§à¦¨à¥¤
-
-â€¢ à¦¨à¦¾à¦®: $userName
-â€¢ User ID: $userId
-â€¢ IP Address: $myIP
-â€¢ à¦ªà§à¦²à§à¦¯à¦¾à¦¨: $plan
-â€¢ à¦¸à¦¾à¦¬à¦¸à§à¦•à§à¦°à¦¿à¦ªà¦¶à¦¨ à¦¶à§à¦°à§: ${DateFormatter.ddMMyyyy(startDate)}
-â€¢ à¦®à§‡à§Ÿà¦¾à¦¦ à¦¶à§‡à¦·: ${DateFormatter.ddMMyyyy(expiryDate)}
-â€¢ App Version: ${AppConfig.appVersion}
-
-à¦§à¦¨à§à¦¯à¦¬à¦¾à¦¦à¥¤
-''';
-
-                  final uri = Uri.parse(AppConfig.supportWhatsAppUrl(message));
-                  try {
-                    await launchUrl(
-                      uri,
-                      mode: LaunchMode.externalApplication,
-                    );
-                  } catch (e) {
-                    AppLogger.d('Error launching support URL: $e');
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryDark,
-                  foregroundColor: AppColors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                  elevation: 0,
-                  shadowColor: Colors.transparent,
-                ),
-                icon: HugeIcon(icon: HugeIcons.strokeRoundedCustomerSupport, size: 24),
-                label: Text('Contact Support'),
-              ),
-            ]
-
             // All other errors: show retry button (if provided)
-            else if (onRetry != null) ...[
+            if (onRetry != null) ...[
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: onRetry,

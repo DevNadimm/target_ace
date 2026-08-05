@@ -11,10 +11,10 @@ class AppConfig {
   static const String googleWebClientId = "18544964366-df9f7gm7235a1gok16kcmaqcu56im2kp.apps.googleusercontent.com";
 
   /// URLs
-  static const String websiteUrl = "https://flat-management-tan.vercel.app";
-  static const String subscriptionPlanUrl = "$websiteUrl/subscribe";
-  static const String termsUrl = "$websiteUrl/terms";
-  static const String privacyUrl = "$websiteUrl/privacy";
+  static const String websiteUrl = "https://targetace-web.vercel.app/";
+  static const String subscriptionPlanUrl = "$websiteUrl/en#pricing";
+  static const String termsUrl = "$websiteUrl/en/terms";
+  static const String privacyUrl = "$websiteUrl/en/privacy";
 
   /// Support
   static const String supportPhone = "+8801841953404";
@@ -26,6 +26,4 @@ class AppConfig {
 
     return "https://wa.me/$supportPhone?text=${Uri.encodeComponent(message)}";
   }
-
-  static const String subscriptionSharedSecret = "RentBook_S3cur3_2026!@#";
 }

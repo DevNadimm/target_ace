@@ -5,7 +5,7 @@ import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/custom_divider.dart';
 import 'package:target_ace/core/components/section_header.dart';
 import 'package:target_ace/core/config/colors.dart';
-import 'package:target_ace/features/practice/presentation/pages/subject_list_page.dart';
+import 'package:target_ace/features/practice/presentation/pages/practice_page.dart';
 import 'package:target_ace/features/profile/presentation/pages/profile_page.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/utils/enums/message_type.dart';
@@ -37,7 +37,7 @@ class QuickActionsSection extends StatelessWidget {
               title: "Subject Practice",
               subtitle: "Practice by subjects",
 
-              onTap: () => Navigator.push(context, SubjectListPage.route(showBackButton: true)),
+              onTap: () => Navigator.push(context, PracticePage.route(showBackButton: true)),
             ),
             const CustomDivider.dotted(),
             AppListTile(

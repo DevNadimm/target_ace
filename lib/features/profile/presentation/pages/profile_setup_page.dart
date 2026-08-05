@@ -50,6 +50,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   late List<ProfileStepType> _activeSteps;
   int _currentStepIndex = 0;
   bool _isForward = true;
+  bool _isCheckingPhone = false;
 
   String _selectedGoal = '';
   String _selectedGroup = '';
@@ -180,7 +181,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
 
   bool get _isLastStep => _currentStepIndex == _activeSteps.length - 1;
 
-  void _onNext(BuildContext context) {
+  Future<void> _onNext(BuildContext context) async {
     switch (_currentStepType) {
       case ProfileStepType.goal:
         if (_selectedGoal.isEmpty) {
@@ -291,6 +292,17 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           return;
         }
         setState(() => _phoneError = null);
+
+        if (!mounted) return;
+        setState(() => _isCheckingPhone = true);
+        final isUnique = await context.read<ProfileSetupCubit>().checkPhoneUnique(phone);
+        if (!mounted) return;
+        setState(() => _isCheckingPhone = false);
+        
+        if (!isUnique) {
+          setState(() => _phoneError = 'This phone number is already registered.');
+          return;
+        }
 
         if (_isLastStep) {
           _submitData(context);
@@ -546,10 +558,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             child: Scaffold(
             resizeToAvoidBottomInset: true,
             body: GradientBackground(
-              child: SafeArea(
-                child: Stack(
-                  children: [
-                    Column(
+              child: Stack(
+                children: [
+                  SafeArea(
+                    child: Column(
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 12, 16, 12),
@@ -598,7 +610,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                                       alignment: Alignment.topCenter,
                                       children: <Widget>[
                                         ...previousChildren,
-                                        ?currentChild,
+                                        if (currentChild != null) currentChild,
                                       ],
                                     );
                                   },
@@ -633,13 +645,13 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                           ),
                       ],
                     ),
-                    if (isLoading && _serverGoals.isNotEmpty)
-                      Container(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        child: const Loader(),
-                      ),
-                  ],
-                ),
+                  ),
+                  if ((isLoading || _isCheckingPhone) && _serverGoals.isNotEmpty)
+                    Container(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      child: const Loader(),
+                    ),
+                ],
               ),
             ),
           ),

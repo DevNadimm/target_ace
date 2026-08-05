@@ -6,7 +6,7 @@ import 'package:target_ace/core/services/service_locator.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
 import 'package:target_ace/features/subscription/domain/usecases/activate_free_trial.dart';
 import 'package:target_ace/core/components/spring_button.dart';
-
+import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
@@ -72,6 +72,7 @@ class _FreeTrialOfferPageState extends State<FreeTrialOfferPage> {
 
   Future<void> _onSkip() async {
     if (_isProcessing) return;
+    await UserLocalDataSource.setHasSkippedFreeTrial(true);
     if (mounted) {
       context.read<AppLaunchBloc>().add(const FreeTrialHandled());
     }
@@ -126,7 +127,8 @@ class _FreeTrialOfferPageState extends State<FreeTrialOfferPage> {
                 const SizedBox(height: 16),
                 Expanded(
                   child: Center(
-                    child: SizedBox(
+                    child: Image.asset(
+                      Assets.freeTrialGift,
                       height: 360,
                     ),
                   ),

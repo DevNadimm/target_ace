@@ -5,6 +5,7 @@ import 'package:target_ace/features/profile/domain/entities/onboarding_goal_enti
 import 'package:target_ace/features/profile/domain/entities/battle_group_entity.dart';
 import 'package:target_ace/features/profile/domain/usecases/get_battle_groups.dart';
 import 'package:target_ace/features/profile/domain/usecases/get_onboarding_goals.dart';
+import 'package:target_ace/features/profile/domain/usecases/check_phone_unique.dart';
 
 part 'profile_setup_state.dart';
 
@@ -12,14 +13,17 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
   final GetOnboardingGoals _getOnboardingGoals;
   final GetBattleGroups _getBattleGroups;
   final DoSetupProfile _doSetupProfile;
+  final CheckPhoneUnique _checkPhoneUnique;
 
   ProfileSetupCubit({
     required GetOnboardingGoals getOnboardingGoals,
     required GetBattleGroups getBattleGroups,
     required DoSetupProfile doSetupProfile,
+    required CheckPhoneUnique checkPhoneUnique,
   })  : _getOnboardingGoals = getOnboardingGoals,
         _getBattleGroups = getBattleGroups,
         _doSetupProfile = doSetupProfile,
+        _checkPhoneUnique = checkPhoneUnique,
         super(const ProfileSetupInitial());
 
   Future<void> fetchGoals() async {
@@ -75,6 +79,20 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     res.fold(
       (failure) => emit(ProfileSetupFailure(failure.message)),
       (lockedUntil) => emit(ProfileSetupSuccess(lockedUntil)),
+    );
+  }
+
+  Future<bool> checkPhoneUnique(String phone) async {
+    final res = await _checkPhoneUnique(phone);
+    
+    return res.fold(
+      (failure) {
+        emit(ProfileSetupFailure(failure.message));
+        return false;
+      },
+      (isUnique) {
+        return isUnique;
+      },
     );
   }
 }

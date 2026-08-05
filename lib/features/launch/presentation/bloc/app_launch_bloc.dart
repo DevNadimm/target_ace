@@ -234,6 +234,12 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     final userId = await UserLocalDataSource.getUserId();
 
     if (userId.isNotEmpty) {
+      final hasSkipped = await UserLocalDataSource.getHasSkippedFreeTrial();
+      if (hasSkipped) {
+        emit(const AppLaunchNavigateHome());
+        return;
+      }
+
       try {
         final res = await _checkTrialEligibility(userId);
         final isEligible = res.fold((_) => false, (eligible) => eligible);

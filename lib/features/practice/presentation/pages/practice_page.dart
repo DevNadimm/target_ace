@@ -10,22 +10,22 @@ import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/features/practice/domain/entities/subject_entity.dart';
 import 'package:target_ace/features/practice/presentation/bloc/hub/practice_hub_cubit.dart';
 import 'package:target_ace/features/practice/presentation/bloc/subjects/practice_subjects_cubit.dart';
-import 'package:target_ace/features/practice/presentation/pages/topic_selection_page.dart';
+import 'package:target_ace/features/practice/presentation/pages/subject_practice_page.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
 import 'package:target_ace/features/practice/presentation/widgets/subject_card.dart';
 
-class SubjectListPage extends StatelessWidget {
+class PracticePage extends StatelessWidget {
   final bool showBackButton;
 
   static Route route({
     bool showBackButton = true,
   }) => MaterialPageRoute(
-    builder: (_) => SubjectListPage(
+    builder: (_) => PracticePage(
       showBackButton: showBackButton,
     ),
   );
 
-  const SubjectListPage({
+  const PracticePage({
     super.key,
     this.showBackButton = false,
   });
@@ -193,7 +193,7 @@ class _PracticePageViewState extends State<PracticePageView> {
                   onTap: () async {
                     await Navigator.push(
                       context,
-                      TopicSelectionPage.route(subject: subject),
+                      SubjectPracticePage.route(subject: subject),
                     );
                   },
                 );

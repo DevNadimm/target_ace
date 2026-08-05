@@ -9,6 +9,7 @@ import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/shared/widgets/empty_state_widget.dart';
+import 'package:target_ace/core/shared/widgets/section_empty_state.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:fpdart/fpdart.dart' hide State;
 import 'package:target_ace/core/error/failure.dart';
@@ -300,24 +301,9 @@ class _BattleHistoryPageState extends State<BattleHistoryPage> {
   }
 
   Widget _buildHistoryEmpty() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 40),
-      child: Center(
-        child: Column(
-          children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedInvestigation,
-              color: AppColors.textSecondary,
-              size: 40,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'No exam history yet.',
-              style: AppFonts.body(color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-      ),
+    return const SectionEmptyState(
+      message: 'No exam history yet.',
+      icon: HugeIcons.strokeRoundedInvestigation,
     );
   }
 

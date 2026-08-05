@@ -8,20 +8,6 @@ part 'practice_session_state.dart';
 class PracticeSessionCubit extends Cubit<PracticeSessionState> {
   final PracticeRepository _repository;
   final List<Map<String, dynamic>> _pendingAttempts = [];
-  
-  DateTime? _sessionStartTime;
-  
-  List<Map<String, dynamic>> get pendingAttempts => _pendingAttempts;
-  
-  int get totalAttempted => _pendingAttempts.length;
-  
-  int get correctCount => _pendingAttempts.where((e) => e['is_correct'] == true).length;
-  
-  double get accuracy => totalAttempted == 0 ? 0.0 : (correctCount / totalAttempted) * 100;
-  
-  Duration get timeTaken => _sessionStartTime != null 
-      ? DateTime.now().difference(_sessionStartTime!)
-      : Duration.zero;
 
   PracticeSessionCubit({
     required PracticeRepository repository,
@@ -91,8 +77,6 @@ class PracticeSessionCubit extends Cubit<PracticeSessionState> {
               break;
             }
           }
-
-          _sessionStartTime = DateTime.now();
 
           emit(state.copyWith(
             status: PracticeSessionStatus.loaded,

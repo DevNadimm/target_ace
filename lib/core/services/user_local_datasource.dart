@@ -205,12 +205,33 @@ class UserLocalDataSource {
     return await prefs.setBool(key, value);
   }
 
-  /// Checks if the user profile is complete (goal, groupId, and phone are all non-empty).
+  static Future<bool> getHasSkippedFreeTrial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = await getUserId();
+    if (userId.isEmpty) return false;
+    final key = PreferenceKeys.userScoped(
+      userId,
+      PreferenceKeys.hasSkippedFreeTrialSuffix,
+    );
+    return prefs.getBool(key) ?? false;
+  }
+
+  static Future<bool> setHasSkippedFreeTrial(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = await getUserId();
+    if (userId.isEmpty) return false;
+    final key = PreferenceKeys.userScoped(
+      userId,
+      PreferenceKeys.hasSkippedFreeTrialSuffix,
+    );
+    return await prefs.setBool(key, value);
+  }
+
+  /// Checks if the user profile is complete (groupId and phone are non-empty).
   static Future<bool> isProfileComplete() async {
     final user = await readUser();
     if (user == null) return false;
-    return user.goal.isNotEmpty &&
-        user.groupId.isNotEmpty &&
+    return user.groupId.isNotEmpty &&
         user.phone.isNotEmpty;
   }
 }

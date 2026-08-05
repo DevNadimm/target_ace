@@ -27,4 +27,5 @@ abstract interface class ProfileRepository {
     required String groupId,
   });
   Stream<Either<Failure, ProfileEntity>> getProfileData();
+  Future<Either<Failure, bool>> checkPhoneUnique(String phone);
 }

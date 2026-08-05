@@ -48,6 +48,7 @@ class Assets {
   static const String premium = '$_iconPath/premium.png';
   static const String google = '$_iconPath/google.png';
   static const String streakFlame = '$_iconPath/streak_flame.png';
+  static const String freeTrialGift = '$_iconPath/free_trial_gift.png';
 
   /// ── Logos ─────────────────────────────────────────────────────────────────
   static const String appLogo = '$_logoPath/app_logo.png';

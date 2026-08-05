@@ -8,7 +8,7 @@ import 'package:target_ace/core/shared/widgets/app_confirmation_dialog.dart';
 import 'package:target_ace/features/battle/presentation/pages/battle_arena_page.dart';
 import 'package:target_ace/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:target_ace/features/dashboard/presentation/pages/leaderboard_page.dart';
-import 'package:target_ace/features/practice/presentation/pages/practice_dashboard_page.dart';
+import 'package:target_ace/features/practice/presentation/pages/practice_hub_page.dart';
 import 'package:target_ace/features/profile/presentation/pages/profile_page.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
 
@@ -60,7 +60,7 @@ class MainNavigationPageState extends State<MainNavigationPage> {
         case 1:
           return const BattleArenaPage();
         case 2:
-          return const PracticeDashboardPage();
+          return const PracticeHubPage();
         case 3:
           return const LeaderboardPage();
         case 4:

@@ -7,7 +7,7 @@ import 'package:target_ace/core/components/custom_divider.dart';
 import 'package:target_ace/core/components/section_header.dart';
 import 'package:target_ace/features/battle/domain/entities/battle_entity.dart';
 import 'package:target_ace/core/config/colors.dart';
-import 'package:target_ace/core/config/typography.dart';
+import 'package:target_ace/core/shared/widgets/section_empty_state.dart';
 
 class UpcomingBattlesSection extends StatelessWidget {
   final List<BattleEntity> upcomingExams;
@@ -17,7 +17,7 @@ class UpcomingBattlesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomContainer(
-      padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+      padding: const EdgeInsets.fromLTRB(0, 16, 0, 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -30,31 +30,14 @@ class UpcomingBattlesSection extends StatelessWidget {
               dotColor: AppColors.primary,
             ),
           ),
-          const SizedBox(height: 8),
           if (upcomingExams.isEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedInvestigation,
-                      color: AppColors.textSecondary,
-                    ),
-                    SizedBox(height: 6),
-                    Text(
-                      'No upcoming battles have been scheduled yet. New battles will appear here soon.',
-                      style: AppFonts.body(color: AppColors.textSecondary),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: const SectionEmptyState(message: 'No upcoming battles have been scheduled yet. New battles will appear here soon.'),
             ),
           ListView.separated(
             physics: NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.only(top: 8),
             shrinkWrap: true,
             itemBuilder: (context, index) {
               final exam = upcomingExams[index];

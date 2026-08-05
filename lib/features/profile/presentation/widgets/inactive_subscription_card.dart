@@ -14,20 +14,20 @@ class InactiveSubscriptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     String title = 'Get Premium Access';
     String description = 'Claim 7-day Free Trial or upgrade to unlock unlimited live battles and full analytics.';
-    String buttonText = 'Claim Free Trial / Upgrade';
+    String buttonText = 'CLAIM FREE TRIAL / UPGRADE';
 
     if (status == 'expired') {
       title = 'Subscription Expired';
       description = 'Renew your plan to resume live battles and full platform analytics.';
-      buttonText = 'Renew Now';
+      buttonText = 'RENEW NOW';
     } else if (status == 'pending_verification' || status == 'pending') {
       title = 'Verification Pending';
       description = 'Your payment is under review. Access will unlock once approved.';
-      buttonText = 'Check Status';
+      buttonText = 'CHECK STATUS';
     } else if (status == 'cancelled') {
       title = 'Plan Cancelled';
       description = 'Reactivate your premium subscription anytime to unlock full battle access.';
-      buttonText = 'Reactivate';
+      buttonText = 'REACTIVATE';
     }
 
     return CustomContainer(

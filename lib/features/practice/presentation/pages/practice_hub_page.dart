@@ -13,12 +13,12 @@ import 'package:target_ace/core/shared/widgets/fade_wave_animation.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/features/practice/domain/entities/subject_entity.dart';
 import 'package:target_ace/features/practice/presentation/bloc/hub/practice_hub_cubit.dart';
-import 'package:target_ace/features/practice/presentation/pages/subject_list_page.dart';
+import 'package:target_ace/features/practice/presentation/pages/practice_page.dart';
+import 'package:target_ace/features/practice/presentation/pages/bookmarked_questions_page.dart';
+import 'package:target_ace/features/practice/presentation/pages/subject_practice_page.dart';
 
-import 'package:target_ace/features/practice/presentation/pages/topic_selection_page.dart';
-
-class PracticeDashboardPage extends StatelessWidget {
-  const PracticeDashboardPage({super.key});
+class PracticeHubPage extends StatelessWidget {
+  const PracticeHubPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +182,7 @@ class _PracticeHubViewState extends State<PracticeHubView> {
                             );
                             Navigator.push(
                               context,
-                              TopicSelectionPage.route(subject: subject),
+                              SubjectPracticePage.route(subject: subject),
                             ).then((_) {
                               if (context.mounted) {
                                 context.read<PracticeHubCubit>().loadHubData(force: true);
@@ -298,7 +298,7 @@ class _PracticeHubViewState extends State<PracticeHubView> {
                         onTap: () async {
                           await Navigator.push(
                             context,
-                            SubjectListPage.route(
+                            PracticePage.route(
                               showBackButton: true,
                             ),
                           );
@@ -316,8 +316,7 @@ class _PracticeHubViewState extends State<PracticeHubView> {
                         onTap: () async {
                           await Navigator.push(
                             context,
-                            // PracticeBookmarkPage.route(),
-                            MaterialPageRoute(builder: (context) => Container()),
+                            BookmarkedQuestionsPage.route(),
                           );
                           if (context.mounted) {
                             context.read<PracticeHubCubit>().loadHubData(force: true);

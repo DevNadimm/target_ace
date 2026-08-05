@@ -197,4 +197,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
       yield left(Failure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> checkPhoneUnique(String phone) async {
+    try {
+      if (!await connectionChecker.isConnected) {
+        return left(Failure(message: 'No internet connection. Please check your network.'));
+      }
+      final isUnique = await remoteDataSource.checkPhoneUnique(phone);
+      return right(isUnique);
+    } on ServerException catch (e) {
+      return left(Failure(message: e.message));
+    }
+  }
 }

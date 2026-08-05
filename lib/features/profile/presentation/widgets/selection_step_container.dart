@@ -3,6 +3,7 @@ import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/features/profile/presentation/widgets/selection_card.dart';
 import 'package:target_ace/features/profile/presentation/widgets/step_header.dart';
+import 'package:target_ace/core/shared/widgets/inline_error_widget.dart';
 
 class SelectionStepContainer<T> extends StatelessWidget {
   final String title;
@@ -58,14 +59,7 @@ class SelectionStepContainer<T> extends StatelessWidget {
           );
         }),
         if (errorText != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            errorText!,
-            style: AppFonts.body(
-              fontSize: 12,
-              color: AppColors.error,
-            ),
-          ),
+          InlineErrorWidget(errorText!),
         ],
       ],
     );

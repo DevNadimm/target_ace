@@ -4,6 +4,7 @@ import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/section_header.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
+import 'package:target_ace/core/shared/widgets/section_empty_state.dart';
 import 'package:target_ace/core/utils/helpers/helper_functions.dart';
 
 /// A single metric inside the [LatestPerformanceCard] (score, accuracy,
@@ -127,26 +128,8 @@ class LatestPerformanceCard extends StatelessWidget {
             trailingColor: AppColors.textLight,
           ),
           if (data == null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 24, 0, 8),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const HugeIcon(
-                      icon: HugeIcons.strokeRoundedInvestigation,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'No performance data available yet.\nParticipate in battles to see your stats here.',
-                      style: AppFonts.body(color: AppColors.textSecondary),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
+            const SectionEmptyState(
+              message: 'No performance data available yet.\nParticipate in battles to see your stats here.',
             )
           else ...[
             const SizedBox(height: 16),

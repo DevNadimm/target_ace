@@ -4,7 +4,8 @@ import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
-import 'package:target_ace/features/auth/presentation/pages/login_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:target_ace/features/launch/presentation/bloc/app_launch_bloc.dart';
 
 class OnboardingPage extends StatefulWidget {
   static Route route() => MaterialPageRoute(builder: (_) => const OnboardingPage());
@@ -47,7 +48,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Future<void> _finishOnboarding() async {
     await AppPreferences.setFirstTime(false);
     if (!mounted) return;
-    Navigator.pushReplacement(context, LoginPage.route());
+    context.read<AppLaunchBloc>().add(const OnboardingCompleted());
   }
 
   @override

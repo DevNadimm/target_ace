@@ -45,6 +45,7 @@ import 'package:target_ace/features/profile/domain/usecases/get_battle_groups.da
 import 'package:target_ace/features/profile/domain/usecases/get_onboarding_goals.dart';
 import 'package:target_ace/features/profile/presentation/bloc/setup/profile_setup_cubit.dart';
 import 'package:target_ace/features/profile/domain/usecases/get_profile.dart';
+import 'package:target_ace/features/profile/domain/usecases/check_phone_unique.dart';
 import 'package:target_ace/features/battle/domain/usecases/get_battle_arena_data.dart';
 import 'package:target_ace/features/profile/presentation/bloc/profile/profile_cubit.dart';
 import 'package:target_ace/features/notification/data/datasources/notification_remote_datasource.dart';
@@ -191,12 +192,14 @@ void _initProfile() {
     ..registerFactory(() => GetBattleGroups(sl()))
     ..registerFactory(() => DoSetupProfile(sl()))
     ..registerFactory(() => GetProfile(sl()))
+    ..registerFactory(() => CheckPhoneUnique(sl()))
     // Cubit
     ..registerFactory(
       () => ProfileSetupCubit(
         getOnboardingGoals: sl(),
         getBattleGroups: sl(),
         doSetupProfile: sl(),
+        checkPhoneUnique: sl(),
       ),
     )
     ..registerFactory(

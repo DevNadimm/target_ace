@@ -14,28 +14,25 @@ import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/utils/enums/message_type.dart';
 import 'package:target_ace/features/practice/domain/entities/subject_entity.dart';
 import 'package:target_ace/features/practice/presentation/bloc/session/practice_session_cubit.dart';
-
-
+import 'package:target_ace/features/practice/presentation/widgets/topic_filter_chips.dart';
 import 'package:target_ace/features/practice/presentation/widgets/question_practice_view.dart';
 import 'package:target_ace/features/practice/presentation/widgets/report_error_bottom_sheet.dart';
 
-class LivePracticePage extends StatelessWidget {
+class SubjectPracticePage extends StatelessWidget {
   final SubjectEntity subject;
 
-  final String? topicId;
-
-  static Route route({required SubjectEntity subject, String? topicId}) {
+  static Route route({required SubjectEntity subject}) {
     return MaterialPageRoute(
-      builder: (_) => LivePracticePage(subject: subject, topicId: topicId),
+      builder: (_) => SubjectPracticePage(subject: subject),
     );
   }
 
-  const LivePracticePage({super.key, required this.subject, this.topicId});
+  const SubjectPracticePage({super.key, required this.subject});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => sl<PracticeSessionCubit>()..loadSession(subjectId: subject.id, topicId: topicId),
+      create: (_) => sl<PracticeSessionCubit>()..loadSession(subjectId: subject.id),
       child: SubjectPracticePageView(subject: subject),
     );
   }
@@ -73,11 +70,25 @@ class _SubjectPracticePageViewState extends State<SubjectPracticePageView> {
         ),
         body: GradientBackground(child: BlocBuilder<PracticeSessionCubit, PracticeSessionState>(
           builder: (context, state) {
-
+            final topics = state.topics;
             final questions = state.questions;
 
             return Column(
               children: [
+                // 1. Topic Filter Chips (Always visible once loaded, even during loading status)
+                if (topics.isNotEmpty)
+                  TopicFilterChips(
+                    topics: topics,
+                    selectedTopicId: state.selectedTopicId,
+                    onTopicChanged: (topicId) {
+                      context.read<PracticeSessionCubit>().loadSession(
+                            subjectId: widget.subject.id,
+                            topicId: topicId,
+                          );
+                    },
+                  ),
+
+                // 2. Main Content Area
                 Expanded(
                   child: Builder(
                     builder: (context) {
@@ -130,25 +141,7 @@ class _SubjectPracticePageViewState extends State<SubjectPracticePageView> {
                             isBookmarked: state.isBookmarked(questions[state.currentIndex].id),
                             previousAttemptIsCorrect: state.previousAttempts[questions[state.currentIndex].id],
                             onOptionSelected: (option) {
-                              final cubit = context.read<PracticeSessionCubit>();
-                              cubit.selectOption(option);
-                              
-                              // Auto-scroll micro-interaction for correct answers
-                              final q = questions[state.currentIndex];
-                              if (option.toUpperCase() == q.correctOption.toUpperCase()) {
-                                Future.delayed(const Duration(milliseconds: 1500), () {
-                                  if (context.mounted && cubit.state.currentIndex == state.currentIndex) {
-                                    if (state.currentIndex == questions.length - 1) {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(builder: (_) => const Scaffold(body: Center(child: Text("Review Not Found")))),
-                                      );
-                                    } else {
-                                      cubit.nextQuestion();
-                                    }
-                                  }
-                                });
-                              }
+                              context.read<PracticeSessionCubit>().selectOption(option);
                             },
                             onToggleBookmark: () {
                               final q = state.currentQuestion;
@@ -176,15 +169,7 @@ class _SubjectPracticePageViewState extends State<SubjectPracticePageView> {
                               }
                             },
                             onNext: () {
-                              final cubit = context.read<PracticeSessionCubit>();
-                              if (state.currentIndex == questions.length - 1) {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => const Scaffold(body: Center(child: Text("Review Not Found")))),
-                                );
-                              } else {
-                                cubit.nextQuestion();
-                              }
+                              context.read<PracticeSessionCubit>().nextQuestion();
                             },
                             onPrevious: () {
                               context.read<PracticeSessionCubit>().previousQuestion();

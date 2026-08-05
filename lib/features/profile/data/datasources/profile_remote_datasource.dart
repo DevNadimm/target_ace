@@ -12,6 +12,7 @@ abstract interface class ProfileRemoteDataSource {
   Future<void> deactivateActiveMemberships(String userId);
   Future<Map<String, dynamic>> insertGroupMembership(Map<String, dynamic> membershipData);
   Future<Map<String, dynamic>> completeProfileSetup(Map<String, dynamic> params);
+  Future<bool> checkPhoneUnique(String phone);
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -139,6 +140,20 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         params: params,
       );
       return Map<String, dynamic>.from(response as Map);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<bool> checkPhoneUnique(String phone) async {
+    try {
+      final response = await _client
+          .from('profiles')
+          .select('id')
+          .eq('phone', phone)
+          .maybeSingle();
+      return response == null;
     } catch (e) {
       throw ServerException(message: e.toString());
     }
