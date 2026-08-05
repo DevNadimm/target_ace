@@ -6,4 +6,3 @@ class FetchSubscriptionStatus extends SubscriptionEvent {
   final bool isManualCheck;
   FetchSubscriptionStatus({this.isManualCheck = false});
 }
-

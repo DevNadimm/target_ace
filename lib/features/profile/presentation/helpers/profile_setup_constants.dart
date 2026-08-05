@@ -1,4 +1,4 @@
-abstract class ProfileSetupConstants {
+﻿abstract class ProfileSetupConstants {
   static const List<String> howDidYouHearOptions = [
     'Friends or Classmates',
     'Facebook / Social Media',

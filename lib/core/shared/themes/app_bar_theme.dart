@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
 
@@ -14,4 +14,3 @@ AppBarTheme appBarTheme = AppBarTheme(
     fontWeight: FontWeight.bold,
   ),
 );
-

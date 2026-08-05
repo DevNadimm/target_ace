@@ -32,4 +32,3 @@ class DualFieldRow extends StatelessWidget {
     );
   }
 }
-

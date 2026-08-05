@@ -32,4 +32,3 @@ class Loader extends StatelessWidget {
     );
   }
 }
-

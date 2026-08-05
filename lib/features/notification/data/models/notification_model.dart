@@ -1,4 +1,4 @@
-import 'package:target_ace/features/notification/domain/entities/notification_entity.dart';
+﻿import 'package:target_ace/features/notification/domain/entities/notification_entity.dart';
 
 class NotificationModel extends NotificationEntity {
   NotificationModel({

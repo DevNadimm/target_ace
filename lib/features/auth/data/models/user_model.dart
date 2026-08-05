@@ -1,4 +1,4 @@
-import 'package:target_ace/core/common/entities/user.dart';
+﻿import 'package:target_ace/core/common/entities/user.dart';
 
 class UserModel extends User {
   final bool isAdmin;

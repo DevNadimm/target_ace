@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -174,7 +174,7 @@ class _NotificationPermissionPageState extends State<NotificationPermissionPage>
                                 icon: HugeIcons.strokeRoundedFire03,
                                 iconColor: AppColors.warning,
                                 iconBgColor: AppColors.warning.withValues(alpha: 0.15),
-                                title: '3-Day Streak Active! 🔥',
+                                title: '3-Day Streak Active! ðŸ”¥',
                                 subtitle: 'You completed today\'s practice drill.',
                                 time: '1h ago',
                                 timeColor: AppColors.textLight,
@@ -183,7 +183,7 @@ class _NotificationPermissionPageState extends State<NotificationPermissionPage>
                                 icon: HugeIcons.strokeRoundedChampion,
                                 iconColor: AppColors.success,
                                 iconBgColor: AppColors.success.withValues(alpha: 0.15),
-                                title: 'Rank Update 🏆',
+                                title: 'Rank Update ðŸ†',
                                 subtitle: 'You moved up to #2 in BCS group!',
                                 time: '2h ago',
                                 timeColor: AppColors.textLight,

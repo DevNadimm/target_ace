@@ -1,4 +1,4 @@
-import 'package:target_ace/features/battle/domain/entities/leaderboard_entry_entity.dart';
+﻿import 'package:target_ace/features/battle/domain/entities/leaderboard_entry_entity.dart';
 
 class LeaderboardEntryModel extends LeaderboardEntryEntity {
   const LeaderboardEntryModel({

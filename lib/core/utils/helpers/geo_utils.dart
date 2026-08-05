@@ -20,4 +20,3 @@ class GeoUtils {
     return earthRadiusKm * 2 * asin(sqrt(a)) * 1000;
   }
 }
-

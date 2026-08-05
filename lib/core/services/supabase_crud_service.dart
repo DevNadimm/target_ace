@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/services/crud_service.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/utils/enums/error_type.dart';

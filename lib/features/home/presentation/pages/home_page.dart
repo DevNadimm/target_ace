@@ -1,0 +1,194 @@
+﻿import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:target_ace/core/services/service_locator.dart';
+import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
+import 'package:target_ace/core/shared/widgets/gradient_background.dart';
+import 'package:target_ace/core/shared/widgets/loader.dart';
+import 'package:target_ace/features/home/domain/repository/home_repository.dart';
+import 'package:target_ace/features/home/presentation/bloc/home_bloc.dart';
+import 'package:target_ace/features/home/presentation/widgets/home_active_exam_section.dart';
+import 'package:target_ace/features/home/presentation/widgets/home_app_bar.dart';
+import 'package:target_ace/features/home/presentation/widgets/home_latest_performance_section.dart';
+import 'package:target_ace/features/home/presentation/widgets/home_quick_actions_section.dart';
+import 'package:target_ace/features/home/presentation/widgets/home_streak_section.dart';
+import 'package:target_ace/core/services/user_local_datasource.dart';
+
+class HomePage extends StatefulWidget {
+  static Route route() =>
+      MaterialPageRoute(builder: (_) => const HomePage());
+
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String _userGoal = '';
+  StreamSubscription<void>? _realtimeSubscription;
+  Timer? _statusTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserGoal();
+    context.read<HomeBloc>().add(HomeFetchRequested());
+    _setupRealtimeSubscriptions();
+    _startStatusTimer();
+  }
+
+  @override
+  void dispose() {
+    _statusTimer?.cancel();
+    _realtimeSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _startStatusTimer() {
+    _statusTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  void _setupRealtimeSubscriptions() {
+    _realtimeSubscription = sl<HomeRepository>().homeRealtimeChanges
+        .listen((_) {
+          if (mounted) {
+            context.read<HomeBloc>().add(
+              HomeFetchRequested(isSilent: true),
+            );
+            _loadUserGoal();
+          }
+        });
+  }
+
+  Future<void> _loadUserGoal() async {
+    final activeGroup = await UserLocalDataSource.getUserGroupTitle();
+    final goal = await UserLocalDataSource.getUserGoal();
+    if (mounted) {
+      setState(() {
+        _userGoal = (activeGroup != null && activeGroup.isNotEmpty)
+            ? activeGroup
+            : _formatGoal(goal);
+      });
+    }
+  }
+
+  String _formatGoal(String goal) {
+    switch (goal.toLowerCase()) {
+      case 'bcs':
+        return 'BCS & Gov Jobs';
+      case 'admission':
+        return 'DU & Admission';
+      case 'hsc':
+        return 'HSC Exam Board';
+      default:
+        return 'General target';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        int unreadCount = 0;
+        bool isPremium = false;
+        if (state is HomeSuccess) {
+          unreadCount = state.homeModel.stats.unreadNotificationsCount;
+          isPremium = state.homeModel.isPremium;
+        }
+
+        return Scaffold(
+          appBar: HomeAppBar(
+            unreadNotificationsCount: unreadCount,
+            isPremium: isPremium,
+          ),
+          body: GradientBackground(child: _buildBodyContent(context, state)),
+        );
+      },
+    );
+  }
+
+  Widget _buildBodyContent(BuildContext context, HomeState state) {
+    if (state is HomeLoading) {
+      return const Center(child: Loader());
+    }
+
+    if (state is HomeFailure) {
+      return ErrorStateWidget(
+        errorType: state.errorType,
+        message: state.message,
+      );
+    }
+
+    if (state is HomeSuccess) {
+      final data = state.homeModel;
+      return RefreshIndicator(
+        onRefresh: () async {
+          context.read<HomeBloc>().add(HomeFetchRequested());
+          await _loadUserGoal();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Target & Active Exam Block
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: HomeActiveExamSection(
+                  exam: data.activeExam,
+                  hasSubmitted: data.hasSubmittedActiveExam,
+                  userGoal: _userGoal,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Daily Streak Card
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: HomeStreakSection(
+                  streakCount: data.stats.streakCount,
+                  highestStreak: data.stats.highestStreak,
+                  weeklyActiveDays: data.stats.weeklyActiveDays,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Latest Performance Section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: HomeLatestPerformanceSection(
+                  data: data.latestPerformance == null
+                      ? null
+                      : LatestPerformanceModel(
+                          examTitle: data.latestPerformance!.examTitle,
+                          completedAt: data.latestPerformance!.completedAt,
+                          score: data.latestPerformance!.score,
+                          scoreOutOf: data.latestPerformance!.scoreOutOf,
+                          accuracy: data.latestPerformance!.accuracy,
+                          rank: data.latestPerformance!.rank,
+                          totalParticipants:
+                              data.latestPerformance!.totalParticipants,
+                          timeTaken: data.latestPerformance!.timeTaken,
+                        ),
+                  onViewAnalysis: () {},
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Quick Actions Section
+              const HomeQuickActionsSection(),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+}

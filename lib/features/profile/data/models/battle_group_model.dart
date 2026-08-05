@@ -1,4 +1,4 @@
-import 'package:target_ace/features/profile/domain/entities/battle_group_entity.dart';
+﻿import 'package:target_ace/features/profile/domain/entities/battle_group_entity.dart';
 
 class BattleGroupModel extends BattleGroupEntity {
   const BattleGroupModel({

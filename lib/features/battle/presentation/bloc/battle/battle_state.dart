@@ -1,4 +1,4 @@
-part of 'battle_bloc.dart';
+﻿part of 'battle_bloc.dart';
 
 abstract class BattleState {}
 

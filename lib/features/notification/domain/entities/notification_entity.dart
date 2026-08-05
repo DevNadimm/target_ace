@@ -1,4 +1,4 @@
-class NotificationEntity {
+﻿class NotificationEntity {
   final String id;
   final String userId;
   final String title;

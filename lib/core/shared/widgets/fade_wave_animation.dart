@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class FadeWaveAnimation extends StatefulWidget {
   final Widget child;

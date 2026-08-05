@@ -1,4 +1,4 @@
-part of 'auth_bloc.dart';
+﻿part of 'auth_bloc.dart';
 
 sealed class AuthState {}
 
@@ -18,5 +18,4 @@ class AuthFailure extends AuthState {
 }
 
 class LogoutSuccess extends AuthState {}
-
 

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -36,4 +36,3 @@ InputDecorationTheme inputDecorationTheme = InputDecorationTheme(
     borderSide: const BorderSide(width: 1.4, color: AppColors.warning),
   ),
 );
-

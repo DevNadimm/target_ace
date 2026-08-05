@@ -1,4 +1,4 @@
-class SubscriptionEntity {
+﻿class SubscriptionEntity {
   final String status;
   final String? planId;
   final String? planName;

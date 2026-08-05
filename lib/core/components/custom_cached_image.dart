@@ -126,4 +126,3 @@ class CustomCachedImage extends StatelessWidget {
     );
   }
 }
-

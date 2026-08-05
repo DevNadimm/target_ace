@@ -1,4 +1,4 @@
-part of 'battle_arena_bloc.dart';
+﻿part of 'battle_arena_bloc.dart';
 
 abstract class BattleArenaEvent {}
 

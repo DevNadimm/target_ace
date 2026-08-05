@@ -1,4 +1,4 @@
-import 'package:fpdart/fpdart.dart';
+﻿import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/features/battle/domain/entities/battle_entity.dart';
 import 'package:target_ace/features/battle/domain/entities/battle_submission_entity.dart';

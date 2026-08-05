@@ -1,4 +1,4 @@
-import 'package:fpdart/fpdart.dart';
+﻿import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
@@ -125,7 +125,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     }
   }
 
-  // ─── Legacy Compatibility for GroupSwitchCubit ───
+  // â”€â”€â”€ Legacy Compatibility for GroupSwitchCubit â”€â”€â”€
   // Since other features use this directly from ProfileRepo, we keep this method inside the implementation class
   // to avoid breaking existing code. Once we migrate GroupSwitch, this will go away.
   @override

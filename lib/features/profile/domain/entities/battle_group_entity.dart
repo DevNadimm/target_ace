@@ -1,4 +1,4 @@
-class BattleGroupEntity {
+﻿class BattleGroupEntity {
   final String id;
   final String goalId;
   final String title;

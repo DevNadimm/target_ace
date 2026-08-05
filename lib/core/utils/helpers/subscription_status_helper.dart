@@ -1,4 +1,4 @@
-class SubscriptionStatusHelper {
+﻿class SubscriptionStatusHelper {
   SubscriptionStatusHelper._();
 
   /// Resolves the UX subscription status based on profile premium fields and the latest subscription record.

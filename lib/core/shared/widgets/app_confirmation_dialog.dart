@@ -116,4 +116,3 @@ class AppConfirmationDialog extends StatelessWidget {
     );
   }
 }
-

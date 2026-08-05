@@ -1,4 +1,4 @@
-abstract class CrudService {
+﻿abstract class CrudService {
   /// Initialize authorization state or token if necessary.
   Future<void> initAuthToken([String? token]);
 

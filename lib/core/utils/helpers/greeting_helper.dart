@@ -1,4 +1,4 @@
-class GreetingHelper {
+﻿class GreetingHelper {
   GreetingHelper._();
 
   static String getGreeting() {

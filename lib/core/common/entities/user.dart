@@ -1,6 +1,6 @@
-/// Core User entity shared across all features.
+﻿/// Core User entity shared across all features.
 ///
-/// This is a domain entity — pure Dart, no dependencies on any package.
+/// This is a domain entity â€” pure Dart, no dependencies on any package.
 /// Feature-specific user models (e.g., UserModel in auth/data) should
 /// extend this class and add serialization methods.
 ///

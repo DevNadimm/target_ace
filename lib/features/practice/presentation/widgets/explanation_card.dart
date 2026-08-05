@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/config/colors.dart';
@@ -12,8 +12,9 @@ class ExplanationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomContainer(
-      color: AppColors.info.withValues(alpha: 0.1),
-      borderColor: AppColors.info.withValues(alpha: 0.5),
+      color: Color.alphaBlend(AppColors.info.withValues(alpha: 0.1), AppColors.background),
+      borderColor: AppColors.info.withValues(alpha: 0.8),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -26,7 +27,7 @@ class ExplanationCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'ব্যাখ্যা (Explanation)',
+                'à¦¬à§à¦¯à¦¾à¦–à§à¦¯à¦¾ (Explanation)',
                 style: AppFonts.body(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,

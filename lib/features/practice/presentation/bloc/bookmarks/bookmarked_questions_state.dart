@@ -1,4 +1,4 @@
-part of 'bookmarked_questions_cubit.dart';
+﻿part of 'bookmarked_questions_cubit.dart';
 
 abstract class BookmarkedQuestionsState {
   const BookmarkedQuestionsState();

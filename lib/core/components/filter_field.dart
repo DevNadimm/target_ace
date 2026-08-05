@@ -77,4 +77,3 @@ class FilterField extends StatelessWidget {
     );
   }
 }
-

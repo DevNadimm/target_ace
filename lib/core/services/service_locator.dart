@@ -9,6 +9,7 @@ import 'package:target_ace/core/network/connection_checker.dart';
 import 'package:target_ace/core/services/crud_service.dart';
 import 'package:target_ace/core/services/notification_service.dart';
 import 'package:target_ace/core/services/supabase_crud_service.dart';
+import 'package:target_ace/features/practice/presentation/bloc/dashboard/practice_dashboard_cubit.dart';
 import 'dio_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:target_ace/features/auth/data/datasources/auth_remote_datasource.dart';
@@ -38,7 +39,6 @@ import 'package:target_ace/features/practice/domain/usecases/get_topics.dart';
 import 'package:target_ace/features/practice/domain/usecases/get_subject_questions.dart';
 import 'package:target_ace/features/practice/presentation/bloc/subjects/practice_subjects_cubit.dart';
 import 'package:target_ace/features/practice/presentation/bloc/session/practice_session_cubit.dart';
-import 'package:target_ace/features/practice/presentation/bloc/hub/practice_hub_cubit.dart';
 import 'package:target_ace/features/practice/presentation/bloc/bookmarks/bookmarked_questions_cubit.dart';
 import 'package:target_ace/features/profile/domain/usecases/do_setup_profile.dart';
 import 'package:target_ace/features/profile/domain/usecases/get_battle_groups.dart';
@@ -73,13 +73,13 @@ import 'package:target_ace/features/battle/domain/usecases/get_battle_leaderboar
 import 'package:target_ace/features/battle/domain/usecases/get_leaderboard_cache.dart';
 import 'package:target_ace/features/battle/presentation/bloc/battle/battle_bloc.dart';
 import 'package:target_ace/features/battle/presentation/bloc/arena/battle_arena_bloc.dart';
-import 'package:target_ace/features/dashboard/data/datasources/dashboard_remote_datasource.dart';
-import 'package:target_ace/features/dashboard/data/repositories/dashboard_repository_impl.dart';
-import 'package:target_ace/features/dashboard/domain/repository/dashboard_repository.dart';
-import 'package:target_ace/features/dashboard/domain/usecases/get_dashboard.dart';
-import 'package:target_ace/features/dashboard/domain/usecases/get_group_leaderboard.dart';
-import 'package:target_ace/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:target_ace/features/dashboard/presentation/bloc/leaderboard/leaderboard_cubit.dart';
+import 'package:target_ace/features/home/data/datasources/home_remote_datasource.dart';
+import 'package:target_ace/features/home/data/repositories/home_repository_impl.dart';
+import 'package:target_ace/features/home/domain/repository/home_repository.dart';
+import 'package:target_ace/features/home/domain/usecases/get_home.dart';
+import 'package:target_ace/features/home/domain/usecases/get_group_leaderboard.dart';
+import 'package:target_ace/features/home/presentation/bloc/home_bloc.dart';
+import 'package:target_ace/features/home/presentation/bloc/leaderboard/leaderboard_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -91,7 +91,7 @@ Future<void> init() async {
   _initNotification();
   _initSubscription();
   _initBattle();
-  _initDashboard();
+  _initHome();
 }
 
 Future<void> _registerCore() async {
@@ -129,7 +129,7 @@ Future<void> _registerCore() async {
         authRemoteDataSource: sl<AuthRemoteDataSource>(),
       ));
 
-  // ── Clean Architecture Core ──
+  // â”€â”€ Clean Architecture Core â”€â”€
 
   // Connectivity (for ConnectionChecker)
   sl.registerFactory(() => Connectivity());
@@ -139,10 +139,10 @@ Future<void> _registerCore() async {
     () => ConnectionCheckerImpl(sl()),
   );
 
-  // AppUserCubit (global auth state — single instance)
+  // AppUserCubit (global auth state â€” single instance)
   sl.registerLazySingleton(() => AppUserCubit());
 
-  // ── Launch Coordinator ──
+  // â”€â”€ Launch Coordinator â”€â”€
   sl.registerLazySingleton(
     () => AppLaunchBloc(
       authRemoteDataSource: sl(),
@@ -235,7 +235,7 @@ void _initPractice() {
       ),
     )
     ..registerLazySingleton(
-      () => PracticeHubCubit(
+      () => PracticeDashboardCubit(
         repository: sl(),
       ),
     )
@@ -337,23 +337,23 @@ void _initBattle() {
     );
 }
 
-void _initDashboard() {
+void _initHome() {
   sl
     // Datasource
-    ..registerFactory<DashboardRemoteDataSource>(
-      () => DashboardRemoteDataSourceImpl(sl()),
+    ..registerFactory<HomeRemoteDataSource>(
+      () => HomeRemoteDataSourceImpl(sl()),
     )
     // Repository
-    ..registerFactory<DashboardRepository>(
-      () => DashboardRepositoryImpl(sl(), sl()),
+    ..registerFactory<HomeRepository>(
+      () => HomeRepositoryImpl(sl(), sl()),
     )
     // Use Cases
-    ..registerFactory(() => GetDashboard(sl()))
+    ..registerFactory(() => GetHome(sl()))
     ..registerFactory(() => GetGroupLeaderboard(sl()))
     // Bloc & Cubit
     ..registerFactory(
-      () => DashboardBloc(
-        getDashboard: sl(),
+      () => HomeBloc(
+        getHome: sl(),
       ),
     )
     ..registerFactory(

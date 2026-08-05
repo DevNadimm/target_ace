@@ -1,4 +1,4 @@
-import 'package:target_ace/features/practice/domain/entities/question_entity.dart';
+﻿import 'package:target_ace/features/practice/domain/entities/question_entity.dart';
 
 class QuestionModel extends QuestionEntity {
   QuestionModel({

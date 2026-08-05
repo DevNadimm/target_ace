@@ -1,4 +1,4 @@
-part of 'notification_bloc.dart';
+﻿part of 'notification_bloc.dart';
 
 sealed class NotificationState {
   const NotificationState();

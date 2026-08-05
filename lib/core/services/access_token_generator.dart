@@ -14,4 +14,3 @@ class AccessTokenGenerator {
     return accessToken;
   }
 }
-

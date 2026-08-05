@@ -1,4 +1,4 @@
-import 'package:fpdart/fpdart.dart';
+﻿import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
@@ -19,12 +19,12 @@ class PracticeRepositoryImpl implements PracticeRepository {
   const PracticeRepositoryImpl(this.remoteDataSource, this.connectionChecker);
 
   @override
-  Future<Either<Failure, List<SubjectEntity>>> getSubjects(String goalId) async {
+  Future<Either<Failure, List<SubjectEntity>>> getSubjects(String groupId) async {
     try {
       if (!await connectionChecker.isConnected) {
         return left(Failure(message: 'No internet connection. Please check your network.'));
       }
-      final subjectsData = await remoteDataSource.getSubjects(goalId);
+      final subjectsData = await remoteDataSource.getSubjects(groupId);
       final subjects = subjectsData.map((e) => SubjectModel.fromJson(e)).toList();
       return right(subjects);
     } on ServerException catch (e) {
@@ -103,12 +103,12 @@ class PracticeRepositoryImpl implements PracticeRepository {
   }
 
   @override
-  Future<Either<Failure, Map<String, dynamic>>> getPracticeSummary(String goalId) async {
+  Future<Either<Failure, Map<String, dynamic>>> getPracticeDashboardData(String groupId) async {
     try {
       if (!await connectionChecker.isConnected) {
         return left(Failure(message: 'No internet connection. Please check your network.'));
       }
-      final summary = await remoteDataSource.getPracticeSummary(goalId);
+      final summary = await remoteDataSource.getPracticeDashboardData(groupId);
       return right(summary);
     } on ServerException catch (e) {
       return left(Failure(message: e.message));

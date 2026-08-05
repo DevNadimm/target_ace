@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
@@ -134,7 +134,6 @@ class GroupLockedView extends StatelessWidget {
             const SizedBox(height: 32),
             SpringButton(
               width: double.infinity,
-              backgroundColor: AppColors.primary,
               onPressed: onBack,
               child: const Text('GOT IT, GO BACK'),
             ),

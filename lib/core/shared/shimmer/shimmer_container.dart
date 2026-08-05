@@ -31,4 +31,3 @@ class ShimmerContainer extends StatelessWidget {
     );
   }
 }
-

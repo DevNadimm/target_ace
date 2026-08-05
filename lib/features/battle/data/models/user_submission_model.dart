@@ -1,4 +1,4 @@
-import 'package:target_ace/features/battle/domain/entities/user_submission_entity.dart';
+﻿import 'package:target_ace/features/battle/domain/entities/user_submission_entity.dart';
 
 class UserSubmissionModel extends UserSubmissionEntity {
   const UserSubmissionModel({

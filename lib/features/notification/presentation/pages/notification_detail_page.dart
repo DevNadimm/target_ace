@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide BackButton;
+﻿import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/back_button.dart';

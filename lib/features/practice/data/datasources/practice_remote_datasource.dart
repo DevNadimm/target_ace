@@ -1,8 +1,8 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 
 abstract interface class PracticeRemoteDataSource {
-  Future<List<Map<String, dynamic>>> getSubjects(String goalId);
+  Future<List<Map<String, dynamic>>> getSubjects(String groupId);
   Future<Map<String, dynamic>> startPracticeSession({
     required String subjectId,
     String? topicId,
@@ -15,7 +15,7 @@ abstract interface class PracticeRemoteDataSource {
     int limit = 20,
   });
   Future<void> recordAttempts(List<Map<String, dynamic>> attempts);
-  Future<Map<String, dynamic>> getPracticeSummary(String goalId);
+  Future<Map<String, dynamic>> getPracticeDashboardData(String groupId);
   Future<List<String>> getAttemptedQuestionIds(String subjectId);
 
   // Bookmark methods
@@ -30,14 +30,17 @@ class PracticeRemoteDataSourceImpl implements PracticeRemoteDataSource {
   const PracticeRemoteDataSourceImpl(this._client);
 
   @override
-  Future<List<Map<String, dynamic>>> getSubjects(String goalId) async {
+  Future<List<Map<String, dynamic>>> getSubjects(String groupId) async {
     try {
-      final response = await _client
-          .from('subjects')
-          .select()
-          .eq('goal_id', goalId)
-          .order('display_order', ascending: true);
-      return List<Map<String, dynamic>>.from(response);
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null) {
+        throw const ServerException(message: 'User not authenticated');
+      }
+      final response = await _client.rpc('get_subjects_with_progress', params: {
+        'p_group_id': groupId,
+        'p_user_id': userId,
+      });
+      return List<Map<String, dynamic>>.from(response as List);
     } catch (e) {
       throw ServerException(message: e.toString());
     }
@@ -119,12 +122,12 @@ class PracticeRemoteDataSourceImpl implements PracticeRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> getPracticeSummary(String goalId) async {
+  Future<Map<String, dynamic>> getPracticeDashboardData(String groupId) async {
     try {
       final userId = _client.auth.currentUser?.id;
       final response = await _client.rpc('get_practice_summary', params: {
         'target_user_id': userId,
-        'target_goal_id': goalId,
+        'target_group_id': groupId,
       });
       return Map<String, dynamic>.from(response as Map);
     } catch (e) {

@@ -1,4 +1,4 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+﻿import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/features/practice/domain/entities/subject_entity.dart';
 import 'package:target_ace/features/practice/domain/usecases/get_subjects.dart';
 
@@ -12,9 +12,9 @@ class PracticeSubjectsCubit extends Cubit<PracticeSubjectsState> {
   })  : _getSubjects = getSubjects,
         super(const PracticeSubjectsInitial());
 
-  Future<void> fetchSubjects(String goalId) async {
+  Future<void> fetchSubjects(String groupId) async {
     emit(const PracticeSubjectsLoading());
-    final res = await _getSubjects(goalId);
+    final res = await _getSubjects(groupId);
 
     res.fold(
       (failure) => emit(PracticeSubjectsFailure(failure.message)),

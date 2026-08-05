@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_divider.dart';
 import 'package:target_ace/core/config/colors.dart';
@@ -45,7 +45,7 @@ class LiveRankPreviewCard extends StatelessWidget {
               ),
               const SizedBox(width: 7),
               Text(
-                'LIVE · BCS 46th Battle',
+                'LIVE Â· BCS 46th Battle',
                 style: AppFonts.body(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,

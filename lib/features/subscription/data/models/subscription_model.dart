@@ -1,4 +1,4 @@
-import 'package:target_ace/features/subscription/domain/entities/subscription_entity.dart';
+﻿import 'package:target_ace/features/subscription/domain/entities/subscription_entity.dart';
 
 class SubscriptionModel extends SubscriptionEntity {
   const SubscriptionModel({

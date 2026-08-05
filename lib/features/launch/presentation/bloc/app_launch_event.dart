@@ -1,4 +1,4 @@
-part of 'app_launch_bloc.dart';
+﻿part of 'app_launch_bloc.dart';
 
 /// Events that drive the app launch state machine.
 ///

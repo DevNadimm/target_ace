@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/app_list_tile.dart';
 import 'package:target_ace/core/components/custom_container.dart';
@@ -75,7 +75,7 @@ class BattleHistorySection extends StatelessWidget {
                 },
                 icon: HugeIcons.strokeRoundedChampion,
                 title: title,
-                subtitle: '$scoreDisplay pts  •  Rank $rank/$totalParticipants',
+                subtitle: '$scoreDisplay pts  â€¢  Rank $rank/$totalParticipants',
               );
             },
             separatorBuilder: (context, index) => const CustomDivider.dotted(),

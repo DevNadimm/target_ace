@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:target_ace/core/components/custom_cached_image.dart';
 import 'package:target_ace/core/components/premium_avatar_ring.dart';
 import 'package:target_ace/core/config/colors.dart';

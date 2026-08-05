@@ -1,4 +1,4 @@
-import 'package:fpdart/fpdart.dart';
+﻿import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/usecase/usecase.dart';
 import 'package:target_ace/features/practice/domain/repository/practice_repository.dart';
@@ -10,7 +10,7 @@ class GetSubjects implements UseCase<List<SubjectEntity>, String> {
   const GetSubjects(this.repository);
 
   @override
-  Future<Either<Failure, List<SubjectEntity>>> call(String goalId) async {
-    return await repository.getSubjects(goalId);
+  Future<Either<Failure, List<SubjectEntity>>> call(String groupId) async {
+    return await repository.getSubjects(groupId);
   }
 }

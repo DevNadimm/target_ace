@@ -1,4 +1,4 @@
-class ProfileEntity {
+﻿class ProfileEntity {
   final String name;
   final String email;
   final String phone;

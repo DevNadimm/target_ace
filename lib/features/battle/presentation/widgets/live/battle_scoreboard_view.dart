@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/custom_divider.dart';
 import 'package:target_ace/core/components/spring_button.dart';
@@ -6,7 +6,7 @@ import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/features/battle/domain/entities/leaderboard_entry_entity.dart';
-import 'package:target_ace/features/dashboard/presentation/widgets/podium_widget.dart';
+import 'package:target_ace/features/home/presentation/widgets/home_podium_section.dart';
 import 'package:target_ace/features/battle/presentation/pages/battle_review_page.dart';
 import 'package:target_ace/features/practice/domain/entities/question_entity.dart';
 
@@ -109,7 +109,7 @@ class BattleScoreboardView extends StatelessWidget {
                 ),
                 const SizedBox(height: 28),
 
-                // PodiumWidget for Top 3
+                // HomePodiumSection for Top 3
                 if (leaderboard.isNotEmpty) ...[
                   Builder(
                     builder: (context) {
@@ -118,10 +118,10 @@ class BattleScoreboardView extends StatelessWidget {
                         items[i] = leaderboard[i];
                       }
 
-                      final podiumUsers = List<PodiumWidgetUser?>.generate(3, (index) {
+                      final podiumUsers = List<HomePodiumUser?>.generate(3, (index) {
                         final item = items[index];
                         if (item == null) return null;
-                        return PodiumWidgetUser(
+                        return HomePodiumUser(
                           name: item.name,
                           avatarUrl: item.avatarUrl,
                           score: item.score,
@@ -131,7 +131,7 @@ class BattleScoreboardView extends StatelessWidget {
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: PodiumWidget(
+                        child: HomePodiumSection(
                           users: podiumUsers,
                           scoreSuffix: '/100',
                         ),
@@ -347,7 +347,7 @@ class BattleScoreboardView extends StatelessWidget {
                     backgroundColor: AppColors.primary,
                     onPressed: onExit,
                     child: Text(
-                      'Back to Dashboard',
+                      'Back to Home',
                       style: AppFonts.body(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,

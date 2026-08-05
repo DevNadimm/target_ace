@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/app_list_tile.dart';
 import 'package:target_ace/core/components/custom_container.dart';
@@ -182,13 +182,13 @@ class _BattleHistoryPageState extends State<BattleHistoryPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // ── Upcoming & Live + History in one CustomContainer ──
+                                // â”€â”€ Upcoming & Live + History in one CustomContainer â”€â”€
                                 CustomContainer(
                                   padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // ── 1. Upcoming & Live ──
+                                      // â”€â”€ 1. Upcoming & Live â”€â”€
                                       if (_upcomingExams.isNotEmpty) ...[
                                         Padding(
                                           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -257,7 +257,7 @@ class _BattleHistoryPageState extends State<BattleHistoryPage> {
                                         const SizedBox(height: 16),
                                       ],
 
-                                      // ── 2. Exam History ──
+                                      // â”€â”€ 2. Exam History â”€â”€
                                       Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 16),
                                         child: _SectionHeader(label: 'EXAM HISTORY'),
@@ -338,7 +338,7 @@ class _BattleHistoryPageState extends State<BattleHistoryPage> {
   }
 }
 
-// ─── Shared Section Header ───────────────────────────────────────────────────
+// â”€â”€â”€ Shared Section Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _SectionHeader extends StatelessWidget {
   final String label;
@@ -371,7 +371,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// ─── History Item ────────────────────────────────────────────────────────────
+// â”€â”€â”€ History Item â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _HistoryItem extends StatelessWidget {
   final UserSubmissionEntity sub;
@@ -396,7 +396,7 @@ class _HistoryItem extends StatelessWidget {
       onTap: onTap,
       icon: HugeIcons.strokeRoundedChampion,
       title: title,
-      subtitle: '$scoreDisplay pts  •  Rank $rank/$totalParticipants',
+      subtitle: '$scoreDisplay pts  â€¢  Rank $rank/$totalParticipants',
     );
   }
 }

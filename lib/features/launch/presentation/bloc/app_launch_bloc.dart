@@ -1,4 +1,4 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
+﻿import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
@@ -15,8 +15,8 @@ part 'app_launch_state.dart';
 ///
 /// Implements a deterministic state machine:
 /// ```
-/// Initializing → CheckOnboarding → CheckAuth → SyncProfile
-///   → CheckProfile → CheckNotification → CheckTrial → Home
+/// Initializing â†’ CheckOnboarding â†’ CheckAuth â†’ SyncProfile
+///   â†’ CheckProfile â†’ CheckNotification â†’ CheckTrial â†’ Home
 /// ```
 ///
 /// **Key invariants**:
@@ -49,9 +49,9 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     on<FreeTrialHandled>(_onFreeTrialHandled);
   }
 
-  // ─────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Event Handlers
-  // ─────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   /// Entry point: runs the full state machine from the top.
   Future<void> _onAppLaunchStarted(
@@ -64,24 +64,24 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
         await Future.delayed(const Duration(milliseconds: 1500));
       }
 
-      // ── Step 1: Check Onboarding ──
+      // â”€â”€ Step 1: Check Onboarding â”€â”€
       final isFirstTime = await AppPreferences.isFirstTime();
       if (isFirstTime) {
         emit(const AppLaunchShowOnboarding());
         return;
       }
 
-      // ── Step 2: Check Auth Session ──
+      // â”€â”€ Step 2: Check Auth Session â”€â”€
       final session = _authRemoteDataSource.currentSession;
       if (session == null) {
         emit(const AppLaunchShowLogin());
         return;
       }
 
-      // ── Step 3: Sync Profile (with offline resilience) ──
+      // â”€â”€ Step 3: Sync Profile (with offline resilience) â”€â”€
       await _syncProfileWithFallback(emit);
 
-      // ── Step 4–6: Run remaining checks ──
+      // â”€â”€ Step 4â€“6: Run remaining checks â”€â”€
       await _runPostAuthChecks(emit);
     } catch (e) {
       debugPrint('AppLaunchBloc._onAppLaunchStarted error: $e');
@@ -89,7 +89,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     }
   }
 
-  /// Onboarding done → show login.
+  /// Onboarding done â†’ show login.
   Future<void> _onOnboardingCompleted(
     OnboardingCompleted event,
     Emitter<AppLaunchState> emit,
@@ -97,7 +97,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     emit(const AppLaunchShowLogin());
   }
 
-  /// Login succeeded → sync profile → run post-auth checks.
+  /// Login succeeded â†’ sync profile â†’ run post-auth checks.
   Future<void> _onLoginCompleted(
     LoginCompleted event,
     Emitter<AppLaunchState> emit,
@@ -112,7 +112,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     }
   }
 
-  /// Profile setup saved → check notification → check trial → home.
+  /// Profile setup saved â†’ check notification â†’ check trial â†’ home.
   Future<void> _onProfileSetupCompleted(
     ProfileSetupCompleted event,
     Emitter<AppLaunchState> emit,
@@ -125,7 +125,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     }
   }
 
-  /// Notification permission handled → check trial → home.
+  /// Notification permission handled â†’ check trial â†’ home.
   Future<void> _onNotificationPermissionHandled(
     NotificationPermissionHandled event,
     Emitter<AppLaunchState> emit,
@@ -138,7 +138,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     }
   }
 
-  /// Free trial handled → navigate home.
+  /// Free trial handled â†’ navigate home.
   Future<void> _onFreeTrialHandled(
     FreeTrialHandled event,
     Emitter<AppLaunchState> emit,
@@ -146,16 +146,16 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     emit(const AppLaunchNavigateHome());
   }
 
-  // ─────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Internal State Machine Steps
-  // ─────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   /// Syncs profile from Supabase DB. Falls back to cached data if offline.
   Future<void> _syncProfileWithFallback(Emitter<AppLaunchState> emit) async {
     final isProfileLocallyCached = await UserLocalDataSource.isProfileComplete();
 
     if (isProfileLocallyCached) {
-      // Profile exists locally — sync in background, don't block the user.
+      // Profile exists locally â€” sync in background, don't block the user.
       _authRepository.syncProfile().then((either) {
         either.fold(
           (failure) => debugPrint(
@@ -167,7 +167,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
         debugPrint('AppLaunchBloc: Background sync unhandled error: $error');
       });
     } else {
-      // No local data — must sync now.
+      // No local data â€” must sync now.
       final isOnline = await _connectionChecker.isConnected;
       if (isOnline) {
         await _authRepository.syncProfile();
@@ -177,16 +177,16 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
   }
 
   /// Runs the post-authentication check sequence:
-  /// CheckProfile → CheckNotification → CheckTrial → Home
+  /// CheckProfile â†’ CheckNotification â†’ CheckTrial â†’ Home
   Future<void> _runPostAuthChecks(Emitter<AppLaunchState> emit) async {
-    // ── Step 4: Check Profile Completion ──
+    // â”€â”€ Step 4: Check Profile Completion â”€â”€
     final isProfileComplete = await UserLocalDataSource.isProfileComplete();
     if (!isProfileComplete) {
       emit(const AppLaunchShowProfileSetup());
       return;
     }
 
-    // ── Step 5: Check Notification Permission ──
+    // â”€â”€ Step 5: Check Notification Permission â”€â”€
     await _checkNotificationStep(emit);
   }
 
@@ -200,7 +200,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
         await UserLocalDataSource.getHasPromptedNotification();
 
     if (!hasPrompted) {
-      // Also check OS-level permission — skip the prompt if already granted.
+      // Also check OS-level permission â€” skip the prompt if already granted.
       bool isAlreadyGranted = false;
       try {
         final settings =
@@ -210,11 +210,11 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
                 settings.authorizationStatus == AuthorizationStatus.provisional;
       } catch (e) {
         debugPrint('AppLaunchBloc: Failed to get notification settings: $e');
-        // Fail open — assume not granted and show the prompt
+        // Fail open â€” assume not granted and show the prompt
       }
 
       if (isAlreadyGranted) {
-        // OS permission already granted — mark as prompted and move on.
+        // OS permission already granted â€” mark as prompted and move on.
         await UserLocalDataSource.setHasPromptedNotification(true);
       } else {
         emit(const AppLaunchShowNotificationPermission());
@@ -222,13 +222,13 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
       }
     }
 
-    // Notification handled — proceed to trial check.
+    // Notification handled â€” proceed to trial check.
     await _checkTrialStep(emit);
   }
 
   /// Checks if the user is eligible for a free trial.
   ///
-  /// Logic: DB-first — if the database says the user already has/had a trial,
+  /// Logic: DB-first â€” if the database says the user already has/had a trial,
   /// skip. Only falls back to error-safe "not eligible" on failure.
   Future<void> _checkTrialStep(Emitter<AppLaunchState> emit) async {
     final userId = await UserLocalDataSource.getUserId();
@@ -249,7 +249,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
           return;
         }
       } catch (e) {
-        // On error, fail open — skip the trial page, go to home.
+        // On error, fail open â€” skip the trial page, go to home.
         debugPrint('AppLaunchBloc: Trial eligibility check failed: $e');
       }
     }

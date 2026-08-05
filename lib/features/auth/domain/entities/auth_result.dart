@@ -1,4 +1,4 @@
-import 'package:target_ace/core/common/entities/user.dart';
+﻿import 'package:target_ace/core/common/entities/user.dart';
 
 /// Pure domain entity representing subscription details.
 class AuthSubscription {

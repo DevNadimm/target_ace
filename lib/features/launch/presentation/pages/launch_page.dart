@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/config/app_config.dart';
 import 'package:target_ace/core/config/assets.dart';
@@ -9,14 +9,14 @@ import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/features/auth/presentation/pages/login_page.dart';
 import 'package:target_ace/features/auth/presentation/pages/onboarding_page.dart';
-import 'package:target_ace/features/dashboard/presentation/pages/main_navigation_page.dart';
+import 'package:target_ace/features/home/presentation/pages/main_navigation_page.dart';
 import 'package:target_ace/features/launch/presentation/bloc/app_launch_bloc.dart';
 import 'package:target_ace/features/notification/presentation/pages/notification_permission_page.dart';
 import 'package:target_ace/features/profile/presentation/bloc/setup/profile_setup_cubit.dart';
 import 'package:target_ace/features/profile/presentation/pages/profile_setup_page.dart';
 import 'package:target_ace/features/subscription/presentation/pages/free_trial_offer_page.dart';
 
-/// Root launch page — the single entry point for the entire app.
+/// Root launch page â€” the single entry point for the entire app.
 ///
 /// Replaces the old `SplashPage`. Hosts a [BlocListener] that reacts to
 /// [AppLaunchState] emissions and renders the appropriate screen.
@@ -82,7 +82,7 @@ class LaunchPage extends StatelessWidget {
   }
 }
 
-/// Splash screen UI — shown during [AppLaunchInitializing].
+/// Splash screen UI â€” shown during [AppLaunchInitializing].
 ///
 /// Preserves the exact same visual design from the old `SplashPage`:
 /// centered logo, app name, subtitle, and a loading indicator.

@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -143,7 +143,7 @@ class _MindPopHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  '${exam.durationMinutes} Minutes  •  ${(exam.totalQuestions).toInt()} Questions',
+                  '${exam.durationMinutes} Minutes  â€¢  ${(exam.totalQuestions).toInt()} Questions',
                   style: AppFonts.body(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -374,7 +374,7 @@ class _MindPopCountdownState extends State<_MindPopCountdown> {
         ),
         const SizedBox(height: 10),
         Center(
-          child: _displayText.contains(':')
+          child: _displayText.contains(' : ')
               ? _buildTimerRow(_displayText)
               : Text(
                   _displayText,

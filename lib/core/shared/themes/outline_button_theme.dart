@@ -19,4 +19,3 @@ OutlinedButtonThemeData outlinedButtonTheme = OutlinedButtonThemeData(
     ),
   ),
 );
-

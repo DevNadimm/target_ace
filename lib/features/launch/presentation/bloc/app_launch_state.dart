@@ -1,4 +1,4 @@
-part of 'app_launch_bloc.dart';
+﻿part of 'app_launch_bloc.dart';
 
 /// Sealed state hierarchy for the app launch state machine.
 ///
@@ -8,7 +8,7 @@ sealed class AppLaunchState {
   const AppLaunchState();
 }
 
-/// Initial state — splash screen with logo + loader.
+/// Initial state â€” splash screen with logo + loader.
 final class AppLaunchInitializing extends AppLaunchState {
   const AppLaunchInitializing();
 }
@@ -38,12 +38,12 @@ final class AppLaunchShowFreeTrial extends AppLaunchState {
   const AppLaunchShowFreeTrial();
 }
 
-/// Terminal state — navigate to home/dashboard.
+/// Terminal state â€” navigate to home/home.
 final class AppLaunchNavigateHome extends AppLaunchState {
   const AppLaunchNavigateHome();
 }
 
-/// Error state — unrecoverable launch failure.
+/// Error state â€” unrecoverable launch failure.
 final class AppLaunchError extends AppLaunchState {
   final String message;
   const AppLaunchError(this.message);

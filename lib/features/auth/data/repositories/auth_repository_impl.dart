@@ -1,4 +1,4 @@
-import 'package:fpdart/fpdart.dart';
+﻿import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
@@ -34,7 +34,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final supabaseUser = remoteDataSource.currentUser!;
       final subscription = profile['subscription'] as Map<String, dynamic>?;
 
-      // Build and save unified cached user — single write
+      // Build and save unified cached user â€” single write
       final cachedUser = CachedUserModel.fromRpcPayload(
         profile: profile,
         subscription: subscription,
@@ -105,7 +105,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final profile = await remoteDataSource.fetchProfile(user.id);
       final subscription = profile['subscription'] as Map<String, dynamic>?;
 
-      // Build and save unified cached user — single write
+      // Build and save unified cached user â€” single write
       final cachedUser = CachedUserModel.fromRpcPayload(
         profile: profile,
         subscription: subscription,

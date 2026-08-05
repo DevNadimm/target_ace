@@ -9,8 +9,8 @@
   String get forgotPasswordVerifyPin => 'verify-reset-pin';
   String get forgotPasswordSetNewPassword => 'reset-password';
 
-  // ðŸ“¦ Dashboard
-  String get dashboard => 'dashboard';
+  // ðŸ“¦ Home
+  String get home => 'home';
 
   // ðŸ“¦ Properties & Units
   String get properties => 'properties';
@@ -48,4 +48,3 @@
   // ðŸ“¦ Reports
   String get incomeExpenseReport => 'reports/income-expense';
 }
-

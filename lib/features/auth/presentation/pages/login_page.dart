@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/config/app_config.dart';
 import 'package:target_ace/core/config/colors.dart';
@@ -22,7 +22,7 @@ class LoginPage extends StatelessWidget {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthSuccess) {
-          // Notify the launch coordinator — it decides what comes next.
+          // Notify the launch coordinator â€” it decides what comes next.
           context.read<AppLaunchBloc>().add(const LoginCompleted());
         }
       },

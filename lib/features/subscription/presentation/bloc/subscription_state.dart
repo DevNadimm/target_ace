@@ -1,4 +1,4 @@
-part of 'subscription_bloc.dart';
+﻿part of 'subscription_bloc.dart';
 
 sealed class SubscriptionState {}
 

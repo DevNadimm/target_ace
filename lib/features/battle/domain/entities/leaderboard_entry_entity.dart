@@ -1,4 +1,4 @@
-class LeaderboardEntryEntity {
+﻿class LeaderboardEntryEntity {
   final int rank;
   final String name;
   final String avatarUrl;

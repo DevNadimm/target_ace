@@ -1,10 +1,10 @@
-/// Unified cached user entity that holds all user-related data
+﻿/// Unified cached user entity that holds all user-related data
 /// stored locally in SharedPreferences as a single JSON blob.
 ///
-/// This is the domain layer entity — pure Dart, no dependencies.
+/// This is the domain layer entity â€” pure Dart, no dependencies.
 /// All user profile, group membership, and subscription data lives here.
 class CachedUserEntity {
-  // ── Required Fields ──
+  // â”€â”€ Required Fields â”€â”€
   final String id;
   final String name;
   final String email;
@@ -12,23 +12,23 @@ class CachedUserEntity {
   final String gender;
   final String dob;
 
-  // ── Optional Fields ──
+  // â”€â”€ Optional Fields â”€â”€
   final String avatarUrl;
   final String institution;
   final String district;
   final String goal;
 
-  // ── Onboarding Profiling Fields ──
+  // â”€â”€ Onboarding Profiling Fields â”€â”€
   final String howDidYouHear;
   final String dailyGoal;
   final List<String> learningModes;
 
-  // ── Group Membership ──
+  // â”€â”€ Group Membership â”€â”€
   final String groupId;
   final String groupTitle;
   final String groupLockedUntil;
 
-  // ── Subscription ──
+  // â”€â”€ Subscription â”€â”€
   final String subscriptionStatus;
   final String subscriptionPlanName;
   final String subscriptionExpiryDate;

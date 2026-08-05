@@ -57,4 +57,3 @@ class DioLoggerInterceptor extends Interceptor {
     handler.next(err);
   }
 }
-

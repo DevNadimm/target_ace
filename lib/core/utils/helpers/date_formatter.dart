@@ -1,4 +1,4 @@
-import 'package:intl/intl.dart';
+﻿import 'package:intl/intl.dart';
 
 class DateFormatter {
   DateFormatter._();
@@ -21,7 +21,7 @@ class DateFormatter {
         'dd MMM, yyyy', // 07 Apr, 2026
         'dd MMMM, yyyy', // 07 April, 2026
         'dd/MM/yyyy', // 20/09/2025
-        'EEE, dd MMM', // Thu, 02 Apr  (no year â€” limited use)
+        'EEE, dd MMM', // Thu, 02 Apr  (no year Ã¢â‚¬â€ limited use)
       ];
 
       for (final fmt in formats) {
@@ -53,11 +53,11 @@ class DateFormatter {
     return DateFormat('dd MMMM, yyyy hh:mm a').format(date);
   }
 
-  /// 20 Sep 2025  •  01:51 AM
+  /// 20 Sep 2025  â€¢  01:51 AM
   static String readableShortWithTime(dynamic value) {
     final date = _parse(value);
     if (date == null) return value?.toString() ?? 'N/A';
-    return '${DateFormat('dd MMM yyyy').format(date)}  •  ${DateFormat('hh:mm a').format(date)}';
+    return '${DateFormat('dd MMM yyyy').format(date)}  â€¢  ${DateFormat('hh:mm a').format(date)}';
   }
 
   static String readableWithTime12(dynamic value) {
@@ -80,7 +80,7 @@ class DateFormatter {
     return DateFormat('dd/MM/yyyy').format(date);
   }
 
-  /// 2025-09-20  — always ASCII digits (safe for API calls)
+  /// 2025-09-20  â€” always ASCII digits (safe for API calls)
   static String yyyyMMdd(dynamic value) {
     final date = _parse(value);
     if (date == null) return value.toString();
@@ -200,11 +200,10 @@ class DateFormatter {
       } else if (diff.inHours < 24) {
         return "Starts in ${diff.inHours} hours";
       } else {
-        return DateFormat('EEE, dd MMM  •  hh:mm a').format(start);
+        return DateFormat('EEE, dd MMM  â€¢  hh:mm a').format(start);
       }
     } catch (_) {
       return startStr;
     }
   }
 }
-

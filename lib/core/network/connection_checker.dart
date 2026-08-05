@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 /// Abstract interface for checking internet connectivity at the repository level.
@@ -43,7 +43,7 @@ class ConnectionCheckerImpl implements ConnectionChecker {
       return false;
     }
 
-    // Network interface exists — verify actual internet access
+    // Network interface exists â€” verify actual internet access
     try {
       final result = await InternetAddress.lookup('google.com')
           .timeout(const Duration(seconds: 3));

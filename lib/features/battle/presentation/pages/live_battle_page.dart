@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
@@ -93,7 +93,7 @@ class _LiveBattlePageState extends State<LiveBattlePage> with WidgetsBindingObse
           if (previous is BattleAnalyzing && current is BattleAnalyzing) {
             return previous.isDisqualified != current.isDisqualified;
           }
-          // BattleWaiting timer ticks → never rebuild (handled by ValueNotifier)
+          // BattleWaiting timer ticks â†’ never rebuild (handled by ValueNotifier)
           if (previous is BattleWaiting && current is BattleWaiting) return false;
           return true;
         },

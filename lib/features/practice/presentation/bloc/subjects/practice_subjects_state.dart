@@ -1,4 +1,4 @@
-part of 'practice_subjects_cubit.dart';
+﻿part of 'practice_subjects_cubit.dart';
 
 sealed class PracticeSubjectsState {
   const PracticeSubjectsState();

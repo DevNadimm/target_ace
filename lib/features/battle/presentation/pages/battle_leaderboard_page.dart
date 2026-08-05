@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide BackButton;
+﻿import 'package:flutter/material.dart' hide BackButton;
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/services/service_locator.dart';
 import 'package:target_ace/features/battle/domain/entities/battle_entity.dart';
@@ -8,7 +8,7 @@ import 'package:target_ace/core/components/leaderboard_row.dart';
 import 'package:target_ace/core/components/back_button.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
-import 'package:target_ace/features/dashboard/presentation/widgets/podium_widget.dart';
+import 'package:target_ace/features/home/presentation/widgets/home_podium_section.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/shared/widgets/empty_state_widget.dart';
@@ -245,12 +245,12 @@ class _BattleLeaderboardPageState extends State<BattleLeaderboardPage> {
             ),
           ),
 
-        // Beautiful PodiumWidget for Top 3
+        // Beautiful HomePodiumSection for Top 3
         if (podiumItems.isNotEmpty)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-              child: _buildPodiumWidget(podiumItems),
+              child: _buildHomePodiumSection(podiumItems),
             ),
           ),
 
@@ -332,17 +332,17 @@ class _BattleLeaderboardPageState extends State<BattleLeaderboardPage> {
     );
   }
 
-  Widget _buildPodiumWidget(List<LeaderboardEntryEntity> topList) {
+  Widget _buildHomePodiumSection(List<LeaderboardEntryEntity> topList) {
     final items = List<LeaderboardEntryEntity?>.filled(3, null);
     for (int i = 0; i < topList.length && i < 3; i++) {
       items[i] = topList[i];
     }
 
-    final podiumUsers = List<PodiumWidgetUser?>.generate(3, (index) {
+    final podiumUsers = List<HomePodiumUser?>.generate(3, (index) {
       final item = items[index];
       if (item == null) return null;
 
-      return PodiumWidgetUser(
+      return HomePodiumUser(
         name: item.name,
         avatarUrl: item.avatarUrl,
         score: item.score,
@@ -350,7 +350,7 @@ class _BattleLeaderboardPageState extends State<BattleLeaderboardPage> {
       );
     });
 
-    return PodiumWidget(
+    return HomePodiumSection(
       users: podiumUsers,
       scoreSuffix: '/100',
     );

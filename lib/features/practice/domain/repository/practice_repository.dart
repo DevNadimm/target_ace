@@ -1,4 +1,4 @@
-import 'package:fpdart/fpdart.dart';
+﻿import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 
 import 'package:target_ace/features/practice/domain/entities/subject_entity.dart';
@@ -6,7 +6,7 @@ import 'package:target_ace/features/practice/domain/entities/topic_entity.dart';
 import 'package:target_ace/features/practice/domain/entities/question_entity.dart';
 
 abstract interface class PracticeRepository {
-  Future<Either<Failure, List<SubjectEntity>>> getSubjects(String goalId);
+  Future<Either<Failure, List<SubjectEntity>>> getSubjects(String groupId);
   Future<Either<Failure, List<TopicEntity>>> getTopics(String subjectId);
   Future<Either<Failure, Map<String, dynamic>>> startPracticeSession({
     required String subjectId,
@@ -19,7 +19,7 @@ abstract interface class PracticeRepository {
     int limit = 20,
   });
   Future<Either<Failure, void>> recordAttempts(List<Map<String, dynamic>> attempts);
-  Future<Either<Failure, Map<String, dynamic>>> getPracticeSummary(String goalId);
+  Future<Either<Failure, Map<String, dynamic>>> getPracticeDashboardData(String groupId);
   Future<Either<Failure, Set<String>>> getAttemptedQuestionIds(String subjectId);
 
   // Bookmark methods

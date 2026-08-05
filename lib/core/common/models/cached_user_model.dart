@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart' show User;
+﻿import 'package:supabase_flutter/supabase_flutter.dart' show User;
 import 'package:target_ace/core/common/entities/cached_user_entity.dart';
 import 'package:target_ace/core/utils/helpers/subscription_status_helper.dart';
 

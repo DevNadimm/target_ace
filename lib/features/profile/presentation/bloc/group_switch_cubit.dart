@@ -1,4 +1,4 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+﻿import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/services/notification_service.dart';
 import 'package:target_ace/core/utils/helpers/date_formatter.dart';
 import 'package:target_ace/features/auth/data/datasources/auth_remote_datasource.dart';
@@ -8,7 +8,7 @@ import 'package:target_ace/features/profile/domain/entities/onboarding_goal_enti
 import 'package:target_ace/features/profile/domain/entities/battle_group_entity.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
 
-// ─── State ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 enum GroupSwitchStatus { loading, locked, unlocked, saving, success, error }
 
@@ -70,7 +70,7 @@ class GroupSwitchState {
   }
 }
 
-// ─── Cubit ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Cubit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class GroupSwitchCubit extends Cubit<GroupSwitchState> {
   final NotificationService _notificationService;
@@ -194,7 +194,7 @@ class GroupSwitchCubit extends Cubit<GroupSwitchState> {
               ));
               return false; // Need group selection next
             } else {
-              // No subgroups — selectedGroup = selectedGoal
+              // No subgroups â€” selectedGroup = selectedGoal
               emit(state.copyWith(
                 selectedGroup: state.selectedGoal,
                 isFetchingGroups: false,
@@ -211,7 +211,7 @@ class GroupSwitchCubit extends Cubit<GroupSwitchState> {
         return false;
       }
     } else {
-      // Step 1 — group already selected
+      // Step 1 â€” group already selected
       if (state.selectedGroup.isEmpty) return false;
       return true; // Ready for confirmation
     }

@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/features/battle/data/models/battle_model.dart';
 import 'package:target_ace/features/battle/data/models/battle_submission_model.dart';

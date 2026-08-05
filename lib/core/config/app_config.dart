@@ -1,9 +1,11 @@
-class AppConfig {
+﻿class AppConfig {
   AppConfig._();
 
   static const String appName = "TargetAce";
   static const String appVersion = "1.0.0";
   static const String appSubtitle = "Live. Battle. Exams.";
+  static const bool isDevelopment = true;
+  static const bool isPracticeUnderDevelopment = true;
 
   /// Supabase Configuration Placeholders
   static const String supabaseUrl = "https://pymjlwxuqyxjdjwdkryl.supabase.co";

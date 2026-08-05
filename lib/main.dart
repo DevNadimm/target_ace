@@ -1,4 +1,4 @@
-import 'package:firebase_core/firebase_core.dart';
+﻿import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:target_ace/firebase_options.dart';
 import 'package:target_ace/core/services/notification_service.dart';
@@ -33,4 +33,3 @@ void main() async {
 
   return runApp(DevicePreview(enabled: false, builder: (_) => const MyApp()));
 }
-

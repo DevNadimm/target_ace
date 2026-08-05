@@ -1,4 +1,4 @@
-class QuestionEntity {
+﻿class QuestionEntity {
   final String id;
   final String questionText;
   final String optionA;

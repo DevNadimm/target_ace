@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
@@ -64,7 +64,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       ),
       _OnboardingItem(
         title: 'Your Target, Your Leaderboard',
-        subtitle: 'Pick your goal — BCS, Admission, HSC — and compete only with students on the same path.',
+        subtitle: 'Pick your goal â€” BCS, Admission, HSC â€” and compete only with students on the same path.',
         icon: HugeIcons.strokeRoundedCrown,
         color: AppColors.success,
       ),

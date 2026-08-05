@@ -1,8 +1,8 @@
-/// Domain-layer failure class for clean architecture error handling.
+﻿/// Domain-layer failure class for clean architecture error handling.
 ///
 /// Used as the LEFT side of `Either<Failure, T>` returned by repositories.
 /// Unlike exceptions, failures are VALUES that flow through the call stack
-/// without try-catch — making error handling explicit and type-safe.
+/// without try-catch â€” making error handling explicit and type-safe.
 ///
 /// Example:
 /// ```dart

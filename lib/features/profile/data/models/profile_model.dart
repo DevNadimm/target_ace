@@ -1,4 +1,4 @@
-import 'package:target_ace/features/profile/domain/entities/profile_entity.dart';
+﻿import 'package:target_ace/features/profile/domain/entities/profile_entity.dart';
 
 class ProfileModel extends ProfileEntity {
   const ProfileModel({

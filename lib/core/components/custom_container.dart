@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:target_ace/core/config/colors.dart';
 
@@ -64,13 +64,13 @@ class _CustomContainerState extends State<CustomContainer> {
     final borderRadius = widget.borderRadius ?? const BorderRadius.all(Radius.circular(16));
 
     final double translation = _isPressed ? widget.depth : 0.0;
-    
+
     Color effectiveBorderColor = widget.borderColor ?? AppColors.inputBorder;
     if (widget.borderColor == null && widget.color != null) {
       final hsl = HSLColor.fromColor(widget.color!);
       effectiveBorderColor = hsl.withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0)).toColor();
     }
-    
+
     Widget content = Stack(
       clipBehavior: Clip.none,
       children: [
@@ -84,7 +84,7 @@ class _CustomContainerState extends State<CustomContainer> {
             decoration: BoxDecoration(
               color: effectiveBorderColor,
               borderRadius: borderRadius,
-              boxShadow: widget.boxShadow ?? 
+              boxShadow: widget.boxShadow ??
                   [
                     BoxShadow(
                       color: AppColors.black.withValues(alpha: 0.01),
@@ -95,7 +95,7 @@ class _CustomContainerState extends State<CustomContainer> {
             ),
           ),
         ),
-        
+
         // Animated Top Face
         AnimatedPadding(
           duration: const Duration(milliseconds: 60),
@@ -105,8 +105,8 @@ class _CustomContainerState extends State<CustomContainer> {
             bottom: widget.depth - translation,
           ),
           child: Container(
-            height: widget.height != null 
-                ? (widget.height! - widget.depth > 0 ? widget.height! - widget.depth : null) 
+            height: widget.height != null
+                ? (widget.height! - widget.depth > 0 ? widget.height! - widget.depth : null)
                 : null,
             width: widget.width,
             padding: widget.padding ?? const EdgeInsets.all(16),

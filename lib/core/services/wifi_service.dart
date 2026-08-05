@@ -43,4 +43,3 @@ class WifiService {
     return wifiName == allowedSSID && wifiBSSID == allowedBSSID.toLowerCase();
   }
 }
-

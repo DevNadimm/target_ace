@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:target_ace/features/battle/domain/entities/leaderboard_entry_entity.dart';
 
 class LeaderboardDataEntity {

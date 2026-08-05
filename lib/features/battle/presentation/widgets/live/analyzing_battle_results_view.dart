@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
@@ -208,7 +208,7 @@ class AnalyzingBattleResultsView extends StatelessWidget {
                           const SizedBox(height: 10),
                           _buildInfoRow(
                             HugeIcons.strokeRoundedMedal01,
-                            'Stay on this screen — results will appear here automatically. No need to refresh.',
+                            'Stay on this screen â€” results will appear here automatically. No need to refresh.',
                           ),
                         ],
                       ),

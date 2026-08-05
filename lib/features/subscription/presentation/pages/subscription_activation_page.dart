@@ -1,3 +1,4 @@
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -15,7 +16,7 @@ import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/inline_error_widget.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/utils/enums/message_type.dart';
-import 'package:target_ace/features/dashboard/presentation/pages/main_navigation_page.dart';
+import 'package:target_ace/features/home/presentation/pages/main_navigation_page.dart';
 import 'package:target_ace/features/subscription/presentation/bloc/subscription_bloc.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
 
@@ -84,8 +85,7 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
           if (status == 'active' || status == 'trial') {
             Navigator.pushAndRemoveUntil(
               context,
-              MainNavigationPage.route(),
-              (_) => false,
+              MainNavigationPage.route(), (_) => false,
             );
           }
         }
@@ -146,23 +146,43 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: AppColors.card,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Transform.rotate(
+                            angle: -20 * math.pi / 180,
+                            child: const HugeIcon(
+                              icon: HugeIcons.strokeRoundedDiamond02,
+                              color: AppColors.info,
+                              size: 34,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       Text(
                         headerTitle,
                         style: AppFonts.heading(
-                          fontSize: 18,
+                          fontSize: 24,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         headerSubtext,
                         style: AppFonts.body(
-                          fontSize: 13,
+                          fontSize: 14,
                           color: AppColors.textSecondary,
+                          height: 1.4,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 22),
                       Text(
                         'Subscription Information',
                         style: AppFonts.body(
@@ -250,7 +270,7 @@ Thank you.
                         ),
                       ),
                       InlineErrorWidget(inlineError),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 32),
                       SpringButton(
                         width: double.infinity,
                         onPressed: mainButtonAction,

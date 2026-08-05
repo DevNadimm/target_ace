@@ -1,11 +1,11 @@
-import 'package:fpdart/fpdart.dart';
+﻿import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 
 /// Base interface for all use cases in the application.
 ///
 /// Every use case implements this interface, ensuring a consistent
 /// contract across the domain layer. The `call()` method returns
-/// `Either<Failure, SuccessType>` — Left for errors, Right for success.
+/// `Either<Failure, SuccessType>` â€” Left for errors, Right for success.
 ///
 /// Usage:
 /// ```dart

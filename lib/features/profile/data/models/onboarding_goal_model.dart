@@ -1,4 +1,4 @@
-import 'package:target_ace/features/profile/data/models/battle_group_model.dart';
+﻿import 'package:target_ace/features/profile/data/models/battle_group_model.dart';
 import 'package:target_ace/features/profile/domain/entities/onboarding_goal_entity.dart';
 
 class OnboardingGoalModel extends OnboardingGoalEntity {

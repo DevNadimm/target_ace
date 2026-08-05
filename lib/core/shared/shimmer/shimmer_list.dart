@@ -77,4 +77,3 @@ class ShimmerList extends StatelessWidget {
     );
   }
 }
-

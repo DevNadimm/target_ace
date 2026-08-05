@@ -1,4 +1,4 @@
-part of 'profile_setup_cubit.dart';
+﻿part of 'profile_setup_cubit.dart';
 
 sealed class ProfileSetupState {
   const ProfileSetupState();

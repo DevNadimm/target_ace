@@ -1,4 +1,4 @@
-enum ProfileStepType {
+﻿enum ProfileStepType {
   goal,
   group,
   howDidYouHear,

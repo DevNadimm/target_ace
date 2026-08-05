@@ -45,4 +45,3 @@ class InlineErrorWidget extends StatelessWidget {
         : SizedBox.shrink();
   }
 }
-

@@ -47,4 +47,3 @@ extension TimeOfDayX on TimeOfDay {
     return '$h:$m';
   }
 }
-

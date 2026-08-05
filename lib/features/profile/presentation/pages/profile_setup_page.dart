@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -13,7 +13,7 @@ import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/utils/enums/message_type.dart';
 import 'package:target_ace/core/utils/helpers/date_formatter.dart';
 import 'package:target_ace/core/utils/helpers/option_picker_bottom_sheet_helper.dart';
-import 'package:target_ace/features/dashboard/presentation/pages/main_navigation_page.dart';
+import 'package:target_ace/features/home/presentation/pages/main_navigation_page.dart';
 import 'package:target_ace/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:target_ace/features/launch/presentation/bloc/app_launch_bloc.dart';
 import 'package:target_ace/features/profile/domain/entities/battle_group_entity.dart';
@@ -504,17 +504,17 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             );
             if (!context.mounted) return;
             if (Navigator.canPop(context) && widget.customSteps != null) {
-              // In-app profile edit — pop back to the previous page.
+              // In-app profile edit â€” pop back to the previous page.
               Navigator.pop(context, true);
             } else if (widget.customSteps != null) {
-              // In-app edit with no previous route — go to main navigation.
+              // In-app edit with no previous route â€” go to main navigation.
               Navigator.pushAndRemoveUntil(
                 context,
                 MainNavigationPage.route(),
                 (_) => false,
               );
             } else {
-              // Launch flow — notify the coordinator.
+              // Launch flow â€” notify the coordinator.
               context.read<AppLaunchBloc>().add(const ProfileSetupCompleted());
             }
           } else if (state is ProfileSetupFailure) {

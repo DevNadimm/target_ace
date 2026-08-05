@@ -58,4 +58,3 @@ class EmptyStateWidget extends StatelessWidget {
     return Image.asset(Assets.noContent, height: 100, width: 100);
   }
 }
-

@@ -100,4 +100,3 @@ class LocationService {
     return distance <= radiusMeters;
   }
 }
-

@@ -143,4 +143,3 @@ class ErrorStateWidget extends StatelessWidget {
     return Image.asset(_getIconName(), height: 100, width: 100);
   }
 }
-
