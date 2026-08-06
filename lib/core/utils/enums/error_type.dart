@@ -1,1 +1,1 @@
-﻿enum ErrorType { network, server, notFound, botProtection, unknown }
+enum ErrorType { network, server, notFound, botProtection, auth, unknown }

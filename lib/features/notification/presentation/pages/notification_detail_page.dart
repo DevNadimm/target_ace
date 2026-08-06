@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart' hide BackButton;
+import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/back_button.dart';
@@ -12,7 +12,13 @@ import 'package:target_ace/features/notification/presentation/bloc/notification_
 import 'package:target_ace/features/notification/presentation/helpers/notification_helper.dart';
 
 class NotificationDetailPage extends StatelessWidget {
-  static Route route(NotificationEntity notification) => MaterialPageRoute(builder: (_) => NotificationDetailPage(notification: notification));
+  static Route route(NotificationEntity notification, NotificationBloc bloc) =>
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: bloc,
+          child: NotificationDetailPage(notification: notification),
+        ),
+      );
 
   final NotificationEntity notification;
 

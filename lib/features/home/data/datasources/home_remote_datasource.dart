@@ -1,6 +1,7 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/error/server_exception.dart';
+import 'package:target_ace/core/network/base_remote_datasource.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
 import 'package:target_ace/features/home/data/models/home_model.dart';
 
@@ -14,10 +15,8 @@ abstract interface class HomeRemoteDataSource {
   Stream<void> get homeRealtimeChanges;
 }
 
-class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
-  final SupabaseClient supabaseClient;
-
-  HomeRemoteDataSourceImpl(this.supabaseClient);
+class HomeRemoteDataSourceImpl extends BaseRemoteDataSource implements HomeRemoteDataSource {
+  const HomeRemoteDataSourceImpl(super.client);
 
   @override
   Stream<void> get homeRealtimeChanges {
@@ -27,7 +26,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
     controller = StreamController<void>.broadcast(
       onListen: () {
-        examsChannel = supabaseClient
+        examsChannel = client
             .channel('public-exams-home')
             .onPostgresChanges(
               event: PostgresChangeEvent.all,
@@ -41,7 +40,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
             );
         examsChannel!.subscribe();
 
-        submissionsChannel = supabaseClient
+        submissionsChannel = client
             .channel('public-submissions-home')
             .onPostgresChanges(
               event: PostgresChangeEvent.all,
@@ -57,10 +56,10 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       },
       onCancel: () {
         if (examsChannel != null) {
-          supabaseClient.removeChannel(examsChannel!);
+          client.removeChannel(examsChannel!);
         }
         if (submissionsChannel != null) {
-          supabaseClient.removeChannel(submissionsChannel!);
+          client.removeChannel(submissionsChannel!);
         }
       },
     );
@@ -71,20 +70,15 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   @override
   Future<List<Map<String, dynamic>>> getGroupLeaderboard(String groupId) async {
     try {
-      final response = await supabaseClient
+      final response = await client
           .from('group_leaderboard')
           .select()
           .eq('group_id', groupId)
           .order('total_score', ascending: false)
           .limit(50);
       return List<Map<String, dynamic>>.from(response);
-    } on PostgrestException catch (e) {
-      throw ServerException(
-        message: e.message,
-        statusCode: int.tryParse(e.code ?? ''),
-      );
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
@@ -101,9 +95,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
       final targetGroupId = groupId.isEmpty ? goalId : groupId;
 
-      // â”€â”€ Single Atomic RPC Call (1 HTTP RTT) â”€â”€
+      // ── Single Atomic RPC Call (1 HTTP RTT) ──
       try {
-        final resp = await supabaseClient.rpc('get_user_home_summary', params: {
+        final resp = await client.rpc('get_user_home_summary', params: {
           'target_user_id': userId,
           'target_group_id': targetGroupId,
         });
@@ -221,18 +215,12 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         } else {
           throw const ServerException(message: 'Invalid home response from server.');
         }
-      } on PostgrestException catch (e) {
-        throw ServerException(
-          message: e.message,
-          statusCode: int.tryParse(e.code ?? ''),
-        );
       } catch (e) {
-        throw ServerException(message: e.toString());
+        handleException(e);
       }
-    } on ServerException {
-      rethrow;
     } catch (e) {
-      throw ServerException(message: e.toString());
+      if (e is ServerException) rethrow;
+      handleException(e);
     }
   }
 }

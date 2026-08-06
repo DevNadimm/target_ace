@@ -1,5 +1,6 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/error/server_exception.dart';
+import 'package:target_ace/core/network/base_remote_datasource.dart';
 
 abstract interface class PracticeRemoteDataSource {
   Future<List<Map<String, dynamic>>> getSubjects(String groupId);
@@ -25,24 +26,24 @@ abstract interface class PracticeRemoteDataSource {
   Future<void> submitReport(String questionId, String reportText);
 }
 
-class PracticeRemoteDataSourceImpl implements PracticeRemoteDataSource {
-  final SupabaseClient _client;
-  const PracticeRemoteDataSourceImpl(this._client);
+class PracticeRemoteDataSourceImpl extends BaseRemoteDataSource implements PracticeRemoteDataSource {
+  const PracticeRemoteDataSourceImpl(super.client);
 
   @override
   Future<List<Map<String, dynamic>>> getSubjects(String groupId) async {
     try {
-      final userId = _client.auth.currentUser?.id;
+      final userId = client.auth.currentUser?.id;
       if (userId == null) {
         throw const ServerException(message: 'User not authenticated');
       }
-      final response = await _client.rpc('get_subjects_with_progress', params: {
+      final response = await client.rpc('get_subjects_with_progress', params: {
         'p_group_id': groupId,
         'p_user_id': userId,
       });
       return List<Map<String, dynamic>>.from(response as List);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      if (e is ServerException) rethrow;
+      handleException(e);
     }
   }
 
@@ -53,12 +54,12 @@ class PracticeRemoteDataSourceImpl implements PracticeRemoteDataSource {
     int limit = 20,
   }) async {
     try {
-      final userId = _client.auth.currentUser?.id;
+      final userId = client.auth.currentUser?.id;
       if (userId == null) {
         throw const ServerException(message: 'User not authenticated');
       }
 
-      final response = await _client.rpc('start_practice_session', params: {
+      final response = await client.rpc('start_practice_session', params: {
         'p_user_id': userId,
         'p_subject_id': subjectId,
         'p_topic_id': topicId,
@@ -67,21 +68,22 @@ class PracticeRemoteDataSourceImpl implements PracticeRemoteDataSource {
 
       return Map<String, dynamic>.from(response as Map);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      if (e is ServerException) rethrow;
+      handleException(e);
     }
   }
 
   @override
   Future<List<Map<String, dynamic>>> getTopics(String subjectId) async {
     try {
-      final response = await _client
+      final response = await client
           .from('topics')
           .select()
           .eq('subject_id', subjectId)
           .order('display_order', ascending: true);
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
@@ -92,21 +94,21 @@ class PracticeRemoteDataSourceImpl implements PracticeRemoteDataSource {
     int limit = 20,
   }) async {
     try {
-      var query = _client.from('questions').select().eq('subject_id', subjectId);
+      var query = client.from('questions').select().eq('subject_id', subjectId);
       if (topicId != null) {
         query = query.eq('topic_id', topicId);
       }
       final response = await query.limit(limit);
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<void> recordAttempts(List<Map<String, dynamic>> attempts) async {
     try {
-      final userId = _client.auth.currentUser?.id;
+      final userId = client.auth.currentUser?.id;
       if (userId == null) return;
       if (attempts.isEmpty) return;
 
@@ -115,52 +117,53 @@ class PracticeRemoteDataSourceImpl implements PracticeRemoteDataSource {
             'user_id': userId,
           }).toList();
 
-      await _client.from('practice_attempts').insert(attemptsToInsert);
+      await client.from('practice_attempts').insert(attemptsToInsert);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<Map<String, dynamic>> getPracticeDashboardData(String groupId) async {
     try {
-      final userId = _client.auth.currentUser?.id;
-      final response = await _client.rpc('get_practice_summary', params: {
+      final userId = client.auth.currentUser?.id;
+      final response = await client.rpc('get_practice_summary', params: {
         'target_user_id': userId,
         'target_group_id': groupId,
       });
       return Map<String, dynamic>.from(response as Map);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<bool> toggleBookmark(String questionId) async {
     try {
-      final userId = _client.auth.currentUser?.id;
+      final userId = client.auth.currentUser?.id;
       if (userId == null) {
         throw const ServerException(message: 'User not authenticated');
       }
 
-      final response = await _client.rpc('toggle_bookmark', params: {
+      final response = await client.rpc('toggle_bookmark', params: {
         'p_user_id': userId,
         'p_question_id': questionId,
       });
 
       return response as bool;
     } catch (e) {
-      throw ServerException(message: e.toString());
+      if (e is ServerException) rethrow;
+      handleException(e);
     }
   }
 
   @override
   Future<List<String>> getBookmarkedQuestionIds() async {
     try {
-      final userId = _client.auth.currentUser?.id;
+      final userId = client.auth.currentUser?.id;
       if (userId == null) return [];
 
-      final response = await _client
+      final response = await client
           .from('bookmarked_questions')
           .select('question_id')
           .eq('user_id', userId);
@@ -169,17 +172,17 @@ class PracticeRemoteDataSourceImpl implements PracticeRemoteDataSource {
           .map((row) => row['question_id'].toString())
           .toList();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<List<Map<String, dynamic>>> getBookmarkedQuestions() async {
     try {
-      final userId = _client.auth.currentUser?.id;
+      final userId = client.auth.currentUser?.id;
       if (userId == null) return [];
 
-      final response = await _client
+      final response = await client
           .from('bookmarked_questions')
           .select('question_id, questions!inner(*)')
           .eq('user_id', userId)
@@ -189,17 +192,17 @@ class PracticeRemoteDataSourceImpl implements PracticeRemoteDataSource {
           .map((row) => Map<String, dynamic>.from(row['questions'] as Map))
           .toList();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<List<String>> getAttemptedQuestionIds(String subjectId) async {
     try {
-      final userId = _client.auth.currentUser?.id;
+      final userId = client.auth.currentUser?.id;
       if (userId == null) return [];
 
-      final response = await _client
+      final response = await client
           .from('practice_attempts')
           .select('question_id')
           .eq('user_id', userId)
@@ -210,23 +213,24 @@ class PracticeRemoteDataSourceImpl implements PracticeRemoteDataSource {
           .toSet()
           .toList();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<void> submitReport(String questionId, String reportText) async {
     try {
-      final userId = _client.auth.currentUser?.id;
+      final userId = client.auth.currentUser?.id;
       if (userId == null) throw const ServerException(message: 'User not authenticated');
 
-      await _client.from('question_reports').insert({
+      await client.from('question_reports').insert({
         'user_id': userId,
         'question_id': questionId,
         'report_text': reportText,
       });
     } catch (e) {
-      throw ServerException(message: e.toString());
+      if (e is ServerException) rethrow;
+      handleException(e);
     }
   }
 }

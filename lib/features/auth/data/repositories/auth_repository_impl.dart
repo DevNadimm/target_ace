@@ -1,10 +1,11 @@
-﻿import 'package:fpdart/fpdart.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/core/services/notification_service.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
+import 'package:target_ace/core/utils/enums/error_type.dart';
 import 'package:target_ace/core/common/models/cached_user_model.dart';
 import 'package:target_ace/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:target_ace/features/auth/domain/entities/auth_result.dart';
@@ -71,7 +72,7 @@ class AuthRepositoryImpl implements AuthRepository {
         subscription: authSubscription,
       ));
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -88,7 +89,22 @@ class AuthRepositoryImpl implements AuthRepository {
       await AppPreferences.clearAll();
       return right(null);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
+    } catch (e) {
+      return left(Failure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> localLogout() async {
+    try {
+      // Run FCM unsubscribe asynchronously so a blocked Firebase request doesn't halt user logout.
+      notificationService.handleLogout().catchError((_) {});
+      
+      await remoteDataSource.clearLocalSession();
+      await UserLocalDataSource.clear();
+      await AppPreferences.clearAll();
+      return right(null);
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -99,7 +115,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final user = remoteDataSource.currentUser;
       if (user == null) {
-        return left(Failure(message: 'User is not logged in.'));
+        return left(Failure(message: 'User is not logged in.', type: ErrorType.auth));
       }
 
       final profile = await remoteDataSource.fetchProfile(user.id);
@@ -121,7 +137,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return right(null);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }

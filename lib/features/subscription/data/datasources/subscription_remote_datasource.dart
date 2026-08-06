@@ -1,5 +1,6 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/error/server_exception.dart';
+import 'package:target_ace/core/network/base_remote_datasource.dart';
 import 'package:target_ace/features/subscription/data/models/subscription_model.dart';
 
 abstract interface class SubscriptionRemoteDataSource {
@@ -10,28 +11,27 @@ abstract interface class SubscriptionRemoteDataSource {
   Future<void> activateFreeTrial({required String userId, required String userEmail});
 }
 
-class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
-  final SupabaseClient _client;
-  const SubscriptionRemoteDataSourceImpl(this._client);
+class SubscriptionRemoteDataSourceImpl extends BaseRemoteDataSource implements SubscriptionRemoteDataSource {
+  const SubscriptionRemoteDataSourceImpl(super.client);
 
   @override
   Future<bool> fetchIsPremium(String userId) async {
     try {
-      final response = await _client
+      final response = await client
           .from('profiles')
           .select('is_premium')
           .eq('id', userId)
           .single();
       return response['is_premium'] as bool? ?? false;
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<SubscriptionModel?> fetchLatestApprovedSubscription(String userId) async {
     try {
-      final response = await _client
+      final response = await client
           .from('subscriptions')
           .select()
           .eq('user_id', userId)
@@ -43,14 +43,14 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       if (list.isEmpty) return null;
       return SubscriptionModel.fromJson(list.first);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<SubscriptionModel?> fetchLatestSubscription(String userId) async {
     try {
-      final response = await _client
+      final response = await client
           .from('subscriptions')
           .select()
           .eq('user_id', userId)
@@ -61,14 +61,14 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       if (list.isEmpty) return null;
       return SubscriptionModel.fromJson(list.first);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<bool> checkTrialEligibility(String userId) async {
     try {
-      final profile = await _client
+      final profile = await client
           .from('profiles')
           .select('is_premium')
           .eq('id', userId)
@@ -77,7 +77,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       final isPremium = profile?['is_premium'] as bool? ?? false;
       if (isPremium) return false;
 
-      final hasTrial = await _client
+      final hasTrial = await client
           .from('subscriptions')
           .select('id')
           .eq('user_id', userId)
@@ -87,7 +87,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
 
       return hasTrial == null;
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
@@ -99,7 +99,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       final transactionId = 'FREE-$userShortId-$timestamp';
       final senderNumber = userEmail.isNotEmpty ? userEmail : 'FREE_TRIAL';
 
-      await _client.rpc('submit_purchase', params: {
+      await client.rpc('submit_purchase', params: {
         'p_user_id': userId,
         'p_plan_id': 'free_trial',
         'p_promo_code': null,
@@ -108,7 +108,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
         'p_transaction_id': transactionId,
       });
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 }

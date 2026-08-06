@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/config/colors.dart';
@@ -42,6 +42,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
   Future<void> _loadUserData() async {
     final name = await UserLocalDataSource.getUserName();
     final avatarUrl = await UserLocalDataSource.getUserAvatarUrl();
+    
     if (mounted) {
       setState(() {
         _userName = name.isNotEmpty ? name[0].toUpperCase() + name.substring(1) : 'User';

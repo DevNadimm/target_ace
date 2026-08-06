@@ -1,5 +1,6 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/error/server_exception.dart';
+import 'package:target_ace/core/network/base_remote_datasource.dart';
 import 'package:target_ace/features/battle/data/models/battle_model.dart';
 import 'package:target_ace/features/battle/data/models/battle_submission_model.dart';
 import 'package:target_ace/features/practice/data/models/question_model.dart';
@@ -51,16 +52,14 @@ abstract interface class BattleRemoteDataSource {
   Future<List<Map<String, dynamic>>> getLeaderboardCache(String examId);
 }
 
-class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
-  final SupabaseClient _client;
-
-  const BattleRemoteDataSourceImpl(this._client);
+class BattleRemoteDataSourceImpl extends BaseRemoteDataSource implements BattleRemoteDataSource {
+  const BattleRemoteDataSourceImpl(super.client);
 
   @override
   Future<List<BattleModel>> getBattles(String goalId, String groupId) async {
     try {
       final nowUtc = DateTime.now().toUtc();
-      final response = await _client
+      final response = await client
           .from('exams')
           .select()
           .eq('goal_id', goalId)
@@ -84,7 +83,7 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
 
       return list;
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
@@ -94,7 +93,7 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
     String userId,
   ) async {
     try {
-      final response = await _client
+      final response = await client
           .from('exam_submissions')
           .select('id, disqualified, score, answers')
           .eq('exam_id', examId)
@@ -105,14 +104,14 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
       if (response == null) return null;
       return BattleSubmissionModel.fromJson(response);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<List<QuestionModel>> fetchQuestions(String examId) async {
     try {
-      final response = await _client
+      final response = await client
           .from('exam_questions')
           .select('questions(*)')
           .eq('exam_id', examId);
@@ -126,7 +125,7 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
       }
       return questions;
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
@@ -161,7 +160,7 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
         'p_is_auto_submitted': isAutoSubmitted,
       };
 
-      await _client.rpc('submit_battle_exam_secure', params: rpcParams);
+      await client.rpc('submit_battle_exam_secure', params: rpcParams);
     } catch (e) {
       // Fallback to direct upsert if RPC is unavailable during deployment transition
       try {
@@ -193,11 +192,11 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
           payload['app_version'] = appVersion;
         }
 
-        await _client
+        await client
             .from('exam_submissions')
             .upsert(payload, onConflict: 'exam_id,user_id');
       } catch (fallbackError) {
-        throw ServerException(message: e.toString());
+        handleException(e);
       }
     }
   }
@@ -210,38 +209,38 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
   }) async {
     try {
       return await Future.wait([
-        _client.rpc(
+        client.rpc(
           'get_exam_results_and_leaderboard',
           params: {'target_exam_id': examId, 'target_user_id': userId},
         ),
-        _client.rpc(
+        client.rpc(
           'get_user_group_rank',
           params: {'target_user_id': userId, 'target_group_id': activeGroupId},
         ),
-        _client.rpc('get_user_global_rank', params: {'target_user_id': userId}),
+        client.rpc('get_user_global_rank', params: {'target_user_id': userId}),
       ]);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<List<Map<String, dynamic>>> getUserSubmissions(String userId) async {
     try {
-      final response = await _client.rpc(
+      final response = await client.rpc(
         'get_user_submissions_with_stats',
         params: {'p_user_id': userId},
       );
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<List<BattleModel>> getGroupBattles(String groupId) async {
     try {
-      final response = await _client
+      final response = await client
           .from('exams')
           .select()
           .eq('group_id', groupId)
@@ -251,7 +250,7 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
           .map((json) => BattleModel.fromJson(json))
           .toList();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
@@ -261,13 +260,13 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
     required String groupId,
   }) async {
     try {
-      final response = await _client.rpc(
+      final response = await client.rpc(
         'get_battle_arena_data',
         params: {'p_user_id': userId, 'p_group_id': groupId},
       );
       return Map<String, dynamic>.from(response as Map);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
@@ -277,13 +276,13 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
     String? userId,
   }) async {
     try {
-      final examQuery = _client
+      final examQuery = client
           .from('exams')
           .select()
           .eq('id', examId)
           .maybeSingle();
 
-      final leaderboardQuery = _client
+      final leaderboardQuery = client
           .from('leaderboards')
           .select(
             'score, time_taken_seconds, rank, user_id, profiles(name, avatar_url)',
@@ -297,7 +296,7 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
         examQuery,
         leaderboardQuery,
         if (userId != null && userId.isNotEmpty)
-          _client
+          client
               .from('leaderboards')
               .select(
                 'score, time_taken_seconds, rank, user_id, profiles(name, avatar_url)',
@@ -325,7 +324,7 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
             final score = (currentUserRecord['score'] as num).toDouble();
             final time = currentUserRecord['time_taken_seconds'] as int;
 
-            final countResponse = await _client
+            final countResponse = await client
                 .from('leaderboards')
                 .select('id')
                 .eq('exam_id', examId)
@@ -341,14 +340,14 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
 
       return [results[0], top50, currentUserRecord];
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<List<Map<String, dynamic>>> getLeaderboardCache(String examId) async {
     try {
-      final response = await _client
+      final response = await client
           .from('leaderboards')
           .select('*, profiles(name, avatar_url)')
           .eq('exam_id', examId)
@@ -356,7 +355,7 @@ class BattleRemoteDataSourceImpl implements BattleRemoteDataSource {
           .order('time_taken_seconds', ascending: true);
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 }

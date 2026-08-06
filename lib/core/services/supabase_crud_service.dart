@@ -1,12 +1,11 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/services/crud_service.dart';
+import 'package:target_ace/core/network/base_remote_datasource.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/utils/enums/error_type.dart';
 
-class SupabaseCrudService implements CrudService {
-  final SupabaseClient _client;
-
-  SupabaseCrudService(this._client);
+class SupabaseCrudService extends BaseRemoteDataSource implements CrudService {
+  SupabaseCrudService(super.client);
 
   @override
   Future<void> initAuthToken([String? token]) async {
@@ -20,7 +19,7 @@ class SupabaseCrudService implements CrudService {
 
   @override
   void clearAuthToken() {
-    _client.auth.signOut();
+    client.auth.signOut();
   }
 
   /// Maps REST API path/endpoints to database table names.
@@ -46,13 +45,10 @@ class SupabaseCrudService implements CrudService {
   }) async {
     try {
       final table = _toTableName(endpointOrTable);
-      final response = await _client.from(table).insert(data).select();
+      final response = await client.from(table).insert(data).select();
       return response;
     } catch (e) {
-      throw ServerException(
-        message: errorMessage ?? e.toString(),
-        type: ErrorType.server,
-      );
+      handleException(e, defaultMessage: errorMessage);
     }
   }
 
@@ -65,7 +61,7 @@ class SupabaseCrudService implements CrudService {
   }) async {
     try {
       final table = _toTableName(endpointOrTable);
-      var query = _client.from(table).select();
+      var query = client.from(table).select();
 
       if (queryParameters != null) {
         queryParameters.forEach((key, value) {
@@ -78,10 +74,7 @@ class SupabaseCrudService implements CrudService {
       final response = await query;
       return response;
     } catch (e) {
-      throw ServerException(
-        message: errorMessage ?? e.toString(),
-        type: ErrorType.server,
-      );
+      handleException(e, defaultMessage: errorMessage);
     }
   }
 
@@ -102,13 +95,10 @@ class SupabaseCrudService implements CrudService {
           type: ErrorType.unknown,
         );
       }
-      final response = await _client.from(table).update(data).eq('id', id).select();
+      final response = await client.from(table).update(data).eq('id', id).select();
       return response;
     } catch (e) {
-      throw ServerException(
-        message: errorMessage ?? e.toString(),
-        type: ErrorType.server,
-      );
+      handleException(e, defaultMessage: errorMessage);
     }
   }
 
@@ -128,13 +118,10 @@ class SupabaseCrudService implements CrudService {
           type: ErrorType.unknown,
         );
       }
-      final response = await _client.from(table).delete().eq('id', id).select();
+      final response = await client.from(table).delete().eq('id', id).select();
       return response;
     } catch (e) {
-      throw ServerException(
-        message: errorMessage ?? e.toString(),
-        type: ErrorType.server,
-      );
+      handleException(e, defaultMessage: errorMessage);
     }
   }
 }

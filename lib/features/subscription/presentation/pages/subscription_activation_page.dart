@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -19,9 +19,15 @@ import 'package:target_ace/core/utils/enums/message_type.dart';
 import 'package:target_ace/features/home/presentation/pages/main_navigation_page.dart';
 import 'package:target_ace/features/subscription/presentation/bloc/subscription_bloc.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
+import 'package:target_ace/core/services/service_locator.dart';
 
 class SubscriptionActivationPage extends StatefulWidget {
-  static Route route() => MaterialPageRoute(builder: (_) => const SubscriptionActivationPage());
+  static Route route() => MaterialPageRoute(
+    builder: (_) => BlocProvider(
+      create: (_) => sl<SubscriptionBloc>(),
+      child: const SubscriptionActivationPage(),
+    ),
+  );
 
   const SubscriptionActivationPage({super.key});
 

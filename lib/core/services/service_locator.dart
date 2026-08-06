@@ -17,6 +17,7 @@ import 'package:target_ace/features/auth/data/repositories/auth_repository_impl.
 import 'package:target_ace/features/auth/domain/repository/auth_repository.dart';
 import 'package:target_ace/features/auth/domain/usecases/do_google_sign_in.dart';
 import 'package:target_ace/features/auth/domain/usecases/do_logout.dart';
+import 'package:target_ace/features/auth/domain/usecases/do_local_logout.dart';
 import 'package:target_ace/features/auth/domain/usecases/do_sync_profile.dart';
 import 'package:target_ace/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:target_ace/features/launch/presentation/bloc/app_launch_bloc.dart';
@@ -166,13 +167,16 @@ void _initAuth() {
     // Use Cases
     ..registerFactory(() => DoGoogleSignIn(sl()))
     ..registerFactory(() => DoLogout(sl()))
+    ..registerFactory(() => DoLocalLogout(sl()))
     ..registerFactory(() => DoSyncProfile(sl()))
     // Bloc
     ..registerLazySingleton(
       () => AuthBloc(
         doGoogleSignIn: sl(),
         doLogout: sl(),
+        doLocalLogout: sl(),
         appUserCubit: sl(),
+        supabaseClient: sl(),
       ),
     );
 }

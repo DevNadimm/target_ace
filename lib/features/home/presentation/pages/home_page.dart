@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/services/service_locator.dart';
@@ -26,8 +26,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String _userGoal = '';
+  bool _isPremiumCached = false;
   StreamSubscription<void>? _realtimeSubscription;
   Timer? _statusTimer;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -40,6 +42,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _statusTimer?.cancel();
     _realtimeSubscription?.cancel();
     super.dispose();
@@ -56,23 +59,30 @@ class _HomePageState extends State<HomePage> {
   void _setupRealtimeSubscriptions() {
     _realtimeSubscription = sl<HomeRepository>().homeRealtimeChanges
         .listen((_) {
-          if (mounted) {
-            context.read<HomeBloc>().add(
-              HomeFetchRequested(isSilent: true),
-            );
-            _loadUserGoal();
+          if (_debounceTimer?.isActive ?? false) {
+            _debounceTimer!.cancel();
           }
+          _debounceTimer = Timer(const Duration(seconds: 5), () {
+            if (mounted) {
+              context.read<HomeBloc>().add(
+                HomeFetchRequested(isSilent: true),
+              );
+              _loadUserGoal();
+            }
+          });
         });
   }
 
   Future<void> _loadUserGoal() async {
     final activeGroup = await UserLocalDataSource.getUserGroupTitle();
     final goal = await UserLocalDataSource.getUserGoal();
+    final subStatus = await UserLocalDataSource.getSubscriptionStatus();
     if (mounted) {
       setState(() {
         _userGoal = (activeGroup != null && activeGroup.isNotEmpty)
             ? activeGroup
             : _formatGoal(goal);
+        _isPremiumCached = subStatus == 'active' || subStatus == 'trial';
       });
     }
   }
@@ -95,10 +105,10 @@ class _HomePageState extends State<HomePage> {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
         int unreadCount = 0;
-        bool isPremium = false;
+        bool isPremium = _isPremiumCached; // Use cached value by default (for offline/loading)
         if (state is HomeSuccess) {
           unreadCount = state.homeModel.stats.unreadNotificationsCount;
-          isPremium = state.homeModel.isPremium;
+          isPremium = state.homeModel.isPremium; // Override with fresh DB data if available
         }
 
         return Scaffold(

@@ -1,9 +1,10 @@
-﻿import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/config/app_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:target_ace/core/error/server_exception.dart';
+import 'package:target_ace/core/network/base_remote_datasource.dart';
 import 'package:target_ace/features/auth/data/models/user_model.dart';
 import 'package:target_ace/features/subscription/data/models/subscription_model.dart';
 import 'package:target_ace/features/subscription/data/datasources/subscription_remote_datasource.dart';
@@ -12,28 +13,33 @@ abstract interface class AuthRemoteDataSource {
   supabase.User? get currentUser;
   Session? get currentSession;
   Future<UserModel> googleSignIn();
+  
+  /// Performs full remote logout (calls server)
   Future<void> logout();
+  
+  /// Performs local cleanup only (no remote call to Supabase)
+  Future<void> clearLocalSession();
+  
   Future<Map<String, dynamic>> fetchProfile(String userId);
   Future<SubscriptionModel?> fetchSubscription();
   Future<void> saveFcmToken(String userId);
 }
 
-class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final SupabaseClient _supabaseClient;
+class AuthRemoteDataSourceImpl extends BaseRemoteDataSource implements AuthRemoteDataSource {
   final GoogleSignIn _googleSignIn;
   final SubscriptionRemoteDataSource _subscriptionRemoteDataSource;
 
   const AuthRemoteDataSourceImpl(
-    this._supabaseClient,
+    super.client,
     this._googleSignIn,
     this._subscriptionRemoteDataSource,
   );
 
   @override
-  supabase.User? get currentUser => _supabaseClient.auth.currentUser;
+  supabase.User? get currentUser => client.auth.currentUser;
 
   @override
-  Session? get currentSession => _supabaseClient.auth.currentSession;
+  Session? get currentSession => client.auth.currentSession;
 
   @override
   Future<UserModel> googleSignIn() async {
@@ -56,14 +62,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw ServerException(message: 'Google Sign-In failed. Please try again: $e');
       }
 
-
-
       final idToken = googleUser.authentication.idToken;
       if (idToken == null) {
         throw const ServerException(message: 'Could not retrieve account credentials.');
       }
 
-      final response = await _supabaseClient.auth.signInWithIdToken(
+      final response = await client.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
       );
@@ -92,18 +96,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> logout() async {
     try {
-      await _supabaseClient.auth.signOut();
-      await _googleSignIn.signOut();
-      await _googleSignIn.disconnect().catchError((_) => null);
+      await client.auth.signOut();
+      await clearLocalSession();
     } catch (e) {
       throw ServerException(message: e.toString());
     }
   }
 
   @override
+  Future<void> clearLocalSession() async {
+    try {
+      await _googleSignIn.signOut();
+      await _googleSignIn.disconnect().catchError((_) => null);
+    } catch (_) {}
+  }
+
+  @override
   Future<Map<String, dynamic>> fetchProfile(String userId) async {
     try {
-      final response = await _supabaseClient.rpc(
+      final response = await client.rpc(
         'get_user_profile_with_subscription',
         params: {'p_user_id': userId},
       );
@@ -115,14 +126,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
       return profile;
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<SubscriptionModel?> fetchSubscription() async {
     try {
-      final userId = _supabaseClient.auth.currentUser?.id;
+      final userId = client.auth.currentUser?.id;
       if (userId == null) return SubscriptionModel(status: 'none');
 
       final isPremium = await _subscriptionRemoteDataSource.fetchIsPremium(userId);
@@ -155,7 +166,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       return SubscriptionModel(status: 'none');
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
@@ -164,12 +175,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
-        await _supabaseClient.from('user_device_tokens').upsert({
+        await client.from('user_device_tokens').upsert({
           'user_id': userId,
           'device_token': token,
           'last_seen_at': DateTime.now().toUtc().toIso8601String(),
         }, onConflict: 'user_id,device_token');
       }
-    } catch (_) {}
+    } catch (e) {
+      handleException(e);
+    }
   }
 }

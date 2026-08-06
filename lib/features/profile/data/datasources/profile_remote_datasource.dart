@@ -1,5 +1,6 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/error/server_exception.dart';
+import 'package:target_ace/core/network/base_remote_datasource.dart';
 
 abstract interface class ProfileRemoteDataSource {
   Future<List<Map<String, dynamic>>> getOnboardingGoals();
@@ -15,52 +16,51 @@ abstract interface class ProfileRemoteDataSource {
   Future<bool> checkPhoneUnique(String phone);
 }
 
-class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
-  final SupabaseClient _client;
-  const ProfileRemoteDataSourceImpl(this._client);
+class ProfileRemoteDataSourceImpl extends BaseRemoteDataSource implements ProfileRemoteDataSource {
+  const ProfileRemoteDataSourceImpl(super.client);
 
   @override
   Future<List<Map<String, dynamic>>> getOnboardingGoals() async {
     try {
-      final response = await _client
+      final response = await client
           .from('onboarding_goals')
           .select('*, battle_groups(*)')
           .order('created_at', ascending: true);
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<List<Map<String, dynamic>>> getBattleGroups(String goalId) async {
     try {
-      final response = await _client
+      final response = await client
           .from('battle_groups')
           .select()
           .eq('goal_id', goalId)
           .order('created_at', ascending: true);
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<void> updateAuthUserMetadata(Map<String, dynamic> metadata) async {
     try {
-      await _client.auth.updateUser(
+      await client.auth.updateUser(
         UserAttributes(data: metadata),
       );
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<Map<String, dynamic>?> fetchLatestApprovedSubscription(String userId) async {
     try {
-      final res = await _client
+      final res = await client
           .from('subscriptions')
           .select()
           .eq('user_id', userId)
@@ -71,91 +71,91 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       if (list.isEmpty) return null;
       return list.first;
     } catch (e) {
-      return null;
+      return null; // Silent catch as per original logic
     }
   }
 
   @override
   Future<Map<String, dynamic>?> fetchProfileSingle(String userId) async {
     try {
-      return await _client.from('profiles').select().eq('id', userId).maybeSingle();
+      return await client.from('profiles').select().eq('id', userId).maybeSingle();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<Map<String, dynamic>?> fetchProfileWithSubscription(String userId) async {
     try {
-      final response = await _client.rpc(
+      final response = await client.rpc(
         'get_user_profile_with_subscription',
         params: {'p_user_id': userId},
       );
       return Map<String, dynamic>.from(response as Map);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<void> upsertProfile(Map<String, dynamic> profileData) async {
     try {
-      await _client.from('profiles').upsert(profileData);
+      await client.from('profiles').upsert(profileData);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<void> deactivateActiveMemberships(String userId) async {
     try {
-      await _client
+      await client
           .from('group_memberships')
           .update({'is_active': false})
           .eq('user_id', userId)
           .eq('is_active', true);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<Map<String, dynamic>> insertGroupMembership(Map<String, dynamic> membershipData) async {
     try {
-      return await _client
+      return await client
           .from('group_memberships')
           .insert(membershipData)
           .select()
           .single();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<Map<String, dynamic>> completeProfileSetup(Map<String, dynamic> params) async {
     try {
-      final response = await _client.rpc(
+      final response = await client.rpc(
         'complete_profile_setup',
         params: params,
       );
       return Map<String, dynamic>.from(response as Map);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 
   @override
   Future<bool> checkPhoneUnique(String phone) async {
     try {
-      final response = await _client
+      final response = await client
           .from('profiles')
           .select('id')
           .eq('phone', phone)
           .maybeSingle();
       return response == null;
     } catch (e) {
-      throw ServerException(message: e.toString());
+      handleException(e);
     }
   }
 }

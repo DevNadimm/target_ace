@@ -1,4 +1,4 @@
-﻿import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
@@ -6,6 +6,7 @@ import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
 import 'package:target_ace/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:target_ace/features/auth/domain/repository/auth_repository.dart';
+import 'package:target_ace/core/utils/enums/error_type.dart';
 import 'package:target_ace/features/subscription/domain/usecases/check_trial_eligibility.dart';
 
 part 'app_launch_event.dart';
@@ -149,17 +150,17 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
   // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Internal State Machine Steps
   // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ————————————————————————————————————————————————
 
   /// Syncs profile from Supabase DB. Falls back to cached data if offline.
   Future<void> _syncProfileWithFallback(Emitter<AppLaunchState> emit) async {
     final isProfileLocallyCached = await UserLocalDataSource.isProfileComplete();
 
     if (isProfileLocallyCached) {
-      // Profile exists locally â€” sync in background, don't block the user.
+      // Profile exists locally — sync in background, don't block the user.
       _authRepository.syncProfile().then((either) {
         either.fold(
-          (failure) => debugPrint(
-              'AppLaunchBloc: Background sync failed: ${failure.message}'),
+          (failure) => debugPrint('AppLaunchBloc: Background sync failed: ${failure.message}'),
           (_) => debugPrint(
               'AppLaunchBloc: Background sync completed successfully.'),
         );
@@ -167,7 +168,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
         debugPrint('AppLaunchBloc: Background sync unhandled error: $error');
       });
     } else {
-      // No local data â€” must sync now.
+      // No local data — must sync now.
       final isOnline = await _connectionChecker.isConnected;
       if (isOnline) {
         await _authRepository.syncProfile();

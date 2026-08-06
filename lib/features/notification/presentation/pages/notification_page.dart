@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart' hide BackButton;
+import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/back_button.dart';
@@ -13,9 +13,15 @@ import 'package:target_ace/features/notification/presentation/bloc/notification_
 import 'package:target_ace/features/notification/presentation/pages/notification_detail_page.dart';
 import 'package:target_ace/features/notification/presentation/widgets/notification_card.dart';
 import 'package:target_ace/features/notification/presentation/widgets/notification_options_bottom_sheet.dart';
+import 'package:target_ace/core/services/service_locator.dart';
 
 class NotificationPage extends StatefulWidget {
-  static Route route() => MaterialPageRoute(builder: (_) => const NotificationPage());
+  static Route route() => MaterialPageRoute(
+    builder: (_) => BlocProvider(
+      create: (_) => sl<NotificationBloc>(),
+      child: const NotificationPage(),
+    ),
+  );
 
   const NotificationPage({super.key});
 
@@ -166,7 +172,10 @@ class _NotificationPageState extends State<NotificationPage> {
                         }
                         Navigator.push(
                           context,
-                          NotificationDetailPage.route(item),
+                          NotificationDetailPage.route(
+                            item,
+                            context.read<NotificationBloc>(),
+                          ),
                         );
                       },
                     );

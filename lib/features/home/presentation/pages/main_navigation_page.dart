@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:target_ace/core/components/custom_cached_image.dart';
@@ -11,9 +11,20 @@ import 'package:target_ace/features/home/presentation/pages/leaderboard_page.dar
 import 'package:target_ace/features/practice/presentation/pages/practice_dashboard_page.dart';
 import 'package:target_ace/features/profile/presentation/pages/profile_page.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:target_ace/core/services/service_locator.dart';
+import 'package:target_ace/features/home/presentation/bloc/home_bloc.dart';
+import 'package:target_ace/features/battle/presentation/bloc/arena/battle_arena_bloc.dart';
 class MainNavigationPage extends StatefulWidget {
-  static Route route() => MaterialPageRoute(builder: (_) => const MainNavigationPage());
+  static Route route() => MaterialPageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => sl<HomeBloc>()),
+            BlocProvider(create: (_) => sl<BattleArenaBloc>()),
+          ],
+          child: const MainNavigationPage(),
+        ),
+      );
 
   const MainNavigationPage({super.key});
 

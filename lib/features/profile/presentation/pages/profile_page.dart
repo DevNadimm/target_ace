@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart' hide BackButton;
+import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -61,16 +61,7 @@ class _ProfilePageViewState extends State<ProfilePageView> {
         child: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             debugPrint("ProfilePageView AuthBloc state changed: $state");
-            if (state is AuthInitial || state is LogoutSuccess) {
-              debugPrint("Navigating to LaunchPage via navigatorKey");
-              // Reset the launch coordinator state machine without splash delay
-              sl<AppLaunchBloc>().add(const AppLaunchStarted(skipDelay: true));
-              
-              navigatorKey.currentState?.pushAndRemoveUntil(
-                LaunchPage.route(),
-                (route) => false,
-              );
-            } else if (state is AuthFailure) {
+            if (state is AuthFailure) {
               debugPrint("Logout failed: ${state.message}");
               AppNotifier.showSnackBar(context, state.message ?? 'An error occurred', type: MessageType.error);
             }
