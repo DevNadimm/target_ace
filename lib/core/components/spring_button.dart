@@ -147,7 +147,7 @@ class _SpringButtonState extends State<SpringButton> {
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: resolvedTextColor,
-                    letterSpacing: 1.0,
+                    letterSpacing: 0.2,
                   ),
                   child: widget.child,
                 ),
