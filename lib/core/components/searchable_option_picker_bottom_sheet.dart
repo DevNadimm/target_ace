@@ -112,7 +112,7 @@ class _SearchableOptionPickerBottomSheetState extends State<SearchableOptionPick
                             ? EmptyStateWidget(
                                 isCenter: false,
                                 icon: Image.asset(
-                                  Assets.noContent,
+                                  Assets.emptyState,
                                   height: 90,
                                   width: 90,
                                 ),
@@ -122,7 +122,7 @@ class _SearchableOptionPickerBottomSheetState extends State<SearchableOptionPick
                             : EmptyStateWidget(
                                 isCenter: false,
                                 icon: Image.asset(
-                                  Assets.noContent,
+                                  Assets.emptyState,
                                   height: 90,
                                   width: 90,
                                 ),

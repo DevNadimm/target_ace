@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class AppColors {
   AppColors._();
@@ -20,6 +20,9 @@ class AppColors {
   static const Color primaryLight2 = Color(0xFF2C1B05);
   static const Color primaryDark = Color(0xFFD67D00);
   static const Color primary10 = Color(0xFF211505);
+  
+  /// Podium Colors
+  static const Color bronze = Color(0xFFCD7F32);
 
   /// Typography
   static const Color textPrimary = Color(0xFFF7F7F7);

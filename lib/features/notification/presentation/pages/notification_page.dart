@@ -4,6 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/back_button.dart';
 import 'package:target_ace/core/components/custom_icon_button.dart';
 import 'package:target_ace/core/config/colors.dart';
+import 'package:target_ace/core/config/messages.dart';
 import 'package:target_ace/core/shared/widgets/empty_state_widget.dart';
 import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
@@ -134,8 +135,10 @@ class _NotificationPageState extends State<NotificationPage> {
                     slivers: [
                       SliverFillRemaining(
                         hasScrollBody: false,
-                        child: Center(
-                          child: EmptyStateWidget(),
+                        child: EmptyStateWidget(
+                          isCenter: true,
+                          title: AppMessages.emptyNotificationsTitle,
+                          message: AppMessages.emptyNotificationsMessage,
                         ),
                       ),
                     ],

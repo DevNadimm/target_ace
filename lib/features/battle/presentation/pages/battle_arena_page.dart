@@ -16,8 +16,7 @@ import 'package:target_ace/features/battle/presentation/widgets/arena/upcoming_b
 import 'package:target_ace/features/battle/presentation/widgets/arena/featured_battle_card.dart';
 
 class BattleArenaPage extends StatefulWidget {
-  static Route route() =>
-      MaterialPageRoute(builder: (_) => const BattleArenaPage());
+  static Route route() => MaterialPageRoute(builder: (_) => const BattleArenaPage());
 
   const BattleArenaPage({super.key});
 

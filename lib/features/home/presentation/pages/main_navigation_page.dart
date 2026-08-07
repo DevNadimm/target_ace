@@ -140,7 +140,7 @@ class MainNavigationPageState extends State<MainNavigationPage> {
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -186,61 +186,69 @@ class MainNavigationPageState extends State<MainNavigationPage> {
     final isSelected = _currentIndex == index;
     final color = isSelected ? AppColors.primary : AppColors.textLight;
 
-    return GestureDetector(
-      onTap: () {
-        if (_currentIndex != index) {
-          _buildPage(index);
-          setState(() {
-            _currentIndex = index;
-          });
-        }
-      },
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        child: index == 4
-            ? Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.textLight.withValues(alpha: 0.4),
-                    width: isSelected ? 2.2 : 1.2,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: _avatarUrl.isNotEmpty
-                        ? CustomCachedImage(
-                            imageUrl: _avatarUrl,
-                            width: 24,
-                            height: 24,
-                            borderRadius: 12,
-                          )
-                        : SvgPicture.asset(
-                            isSelected ? solidIcon : strokeIcon,
-                            colorFilter: ColorFilter.mode(
-                              color,
-                              BlendMode.srcIn,
-                            ),
-                            width: 18,
-                            height: 18,
-                            fit: BoxFit.contain,
-                          ),
-                  ),
-                ),
-              )
-            : SvgPicture.asset(
-                isSelected ? solidIcon : strokeIcon,
-                colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                width: 24,
-                height: 24,
-                fit: BoxFit.contain,
-              ),
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          if (_currentIndex != index) {
+            _buildPage(index);
+            setState(() {
+              _currentIndex = index;
+            });
+          }
+        },
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          color: Colors.transparent,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Center(
+            heightFactor: 1.0,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              child: index == 4
+                  ? Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isSelected ? AppColors.primary : AppColors.textLight.withValues(alpha: 0.4),
+                          width: isSelected ? 2.2 : 1.2,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: _avatarUrl.isNotEmpty
+                              ? CustomCachedImage(
+                                  imageUrl: _avatarUrl,
+                                  width: 24,
+                                  height: 24,
+                                  borderRadius: 12,
+                                )
+                              : SvgPicture.asset(
+                                  isSelected ? solidIcon : strokeIcon,
+                                  colorFilter: ColorFilter.mode(
+                                    color,
+                                    BlendMode.srcIn,
+                                  ),
+                                  width: 18,
+                                  height: 18,
+                                  fit: BoxFit.contain,
+                                ),
+                        ),
+                      ),
+                    )
+                  : SvgPicture.asset(
+                      isSelected ? solidIcon : strokeIcon,
+                      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                    ),
+            ),
+          ),
+        ),
       ),
     );
   }

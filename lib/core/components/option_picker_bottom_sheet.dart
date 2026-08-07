@@ -62,7 +62,7 @@ class OptionPickerBottomSheet extends StatelessWidget {
               child: EmptyStateWidget(
                 isCenter: false,
                 icon: Image.asset(
-                  Assets.noContent,
+                  Assets.emptyState,
                   height: 90,
                   width: 90,
                 ),

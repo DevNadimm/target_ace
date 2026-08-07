@@ -159,4 +159,3 @@ class _SpringButtonState extends State<SpringButton> {
     );
   }
 }
-

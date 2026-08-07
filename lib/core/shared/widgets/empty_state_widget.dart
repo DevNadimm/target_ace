@@ -1,8 +1,8 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/messages.dart';
+import 'package:target_ace/core/config/typography.dart';
 
 class EmptyStateWidget extends StatelessWidget {
   final String? title;
@@ -30,22 +30,22 @@ class EmptyStateWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           icon ?? _loadEmptyImage(),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
           Text(
             title ?? AppMessages.emptyTitle,
-            style: GoogleFonts.poppins(
+            style: AppFonts.heading(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.textLight,
+              color: AppColors.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 14),
           Text(
             message ?? AppMessages.emptyMessage,
-            style: GoogleFonts.poppins(
+            style: AppFonts.body(
               fontSize: 14,
-              color: AppColors.textLight,
+              color: AppColors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -55,6 +55,9 @@ class EmptyStateWidget extends StatelessWidget {
   }
 
   Widget _loadEmptyImage() {
-    return Image.asset(Assets.noContent, height: 100, width: 100);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 60),
+      child: Image.asset(Assets.emptyState, width: double.infinity),
+    );
   }
 }

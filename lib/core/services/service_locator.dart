@@ -74,6 +74,7 @@ import 'package:target_ace/features/battle/domain/usecases/get_battle_leaderboar
 import 'package:target_ace/features/battle/domain/usecases/get_leaderboard_cache.dart';
 import 'package:target_ace/features/battle/presentation/bloc/battle/battle_bloc.dart';
 import 'package:target_ace/features/battle/presentation/bloc/arena/battle_arena_bloc.dart';
+import 'package:target_ace/features/battle/presentation/bloc/history/battle_history_bloc.dart';
 import 'package:target_ace/features/home/data/datasources/home_remote_datasource.dart';
 import 'package:target_ace/features/home/data/repositories/home_repository_impl.dart';
 import 'package:target_ace/features/home/domain/repository/home_repository.dart';
@@ -337,6 +338,12 @@ void _initBattle() {
     ..registerFactory(
       () => BattleArenaBloc(
         getBattleArenaData: sl(),
+      ),
+    )
+    ..registerFactory(
+      () => BattleHistoryBloc(
+        getUserSubmissions: sl(),
+        getBattleQuestions: sl(),
       ),
     );
 }

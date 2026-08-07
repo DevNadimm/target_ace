@@ -16,6 +16,9 @@ class AppMessages {
   static const String emptyProfileDataTitle = "Profile Data Missing";
   static const String emptyProfileDataMessage = "Some information is missing in your profile. Please update your profile to continue.";
 
+  static const String emptyBattleHistoryTitle = "No Completed Exams";
+  static const String emptyBattleHistoryMessage = "Participate in live battles to see your performance history and detailed reviews here!";
+
   // ------------------- GENERAL SUCCESS / ERROR -------------------
   static const String successTitle = "Success";
   static const String successMessage = "Your request was completed successfully.";

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/components/custom_cached_image.dart';
@@ -82,7 +82,7 @@ class HomePodiumSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.15),
+                    color: AppColors.textSecondary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -90,7 +90,7 @@ class HomePodiumSection extends StatelessWidget {
                     style: AppFonts.body(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryLight,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -148,7 +148,7 @@ class HomePodiumSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.labelGreen.withValues(alpha: 0.15),
+                    color: AppColors.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -156,7 +156,7 @@ class HomePodiumSection extends StatelessWidget {
                     style: AppFonts.body(
                       fontSize: 11.5,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.labelGreen,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -214,7 +214,7 @@ class HomePodiumSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.15),
+                    color: AppColors.bronze.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -222,14 +222,14 @@ class HomePodiumSection extends StatelessWidget {
                     style: AppFonts.body(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.accent,
+                      color: AppColors.bronze,
                     ),
                   ),
                 ),
               ] else
                 const SizedBox(height: 118),
               const SizedBox(height: 16),
-              _build3DHomePodiumSectionBlock("3rd", 60, const Color(0xFFCD7F32)),
+              _build3DHomePodiumSectionBlock("3rd", 60, AppColors.bronze),
             ],
           ),
         ),
@@ -285,7 +285,15 @@ class HomePodiumSection extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 6),
         decoration: BoxDecoration(
-          color: AppColors.cardAlt,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.lerp(AppColors.cardAlt, accentColor, 0.2) ?? AppColors.cardAlt,
+              AppColors.cardAlt,
+              Color.lerp(AppColors.cardAlt, accentColor, 0.05) ?? AppColors.cardAlt,
+            ],
+          ),
           borderRadius: BorderRadius.circular(11),
           border: Border.fromBorderSide(
             BorderSide(

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/app_list_tile.dart';
 import 'package:target_ace/core/components/custom_container.dart';
@@ -41,7 +41,7 @@ class BattleHistorySection extends StatelessWidget {
               trailingFontWeight: FontWeight.w600,
               onTrailingTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const BattleHistoryPage()),
+                BattleHistoryPage.route(),
               ),
             ),
           ),
