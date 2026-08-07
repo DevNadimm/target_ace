@@ -1,4 +1,4 @@
-﻿part of 'practice_session_cubit.dart';
+part of 'practice_session_cubit.dart';
 
 enum PracticeSessionStatus { initial, loading, loaded, failure }
 
@@ -12,6 +12,7 @@ class PracticeSessionState {
   final Set<String> bookmarkedIds;
   final Map<String, bool> previousAttempts;
   final String? errorMessage;
+  final ErrorType? errorType;
 
   const PracticeSessionState({
     this.status = PracticeSessionStatus.initial,
@@ -23,6 +24,7 @@ class PracticeSessionState {
     this.bookmarkedIds = const {},
     this.previousAttempts = const {},
     this.errorMessage,
+    this.errorType,
   });
 
   bool isBookmarked(String questionId) => bookmarkedIds.contains(questionId);
@@ -42,6 +44,7 @@ class PracticeSessionState {
     Set<String>? bookmarkedIds,
     Map<String, bool>? previousAttempts,
     String? errorMessage,
+    ErrorType? errorType,
   }) {
     return PracticeSessionState(
       status: status ?? this.status,
@@ -53,6 +56,7 @@ class PracticeSessionState {
       bookmarkedIds: bookmarkedIds ?? this.bookmarkedIds,
       previousAttempts: previousAttempts ?? this.previousAttempts,
       errorMessage: errorMessage,
+      errorType: errorType ?? this.errorType,
     );
   }
 }

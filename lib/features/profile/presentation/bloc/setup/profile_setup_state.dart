@@ -1,4 +1,4 @@
-﻿part of 'profile_setup_cubit.dart';
+part of 'profile_setup_cubit.dart';
 
 sealed class ProfileSetupState {
   const ProfileSetupState();
@@ -29,5 +29,6 @@ class ProfileSetupSuccess extends ProfileSetupState {
 
 class ProfileSetupFailure extends ProfileSetupState {
   final String error;
-  const ProfileSetupFailure(this.error);
+  final ErrorType? errorType;
+  const ProfileSetupFailure(this.error, [this.errorType]);
 }

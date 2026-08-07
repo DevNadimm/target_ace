@@ -69,11 +69,13 @@ lib/
 │   │   ├── messages.dart           # User-facing text strings
 │   │   └── typography.dart         # Mandatory AppFonts typography wrapper
 │   ├── error/
-│   │   ├── failure.dart            # Domain Failure class
-│   │   ├── failures.dart           # Failure subclasses (ServerFailure, NetworkFailure)
+│   │   ├── failure.dart            # Domain Failure class with ErrorType enum
 │   │   └── server_exception.dart   # Data layer Exception class
 │   ├── logger/
 │   │   └── app_logger.dart         # AppLogger utility wrapper
+│   ├── network/
+│   │   ├── base_remote_datasource.dart # Base class handling Supabase exceptions
+│   │   └── connection_checker.dart     # Interface for internet connection checks
 │   ├── services/
 │   │   ├── service_locator.dart    # GetIt Dependency Injection container
 │   │   └── user_local_datasource.dart # SharedPreferences JSON blob cache
@@ -81,6 +83,8 @@ lib/
 │   │   ├── pages/                  # Shared screens (UnderDevelopmentPage)
 │   │   ├── themes/                 # ThemeData, Button themes, Input decoration
 │   │   └── widgets/                # AppNotifier, Loader, ErrorStateWidget, etc.
+│   ├── usecase/
+│   │   └── usecase.dart            # Abstract base UseCase class
 │   └── utils/
 │       ├── enums/                  # ErrorType, MessageType, etc.
 │       └── helpers/                # DateFormatter, DeviceInfoHelper, GreetingHelper

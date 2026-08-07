@@ -45,8 +45,7 @@ class ConnectionCheckerImpl implements ConnectionChecker {
 
     // Network interface exists â€” verify actual internet access
     try {
-      final result = await InternetAddress.lookup('google.com')
-          .timeout(const Duration(seconds: 3));
+      final result = await InternetAddress.lookup('google.com').timeout(const Duration(seconds: 3));
       return result.isNotEmpty && result.first.rawAddress.isNotEmpty;
     } catch (_) {
       return false;

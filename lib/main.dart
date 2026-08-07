@@ -16,7 +16,7 @@ void main() async {
 
   await Supabase.initialize(
     url: AppConfig.supabaseUrl,
-    anonKey: AppConfig.supabaseAnonKey, // ignore: deprecated_member_use
+    anonKey: AppConfig.supabaseAnonKey,
     httpClient: SupabaseLoggingClient(),
   );
 

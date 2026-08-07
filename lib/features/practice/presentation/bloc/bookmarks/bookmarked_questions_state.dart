@@ -1,4 +1,4 @@
-﻿part of 'bookmarked_questions_cubit.dart';
+part of 'bookmarked_questions_cubit.dart';
 
 abstract class BookmarkedQuestionsState {
   const BookmarkedQuestionsState();
@@ -34,5 +34,6 @@ class BookmarkedQuestionsLoaded extends BookmarkedQuestionsState {
 
 class BookmarkedQuestionsError extends BookmarkedQuestionsState {
   final String message;
-  const BookmarkedQuestionsError(this.message);
+  final ErrorType? errorType;
+  const BookmarkedQuestionsError(this.message, [this.errorType]);
 }

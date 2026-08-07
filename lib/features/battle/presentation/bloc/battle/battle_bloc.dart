@@ -1,4 +1,5 @@
-﻿import 'dart:async';
+import 'package:target_ace/core/utils/enums/error_type.dart';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -71,7 +72,7 @@ class BattleBloc extends Bloc<BattleEvent, BattleState> {
       
       final examsList = examRes.fold(
         (failure) {
-          emit(BattleError(failure.message));
+          emit(BattleError(failure.message, failure.type));
           return <BattleEntity>[];
         },
         (list) => list,
@@ -111,7 +112,7 @@ class BattleBloc extends Bloc<BattleEvent, BattleState> {
       bool isSubCheckFailed = false;
       final submissionCheck = subCheckRes.fold(
         (failure) {
-          emit(BattleError(failure.message));
+          emit(BattleError(failure.message, failure.type));
           isSubCheckFailed = true;
           return null;
         },
@@ -125,7 +126,7 @@ class BattleBloc extends Bloc<BattleEvent, BattleState> {
       bool isQuestionsFailed = false;
       final questions = questionRes.fold(
         (failure) {
-          emit(BattleError(failure.message));
+          emit(BattleError(failure.message, failure.type));
           isQuestionsFailed = true;
           return <QuestionEntity>[];
         },

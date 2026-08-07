@@ -1,4 +1,4 @@
-﻿import 'package:fpdart/fpdart.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
@@ -11,6 +11,7 @@ import 'package:target_ace/features/profile/domain/entities/onboarding_goal_enti
 import 'package:target_ace/features/profile/domain/entities/battle_group_entity.dart';
 import 'package:target_ace/features/profile/data/models/onboarding_goal_model.dart';
 import 'package:target_ace/features/profile/data/models/battle_group_model.dart';
+import 'package:target_ace/core/utils/enums/error_type.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource remoteDataSource;
@@ -22,13 +23,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<Either<Failure, List<OnboardingGoalEntity>>> getOnboardingGoals() async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final goalsData = await remoteDataSource.getOnboardingGoals();
       final goals = goalsData.map((e) => OnboardingGoalModel.fromJson(e)).toList();
       return right(goals);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     }
   }
 
@@ -36,13 +37,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<Either<Failure, List<BattleGroupEntity>>> getBattleGroups(String goalId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final groupsData = await remoteDataSource.getBattleGroups(goalId);
       final groups = groupsData.map((e) => BattleGroupModel.fromJson(e)).toList();
       return right(groups);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     }
   }
 
@@ -62,7 +63,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
 
       // 1. Build metadata map for Supabase Auth (only include non-empty values)
@@ -121,7 +122,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
       return right(lockedUntil);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     }
   }
 
@@ -136,7 +137,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       await remoteDataSource.upsertProfile({
         'goal': goalId,
@@ -153,7 +154,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       });
       return right(membership['locked_until'] as String);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     }
   }
 
@@ -202,12 +203,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<Either<Failure, bool>> checkPhoneUnique(String phone) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final isUnique = await remoteDataSource.checkPhoneUnique(phone);
       return right(isUnique);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     }
   }
 }

@@ -113,7 +113,10 @@ class _NotificationPageState extends State<NotificationPage> {
             }
 
             if (state is NotificationError) {
-              return ErrorStateWidget();
+              return ErrorStateWidget(
+                message: state.message,
+                errorType: state.errorType,
+              );
             }
 
             if (state is NotificationLoaded) {

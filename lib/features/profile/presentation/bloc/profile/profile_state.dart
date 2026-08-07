@@ -1,4 +1,4 @@
-﻿part of 'profile_cubit.dart';
+part of 'profile_cubit.dart';
 
 sealed class ProfileState {
   const ProfileState();
@@ -19,5 +19,6 @@ class ProfileLoaded extends ProfileState {
 
 class ProfileFailure extends ProfileState {
   final String error;
-  const ProfileFailure(this.error);
+  final ErrorType? errorType;
+  const ProfileFailure(this.error, [this.errorType]);
 }

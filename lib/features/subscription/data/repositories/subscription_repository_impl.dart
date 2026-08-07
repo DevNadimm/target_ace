@@ -1,4 +1,4 @@
-﻿import 'package:fpdart/fpdart.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/error/server_exception.dart';
@@ -7,6 +7,7 @@ import 'package:target_ace/features/subscription/data/datasources/subscription_r
 import 'package:target_ace/features/subscription/data/models/subscription_model.dart';
 import 'package:target_ace/features/subscription/domain/entities/subscription_entity.dart';
 import 'package:target_ace/features/subscription/domain/repository/subscription_repository.dart';
+import 'package:target_ace/core/utils/enums/error_type.dart';
 
 class SubscriptionRepositoryImpl implements SubscriptionRepository {
   final SubscriptionRemoteDataSource remoteDataSource;
@@ -23,7 +24,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   Future<Either<Failure, SubscriptionEntity>> fetchMySubscription() async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
 
       final userId = supabaseClient.auth.currentUser?.id;
@@ -81,7 +82,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
 
       return right(const SubscriptionModel(status: 'none'));
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -91,12 +92,12 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   Future<Either<Failure, bool>> checkTrialEligibility(String userId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final isEligible = await remoteDataSource.checkTrialEligibility(userId);
       return right(isEligible);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -109,12 +110,12 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       await remoteDataSource.activateFreeTrial(userId: userId, userEmail: userEmail);
       return right(null);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }

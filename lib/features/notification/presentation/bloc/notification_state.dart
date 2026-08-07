@@ -1,4 +1,4 @@
-﻿part of 'notification_bloc.dart';
+part of 'notification_bloc.dart';
 
 sealed class NotificationState {
   const NotificationState();
@@ -38,5 +38,6 @@ class NotificationLoaded extends NotificationState {
 
 class NotificationError extends NotificationState {
   final String message;
-  const NotificationError(this.message);
+  final ErrorType? errorType;
+  const NotificationError(this.message, [this.errorType]);
 }

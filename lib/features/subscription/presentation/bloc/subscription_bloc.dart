@@ -1,4 +1,4 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
 import 'package:target_ace/core/usecase/usecase.dart';
 import 'package:target_ace/core/utils/enums/error_type.dart';
@@ -28,7 +28,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     await res.fold(
       (failure) async {
         emit(SubscriptionError(
-          ErrorType.unknown,
+          failure.type,
           failure.message,
         ));
       },

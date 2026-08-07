@@ -1,4 +1,4 @@
-﻿part of 'practice_dashboard_cubit.dart';
+part of 'practice_dashboard_cubit.dart';
 
 abstract class PracticeDashboardState {
   const PracticeDashboardState();
@@ -54,5 +54,6 @@ class PracticeDashboardLoaded extends PracticeDashboardState {
 
 class PracticeDashboardError extends PracticeDashboardState {
   final String message;
-  const PracticeDashboardError(this.message);
+  final ErrorType? errorType;
+  const PracticeDashboardError(this.message, [this.errorType]);
 }

@@ -1,4 +1,4 @@
-﻿part of 'battle_arena_bloc.dart';
+part of 'battle_arena_bloc.dart';
 
 abstract class BattleArenaState {}
 
@@ -24,5 +24,6 @@ class BattleArenaSuccess extends BattleArenaState {
 
 class BattleArenaFailure extends BattleArenaState {
   final String errorMessage;
-  BattleArenaFailure(this.errorMessage);
+  final ErrorType? errorType;
+  BattleArenaFailure(this.errorMessage, [this.errorType]);
 }

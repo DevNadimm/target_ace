@@ -1,4 +1,4 @@
-﻿part of 'practice_subjects_cubit.dart';
+part of 'practice_subjects_cubit.dart';
 
 sealed class PracticeSubjectsState {
   const PracticeSubjectsState();
@@ -19,5 +19,6 @@ class PracticeSubjectsLoaded extends PracticeSubjectsState {
 
 class PracticeSubjectsFailure extends PracticeSubjectsState {
   final String error;
-  const PracticeSubjectsFailure(this.error);
+  final ErrorType? errorType;
+  const PracticeSubjectsFailure(this.error, [this.errorType]);
 }

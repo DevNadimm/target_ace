@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
@@ -94,7 +94,7 @@ class _BattleArenaPageState extends State<BattleArenaPage> {
                 }
 
                 if (state is BattleArenaFailure) {
-                  return ErrorStateWidget(message: state.errorMessage);
+                  return ErrorStateWidget(message: state.errorMessage, errorType: state.errorType);
                 }
 
                 if (state is BattleArenaSuccess) {

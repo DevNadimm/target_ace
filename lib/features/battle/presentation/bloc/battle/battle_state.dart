@@ -1,4 +1,4 @@
-﻿part of 'battle_bloc.dart';
+part of 'battle_bloc.dart';
 
 abstract class BattleState {}
 
@@ -8,7 +8,8 @@ class BattleLoading extends BattleState {}
 
 class BattleError extends BattleState {
   final String message;
-  BattleError(this.message);
+  final ErrorType? errorType;
+  BattleError(this.message, [this.errorType]);
 }
 
 class BattleWaiting extends BattleState {

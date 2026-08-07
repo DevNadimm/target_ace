@@ -1,4 +1,4 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/usecase/usecase.dart';
 import 'package:target_ace/core/utils/enums/error_type.dart';
 import 'package:target_ace/features/home/domain/entities/home_entity.dart';
@@ -29,7 +29,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     result.fold(
       (failure) {
         if (!event.isSilent) {
-          emit(HomeFailure(ErrorType.unknown, failure.message));
+          emit(HomeFailure(failure.type, failure.message));
         }
       },
       (homeEntity) {

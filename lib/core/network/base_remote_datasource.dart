@@ -10,6 +10,17 @@ abstract class BaseRemoteDataSource {
   /// Handles Supabase exceptions, specifically catching authentication failures 
   /// (PGRST301 or HTTP 401) and synchronizing the local SDK session state.
   Never handleException(Object e, {String? defaultMessage}) {
+    final errorString = e.toString().toLowerCase();
+    
+    // Catch underlying HTTP client/socket exceptions (e.g. offline device)
+    if (errorString.contains('socketexception') || 
+        errorString.contains('clientexception') && errorString.contains('failed host lookup')) {
+      throw const ServerException(
+        message: 'No internet connection. Please check your network.',
+        type: ErrorType.network,
+      );
+    }
+
     if (e is PostgrestException) {
       if (e.code == 'PGRST301' || e.code == '401' || e.message.contains('User profile not found')) {
         // Infrastructure synchronization: The server rejected the session.

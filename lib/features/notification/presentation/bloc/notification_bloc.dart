@@ -1,4 +1,5 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:target_ace/core/utils/enums/error_type.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/usecase/usecase.dart';
 import 'package:target_ace/features/notification/domain/entities/notification_entity.dart';
 import 'package:target_ace/features/notification/domain/usecases/get_notifications.dart';
@@ -49,7 +50,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
 
     final res = await _getNotifications(const GetNotificationsParams(page: 1, limit: _pageSize));
     res.fold(
-      (failure) => emit(NotificationError(failure.message)),
+      (failure) => emit(NotificationError(failure.message, failure.type)),
       (notifications) {
         emit(NotificationLoaded(
           notifications: notifications,
@@ -97,7 +98,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   ) async {
     final res = await _markNotificationAsRead(event.id);
     res.fold(
-      (failure) => emit(NotificationError(failure.message)),
+      (failure) => emit(NotificationError(failure.message, failure.type)),
       (_) {
         if (state is NotificationLoaded) {
           final currentState = state as NotificationLoaded;
@@ -119,7 +120,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   ) async {
     final res = await _markAllNotificationsAsRead(const NoParams());
     res.fold(
-      (failure) => emit(NotificationError(failure.message)),
+      (failure) => emit(NotificationError(failure.message, failure.type)),
       (_) {
         if (state is NotificationLoaded) {
           final currentState = state as NotificationLoaded;
@@ -136,7 +137,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   ) async {
     final res = await _deleteNotification(event.id);
     res.fold(
-      (failure) => emit(NotificationError(failure.message)),
+      (failure) => emit(NotificationError(failure.message, failure.type)),
       (_) {
         if (state is NotificationLoaded) {
           final currentState = state as NotificationLoaded;
@@ -154,7 +155,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     emit(NotificationLoading());
     final res = await _deleteAllNotifications(const NoParams());
     res.fold(
-      (failure) => emit(NotificationError(failure.message)),
+      (failure) => emit(NotificationError(failure.message, failure.type)),
       (_) => emit(const NotificationLoaded(notifications: [], hasMore: false, currentPage: 1)),
     );
   }

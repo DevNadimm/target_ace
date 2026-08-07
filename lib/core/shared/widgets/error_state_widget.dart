@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:target_ace/core/config/typography.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:target_ace/core/config/app_config.dart';
 import 'package:target_ace/core/config/assets.dart';
@@ -84,29 +85,24 @@ class ErrorStateWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             icon ?? _loadErrorImage(),
-            const SizedBox(height: 14),
-
             Text(
               resolvedMessage['title']!,
-              style: GoogleFonts.poppins(
+              style: AppFonts.heading(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textLight,
+                color: AppColors.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
-
             const SizedBox(height: 14),
-
             Text(
               resolvedMessage['message']!,
-              style: GoogleFonts.poppins(
+              style: AppFonts.body(
                 fontSize: 14,
-                color: AppColors.textLight,
+                color: AppColors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
-
             // All other errors: show retry button (if provided)
             if (onRetry != null) ...[
               const SizedBox(height: 24),
@@ -140,6 +136,9 @@ class ErrorStateWidget extends StatelessWidget {
   }
 
   Widget _loadErrorImage() {
-    return Image.asset(_getIconName(), height: 100, width: 100);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 60),
+      child: Image.asset(_getIconName(), width: double.infinity),
+    );
   }
 }

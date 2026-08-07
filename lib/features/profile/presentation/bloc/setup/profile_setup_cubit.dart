@@ -1,4 +1,5 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:target_ace/core/utils/enums/error_type.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/usecase/usecase.dart';
 import 'package:target_ace/features/profile/domain/usecases/do_setup_profile.dart';
 import 'package:target_ace/features/profile/domain/entities/onboarding_goal_entity.dart';
@@ -31,7 +32,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     final res = await _getOnboardingGoals(const NoParams());
 
     res.fold(
-      (failure) => emit(ProfileSetupFailure(failure.message)),
+      (failure) => emit(ProfileSetupFailure(failure.message, failure.type)),
       (goals) => emit(ProfileSetupGoalsLoaded(goals)),
     );
   }
@@ -41,7 +42,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     final res = await _getBattleGroups(goalId);
 
     res.fold(
-      (failure) => emit(ProfileSetupFailure(failure.message)),
+      (failure) => emit(ProfileSetupFailure(failure.message, failure.type)),
       (groups) => emit(ProfileSetupGroupsLoaded(groups)),
     );
   }
@@ -77,7 +78,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     );
 
     res.fold(
-      (failure) => emit(ProfileSetupFailure(failure.message)),
+      (failure) => emit(ProfileSetupFailure(failure.message, failure.type)),
       (lockedUntil) => emit(ProfileSetupSuccess(lockedUntil)),
     );
   }
@@ -87,7 +88,7 @@ class ProfileSetupCubit extends Cubit<ProfileSetupState> {
     
     return res.fold(
       (failure) {
-        emit(ProfileSetupFailure(failure.message));
+        emit(ProfileSetupFailure(failure.message, failure.type));
         return false;
       },
       (isUnique) {

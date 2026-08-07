@@ -1,4 +1,5 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:target_ace/core/utils/enums/error_type.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/features/practice/domain/entities/question_entity.dart';
 import 'package:target_ace/features/practice/domain/repository/practice_repository.dart';
 
@@ -15,7 +16,7 @@ class BookmarkedQuestionsCubit extends Cubit<BookmarkedQuestionsState> {
     emit(BookmarkedQuestionsLoading());
     final res = await _repository.getBookmarkedQuestions();
     res.fold(
-      (failure) => emit(BookmarkedQuestionsError(failure.message)),
+      (failure) => emit(BookmarkedQuestionsError(failure.message, failure.type)),
       (questions) => emit(BookmarkedQuestionsLoaded(questions: questions)),
     );
   }

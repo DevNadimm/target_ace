@@ -1,10 +1,11 @@
-﻿import 'package:fpdart/fpdart.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
 import 'package:target_ace/features/notification/data/datasources/notification_remote_datasource.dart';
 import 'package:target_ace/features/notification/domain/entities/notification_entity.dart';
 import 'package:target_ace/features/notification/domain/repository/notification_repository.dart';
+import 'package:target_ace/core/utils/enums/error_type.dart';
 
 class NotificationRepositoryImpl implements NotificationRepository {
   final NotificationRemoteDataSource remoteDataSource;
@@ -16,12 +17,12 @@ class NotificationRepositoryImpl implements NotificationRepository {
   Future<Either<Failure, void>> storeFcmToken({required String userId, required String token}) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       await remoteDataSource.storeFcmToken(userId: userId, token: token);
       return right(null);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -34,12 +35,12 @@ class NotificationRepositoryImpl implements NotificationRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final list = await remoteDataSource.fetchNotifications(page: page, limit: limit);
       return right(list);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -49,12 +50,12 @@ class NotificationRepositoryImpl implements NotificationRepository {
   Future<Either<Failure, void>> markAsRead(String id) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       await remoteDataSource.markAsRead(id);
       return right(null);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -64,12 +65,12 @@ class NotificationRepositoryImpl implements NotificationRepository {
   Future<Either<Failure, void>> markAllAsRead() async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       await remoteDataSource.markAllAsRead();
       return right(null);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -79,12 +80,12 @@ class NotificationRepositoryImpl implements NotificationRepository {
   Future<Either<Failure, void>> deleteNotification(String id) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       await remoteDataSource.deleteNotification(id);
       return right(null);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -94,12 +95,12 @@ class NotificationRepositoryImpl implements NotificationRepository {
   Future<Either<Failure, void>> deleteAllNotifications() async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       await remoteDataSource.deleteAllNotifications();
       return right(null);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }

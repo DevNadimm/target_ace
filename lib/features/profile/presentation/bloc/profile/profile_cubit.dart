@@ -1,4 +1,5 @@
-﻿import 'dart:async';
+import 'package:target_ace/core/utils/enums/error_type.dart';
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/usecase/usecase.dart';
 import 'package:target_ace/features/profile/domain/entities/profile_entity.dart';
@@ -22,7 +23,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     _profileSubscription = _getProfile(const NoParams()).listen(
       (res) {
         res.fold(
-          (failure) => emit(ProfileFailure(failure.message)),
+          (failure) => emit(ProfileFailure(failure.message, failure.type)),
           (profileData) {
             if (state is ProfileLoaded) {
               final current = (state as ProfileLoaded).profileData;

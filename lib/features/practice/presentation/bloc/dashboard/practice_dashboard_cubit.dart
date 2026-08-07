@@ -1,4 +1,5 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:target_ace/core/utils/enums/error_type.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
 import 'package:target_ace/features/practice/domain/repository/practice_repository.dart';
 
@@ -35,7 +36,7 @@ class PracticeDashboardCubit extends Cubit<PracticeDashboardState> {
       final res = await _repository.getPracticeDashboardData(userGoal.toLowerCase());
 
       res.fold(
-        (failure) => emit(PracticeDashboardError(failure.message)),
+        (failure) => emit(PracticeDashboardError(failure.message, failure.type)),
         (data) {
           final attempted = (data['total_attempted'] as num?)?.toInt() ?? 0;
           final correct = (data['total_correct'] as num?)?.toInt() ?? 0;

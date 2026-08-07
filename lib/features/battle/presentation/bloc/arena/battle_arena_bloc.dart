@@ -1,4 +1,5 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:target_ace/core/utils/enums/error_type.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/features/battle/domain/entities/battle_entity.dart';
 import 'package:target_ace/features/battle/domain/entities/user_submission_entity.dart';
 import 'package:target_ace/features/battle/domain/usecases/get_battle_arena_data.dart';
@@ -51,7 +52,7 @@ class BattleArenaBloc extends Bloc<BattleArenaEvent, BattleArenaState> {
       ));
 
       result.fold(
-        (failure) => emit(BattleArenaFailure(failure.message)),
+        (failure) => emit(BattleArenaFailure(failure.message, failure.type)),
         (arenaData) {
           // Build todayExamsList for Hero Card (if active exam exists and not submitted)
           final todayExamsList = <BattleEntity>[];

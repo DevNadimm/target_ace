@@ -34,11 +34,7 @@ class Failure {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Failure &&
-          runtimeType == other.runtimeType &&
-          message == other.message &&
-          title == other.title &&
-          type == other.type;
+      other is Failure && runtimeType == other.runtimeType && message == other.message && title == other.title && type == other.type;
 
   @override
   int get hashCode => message.hashCode ^ title.hashCode ^ type.hashCode;

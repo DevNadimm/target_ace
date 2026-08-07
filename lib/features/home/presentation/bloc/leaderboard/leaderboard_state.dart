@@ -1,4 +1,4 @@
-﻿part of 'leaderboard_cubit.dart';
+part of 'leaderboard_cubit.dart';
 
 sealed class LeaderboardState {}
 
@@ -13,5 +13,6 @@ class LeaderboardSuccess extends LeaderboardState {
 
 class LeaderboardFailure extends LeaderboardState {
   final String message;
-  LeaderboardFailure(this.message);
+  final ErrorType? errorType;
+  LeaderboardFailure(this.message, [this.errorType]);
 }

@@ -26,7 +26,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, AuthResult>> googleSignIn() async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
 
       final userModel = await remoteDataSource.googleSignIn();

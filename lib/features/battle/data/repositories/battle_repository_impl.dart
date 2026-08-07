@@ -1,4 +1,4 @@
-﻿import 'package:fpdart/fpdart.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
@@ -17,6 +17,7 @@ import 'package:target_ace/features/battle/domain/entities/battle_arena_data_ent
 import 'package:target_ace/features/battle/domain/repository/battle_repository.dart';
 import 'package:target_ace/features/practice/domain/entities/question_entity.dart';
 import 'package:target_ace/features/practice/data/models/question_model.dart';
+import 'package:target_ace/core/utils/enums/error_type.dart';
 
 class BattleRepositoryImpl implements BattleRepository {
   final BattleRemoteDataSource remoteDataSource;
@@ -30,12 +31,12 @@ class BattleRepositoryImpl implements BattleRepository {
       // Clear old exam questions cache to prevent storage bloat
       await AppPreferences.clearCachedExamQuestions();
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final exams = await remoteDataSource.getBattles(goalId, groupId);
       return right(exams);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -45,12 +46,12 @@ class BattleRepositoryImpl implements BattleRepository {
   Future<Either<Failure, BattleSubmissionEntity?>> checkSubmission(String examId, String userId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final submission = await remoteDataSource.checkSubmission(examId, userId);
       return right(submission);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -65,7 +66,7 @@ class BattleRepositoryImpl implements BattleRepository {
           final cachedQuestions = cachedJson.map((q) => QuestionModel.fromJson(q)).toList();
           return right(cachedQuestions);
         }
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final questions = await remoteDataSource.fetchQuestions(examId);
       if (questions.isNotEmpty) {
@@ -79,7 +80,7 @@ class BattleRepositoryImpl implements BattleRepository {
         final cachedQuestions = cachedJson.map((q) => QuestionModel.fromJson(q)).toList();
         return right(cachedQuestions);
       }
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -104,7 +105,7 @@ class BattleRepositoryImpl implements BattleRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       await remoteDataSource.submitBattle(
         examId: examId,
@@ -124,7 +125,7 @@ class BattleRepositoryImpl implements BattleRepository {
       );
       return right(null);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -138,7 +139,7 @@ class BattleRepositoryImpl implements BattleRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final results = await remoteDataSource.fetchLeaderboardAndRanks(
         examId: examId,
@@ -169,7 +170,7 @@ class BattleRepositoryImpl implements BattleRepository {
         leaderboard: leaderboardList,
       ));
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -179,13 +180,13 @@ class BattleRepositoryImpl implements BattleRepository {
   Future<Either<Failure, List<UserSubmissionEntity>>> getUserSubmissions(String userId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final submissions = await remoteDataSource.getUserSubmissions(userId);
       final mapped = submissions.map((s) => UserSubmissionModel.fromJson(s)).toList();
       return right(mapped);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -195,12 +196,12 @@ class BattleRepositoryImpl implements BattleRepository {
   Future<Either<Failure, List<BattleEntity>>> getGroupBattles(String groupId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final exams = await remoteDataSource.getGroupBattles(groupId);
       return right(exams);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -213,7 +214,7 @@ class BattleRepositoryImpl implements BattleRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final data = await remoteDataSource.getBattleArenaData(userId: userId, groupId: groupId);
       
@@ -239,7 +240,7 @@ class BattleRepositoryImpl implements BattleRepository {
         recentHistory: recentHistory,
       ));
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -249,7 +250,7 @@ class BattleRepositoryImpl implements BattleRepository {
   Future<Either<Failure, BattleLeaderboardDataEntity>> getBattleLeaderboardData(String examId, {String? userId}) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final data = await remoteDataSource.getBattleLeaderboardData(examId, userId: userId);
 
@@ -275,7 +276,7 @@ class BattleRepositoryImpl implements BattleRepository {
         currentUserRecord: currentUserRecord,
       ));
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
@@ -285,13 +286,13 @@ class BattleRepositoryImpl implements BattleRepository {
   Future<Either<Failure, List<LeaderboardEntryEntity>>> getLeaderboardCache(String examId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.'));
+        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
       }
       final cache = await remoteDataSource.getLeaderboardCache(examId);
       final mapped = cache.map((c) => LeaderboardEntryModel.fromJson(c)).toList();
       return right(mapped);
     } on ServerException catch (e) {
-      return left(Failure(message: e.message));
+      return left(Failure(message: e.message, type: e.type));
     } catch (e) {
       return left(Failure(message: e.toString()));
     }
