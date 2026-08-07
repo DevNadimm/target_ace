@@ -7,9 +7,9 @@ class BattleInitial extends BattleState {}
 class BattleLoading extends BattleState {}
 
 class BattleError extends BattleState {
-  final String message;
+  final String? message;
   final ErrorType? errorType;
-  BattleError(this.message, [this.errorType]);
+  BattleError([this.message, this.errorType]);
 }
 
 class BattleWaiting extends BattleState {

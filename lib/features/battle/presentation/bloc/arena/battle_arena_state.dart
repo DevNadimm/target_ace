@@ -23,7 +23,7 @@ class BattleArenaSuccess extends BattleArenaState {
 }
 
 class BattleArenaFailure extends BattleArenaState {
-  final String errorMessage;
+  final String? errorMessage;
   final ErrorType? errorType;
-  BattleArenaFailure(this.errorMessage, [this.errorType]);
+  BattleArenaFailure([this.errorMessage, this.errorType]);
 }

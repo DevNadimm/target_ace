@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:target_ace/core/config/messages.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
@@ -72,7 +73,7 @@ class _LiveBattlePageState extends State<LiveBattlePage> with WidgetsBindingObse
         listenWhen: (previous, current) => true,
         listener: (context, state) {
           if (state is BattleError) {
-            AppNotifier.showSnackBar(context, state.message, type: MessageType.error);
+            AppNotifier.showSnackBar(context, state.message ?? AppMessages.errorMessage, type: MessageType.error);
           }
           if (state is BattleWaiting) {
             _secondsRemainingNotifier.value = state.waitingSecondsRemaining;
@@ -137,7 +138,7 @@ class _LiveBattlePageState extends State<LiveBattlePage> with WidgetsBindingObse
               child: Padding(
                 padding: const EdgeInsets.all(32.0),
                 child: Text(
-                  state.message,
+                  state.message ?? AppMessages.errorMessage,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),

@@ -33,7 +33,7 @@ class BookmarkedQuestionsLoaded extends BookmarkedQuestionsState {
 }
 
 class BookmarkedQuestionsError extends BookmarkedQuestionsState {
-  final String message;
+  final String? message;
   final ErrorType? errorType;
-  const BookmarkedQuestionsError(this.message, [this.errorType]);
+  const BookmarkedQuestionsError([this.message, this.errorType]);
 }

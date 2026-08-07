@@ -23,7 +23,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<Either<Failure, List<OnboardingGoalEntity>>> getOnboardingGoals() async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final goalsData = await remoteDataSource.getOnboardingGoals();
       final goals = goalsData.map((e) => OnboardingGoalModel.fromJson(e)).toList();
@@ -37,7 +37,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<Either<Failure, List<BattleGroupEntity>>> getBattleGroups(String goalId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final groupsData = await remoteDataSource.getBattleGroups(goalId);
       final groups = groupsData.map((e) => BattleGroupModel.fromJson(e)).toList();
@@ -63,7 +63,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
 
       // 1. Build metadata map for Supabase Auth (only include non-empty values)
@@ -137,7 +137,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       await remoteDataSource.upsertProfile({
         'goal': goalId,
@@ -203,7 +203,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<Either<Failure, bool>> checkPhoneUnique(String phone) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final isUnique = await remoteDataSource.checkPhoneUnique(phone);
       return right(isUnique);

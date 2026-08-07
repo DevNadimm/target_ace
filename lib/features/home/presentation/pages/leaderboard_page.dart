@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:target_ace/core/config/messages.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/leaderboard_row.dart';
@@ -6,6 +7,7 @@ import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/services/service_locator.dart';
 import 'package:target_ace/core/shared/widgets/empty_state_widget.dart';
+import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/features/home/presentation/bloc/leaderboard/leaderboard_cubit.dart';
@@ -79,18 +81,10 @@ class _LeaderboardPageViewState extends State<_LeaderboardPageView> {
               }
 
               if (state is LeaderboardFailure) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Text(
-                      state.message,
-                      style: AppFonts.body(
-                        fontSize: 14,
-                        color: AppColors.error,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                return ErrorStateWidget(
+                  message: state.message,
+                  errorType: state.errorType,
+                  onRetry: () => context.read<LeaderboardCubit>().fetchLeaderboard(_groupId, isSilent: true),
                 );
               }
 

@@ -18,12 +18,12 @@ import 'package:target_ace/core/utils/enums/error_type.dart';
 /// }
 /// ```
 class Failure {
-  final String message;
+  final String? message;
   final String? title;
   final ErrorType type;
 
   const Failure({
-    required this.message,
+    this.message,
     this.title,
     this.type = ErrorType.unknown,
   });

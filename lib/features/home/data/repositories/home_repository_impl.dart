@@ -21,7 +21,7 @@ class HomeRepositoryImpl implements HomeRepository {
   Future<Either<Failure, HomeEntity>> getHome() async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
 
       final goalId = await UserLocalDataSource.getUserGoal();
@@ -52,7 +52,7 @@ class HomeRepositoryImpl implements HomeRepository {
   Future<Either<Failure, List<Map<String, dynamic>>>> getGroupLeaderboard(String groupId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final leaderboard = await remoteDataSource.getGroupLeaderboard(groupId);
       return right(leaderboard);

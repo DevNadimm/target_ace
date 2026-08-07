@@ -28,7 +28,7 @@ class ProfileSetupSuccess extends ProfileSetupState {
 }
 
 class ProfileSetupFailure extends ProfileSetupState {
-  final String error;
+  final String? error;
   final ErrorType? errorType;
-  const ProfileSetupFailure(this.error, [this.errorType]);
+  const ProfileSetupFailure([this.error, this.errorType]);
 }

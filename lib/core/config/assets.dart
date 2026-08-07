@@ -33,7 +33,7 @@
   static const String enFlag = '$_flagPath/en.png';
 
   /// â”€â”€ Error & Placeholder States â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  static const String error = '$_iconPath/error.png';
+  static const String error = '$_iconPath/default_error.png';
   static const String networkError = '$_iconPath/network_error.png';
   static const String serverError = '$_iconPath/server_error.png';
   static const String notFoundError = '$_iconPath/not_found_error.png';

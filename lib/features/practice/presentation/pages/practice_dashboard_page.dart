@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
@@ -10,6 +10,7 @@ import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/utils/enums/message_type.dart';
 import 'package:target_ace/core/shared/widgets/fade_wave_animation.dart';
+import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/features/practice/domain/entities/subject_entity.dart';
 import 'package:target_ace/features/practice/presentation/bloc/dashboard/practice_dashboard_cubit.dart';
@@ -92,6 +93,14 @@ class _PracticeDashboardViewState extends State<PracticeDashboardView> {
                       return const CustomContainer(
                         padding: EdgeInsets.all(24),
                         child: Center(child: Loader(isShowContainer: false)),
+                      );
+                    }
+
+                    if (state is PracticeDashboardError) {
+                      return ErrorStateWidget(
+                        message: state.message,
+                        errorType: state.errorType,
+                        onRetry: () => context.read<PracticeDashboardCubit>().loadDashboardData(force: true, isSilent: true),
                       );
                     }
 

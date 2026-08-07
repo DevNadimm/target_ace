@@ -12,7 +12,7 @@ class LeaderboardSuccess extends LeaderboardState {
 }
 
 class LeaderboardFailure extends LeaderboardState {
-  final String message;
+  final String? message;
   final ErrorType? errorType;
-  LeaderboardFailure(this.message, [this.errorType]);
+  LeaderboardFailure([this.message, this.errorType]);
 }

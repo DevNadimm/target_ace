@@ -1,17 +1,10 @@
-﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:flutter/material.dart';
+import 'package:target_ace/core/components/spring_button.dart';
 import 'package:target_ace/core/config/typography.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:target_ace/core/config/app_config.dart';
 import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/messages.dart';
-import 'package:target_ace/core/logger/app_logger.dart';
-import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/core/utils/enums/error_type.dart';
-import 'package:target_ace/core/utils/helpers/date_formatter.dart';
-import 'package:target_ace/core/utils/helpers/helper_functions.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   final String? title;
@@ -68,15 +61,18 @@ class ErrorStateWidget extends StatelessWidget {
         messageMap['title'] = title!;
       }
 
+      // Only allow custom messages for Server/Unknown errors.
+      // Global errors like Network, NotFound, BotProtection MUST use AppMessages.
       if (message != null && message!.isNotEmpty) {
-        messageMap['message'] = message!;
+        if (errorType == ErrorType.server || errorType == ErrorType.unknown) {
+          messageMap['message'] = message!;
+        }
       }
 
       return messageMap;
     }
 
     final resolvedMessage = getMessage();
-    final isBotProtection = errorType == ErrorType.botProtection;
 
     return Center(
       child: Padding(
@@ -85,6 +81,7 @@ class ErrorStateWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             icon ?? _loadErrorImage(),
+            const SizedBox(height: 8),
             Text(
               resolvedMessage['title']!,
               style: AppFonts.heading(
@@ -103,22 +100,15 @@ class ErrorStateWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            // All other errors: show retry button (if provided)
             if (onRetry != null) ...[
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: onRetry,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryDark,
-                  foregroundColor: AppColors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                  elevation: 0,
-                  shadowColor: Colors.transparent,
+              SizedBox(
+                height: 40,
+                width: 120,
+                child: SpringButton(
+                  onPressed: onRetry,
+                  child: Text(buttonText ?? 'RETRY'),
                 ),
-                child: Text(buttonText ?? 'Retry'),
               ),
             ],
           ],

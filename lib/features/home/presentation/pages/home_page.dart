@@ -131,6 +131,9 @@ class _HomePageState extends State<HomePage> {
       return ErrorStateWidget(
         errorType: state.errorType,
         message: state.message,
+        onRetry: () {
+          context.read<HomeBloc>().add(HomeFetchRequested(isSilent: true));
+        },
       );
     }
 

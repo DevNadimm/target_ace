@@ -11,8 +11,8 @@ class LeaderboardCubit extends Cubit<LeaderboardState> {
     required this.getGroupLeaderboard,
   }) : super(LeaderboardInitial());
 
-  Future<void> fetchLeaderboard(String groupId) async {
-    emit(LeaderboardLoading());
+  Future<void> fetchLeaderboard(String groupId, {bool isSilent = false}) async {
+    if (!isSilent) emit(LeaderboardLoading());
     final result = await getGroupLeaderboard(groupId);
 
     result.fold(

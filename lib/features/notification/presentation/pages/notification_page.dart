@@ -116,6 +116,7 @@ class _NotificationPageState extends State<NotificationPage> {
               return ErrorStateWidget(
                 message: state.message,
                 errorType: state.errorType,
+                onRetry: () => _fetchNotifications(isRefresh: true),
               );
             }
 

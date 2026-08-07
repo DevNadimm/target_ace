@@ -24,7 +24,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   Future<Either<Failure, SubscriptionEntity>> fetchMySubscription() async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
 
       final userId = supabaseClient.auth.currentUser?.id;
@@ -92,7 +92,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   Future<Either<Failure, bool>> checkTrialEligibility(String userId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final isEligible = await remoteDataSource.checkTrialEligibility(userId);
       return right(isEligible);
@@ -110,7 +110,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       await remoteDataSource.activateFreeTrial(userId: userId, userEmail: userEmail);
       return right(null);

@@ -23,7 +23,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   Future<Either<Failure, List<SubjectEntity>>> getSubjects(String groupId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final subjectsData = await remoteDataSource.getSubjects(groupId);
       final subjects = subjectsData.map((e) => SubjectModel.fromJson(e)).toList();
@@ -41,7 +41,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final sessionData = await remoteDataSource.startPracticeSession(
         subjectId: subjectId,
@@ -58,7 +58,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   Future<Either<Failure, List<TopicEntity>>> getTopics(String subjectId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final topicsData = await remoteDataSource.getTopics(subjectId);
       final topics = topicsData.map((e) => TopicModel.fromJson(e)).toList();
@@ -76,7 +76,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   }) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final questionsData = await remoteDataSource.getSubjectQuestions(
         subjectId: subjectId,
@@ -94,7 +94,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   Future<Either<Failure, void>> recordAttempts(List<Map<String, dynamic>> attempts) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       await remoteDataSource.recordAttempts(attempts);
       return right(null);
@@ -107,7 +107,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   Future<Either<Failure, Map<String, dynamic>>> getPracticeDashboardData(String groupId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final summary = await remoteDataSource.getPracticeDashboardData(groupId);
       return right(summary);
@@ -120,7 +120,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   Future<Either<Failure, bool>> toggleBookmark(String questionId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final isBookmarked = await remoteDataSource.toggleBookmark(questionId);
       return right(isBookmarked);
@@ -133,7 +133,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   Future<Either<Failure, List<String>>> getBookmarkedQuestionIds() async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final ids = await remoteDataSource.getBookmarkedQuestionIds();
       return right(ids);
@@ -146,7 +146,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   Future<Either<Failure, List<QuestionEntity>>> getBookmarkedQuestions() async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final questionsData = await remoteDataSource.getBookmarkedQuestions();
       final questions = questionsData.map((e) => QuestionModel.fromJson(e)).toList();
@@ -160,7 +160,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   Future<Either<Failure, Set<String>>> getAttemptedQuestionIds(String subjectId) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       final ids = await remoteDataSource.getAttemptedQuestionIds(subjectId);
       return right(ids.toSet());
@@ -173,7 +173,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   Future<Either<Failure, void>> submitReport(String questionId, String reportText) async {
     try {
       if (!await connectionChecker.isConnected) {
-        return left(Failure(message: 'No internet connection. Please check your network.', type: ErrorType.network));
+        return left(Failure(type: ErrorType.network));
       }
       await remoteDataSource.submitReport(questionId, reportText);
       return right(null);

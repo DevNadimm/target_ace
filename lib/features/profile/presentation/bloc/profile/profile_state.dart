@@ -18,7 +18,7 @@ class ProfileLoaded extends ProfileState {
 }
 
 class ProfileFailure extends ProfileState {
-  final String error;
+  final String? error;
   final ErrorType? errorType;
-  const ProfileFailure(this.error, [this.errorType]);
+  const ProfileFailure([this.error, this.errorType]);
 }

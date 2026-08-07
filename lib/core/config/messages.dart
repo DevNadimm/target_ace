@@ -1,4 +1,4 @@
-﻿class AppMessages {
+class AppMessages {
   AppMessages._();
 
   static const String passwordSet = "Your password has been reset successfully";
@@ -7,29 +7,14 @@
   static const String emptyTitle = "Nothing Here Yet";
   static const String emptyMessage = "We couldn't find anything to display here at the moment. Try again later or refresh.";
 
-  static const String emptyOrdersTitle = "No Orders Yet";
-  static const String emptyOrdersMessage = "You haven't placed any orders yet. Start browsing and add your first order.";
-
-  static const String emptyCartTitle = "Your Cart is Empty";
-  static const String emptyCartMessage = "Looks like you haven't added any items to your cart. Explore products and add them here.";
-
   static const String emptyFavoritesTitle = "No Favorites Found";
   static const String emptyFavoritesMessage = "You haven't marked any items as favorites yet. Tap the heart icon to save your favorites.";
 
   static const String emptyNotificationsTitle = "No Notifications";
   static const String emptyNotificationsMessage = "You currently have no notifications. Check back later for updates.";
 
-  static const String emptyMessagesTitle = "No Messages";
-  static const String emptyMessagesMessage = "Your inbox is empty. Send or receive messages to get started.";
-
   static const String emptyProfileDataTitle = "Profile Data Missing";
   static const String emptyProfileDataMessage = "Some information is missing in your profile. Please update your profile to continue.";
-
-  static const String emptyWishlistTitle = "No Wishlist Items";
-  static const String emptyWishlistMessage = "You haven't added any items to your wishlist yet. Browse products and add your favorites here.";
-
-  static const String emptyBookingsTitle = "No Bookings Yet";
-  static const String emptyBookingsMessage = "You don't have any bookings yet. Explore listings and make your first booking.";
 
   // ------------------- GENERAL SUCCESS / ERROR -------------------
   static const String successTitle = "Success";

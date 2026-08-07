@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:target_ace/core/config/messages.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -523,7 +524,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             });
             AppNotifier.showSnackBar(
               context,
-              state.error,
+              state.error ?? AppMessages.errorMessage,
               type: MessageType.error,
             );
           }

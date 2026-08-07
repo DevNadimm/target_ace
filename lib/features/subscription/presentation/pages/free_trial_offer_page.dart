@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -42,7 +42,7 @@ class _FreeTrialOfferPageState extends State<FreeTrialOfferPage> {
         res.fold(
           (failure) {
             if (mounted) {
-              final errorMsg = failure.message.toLowerCase();
+              final errorMsg = (failure.message ?? '').toLowerCase();
               if (errorMsg.contains('already used') || errorMsg.contains('free trial')) {
                 AppNotifier.showSnackBar(
                   context,

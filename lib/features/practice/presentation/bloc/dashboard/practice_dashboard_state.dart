@@ -53,7 +53,7 @@ class PracticeDashboardLoaded extends PracticeDashboardState {
 }
 
 class PracticeDashboardError extends PracticeDashboardState {
-  final String message;
+  final String? message;
   final ErrorType? errorType;
-  const PracticeDashboardError(this.message, [this.errorType]);
+  const PracticeDashboardError([this.message, this.errorType]);
 }

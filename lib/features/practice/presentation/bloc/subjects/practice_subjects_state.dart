@@ -18,7 +18,7 @@ class PracticeSubjectsLoaded extends PracticeSubjectsState {
 }
 
 class PracticeSubjectsFailure extends PracticeSubjectsState {
-  final String error;
+  final String? error;
   final ErrorType? errorType;
-  const PracticeSubjectsFailure(this.error, [this.errorType]);
+  const PracticeSubjectsFailure([this.error, this.errorType]);
 }

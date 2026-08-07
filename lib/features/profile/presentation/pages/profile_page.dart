@@ -1,3 +1,4 @@
+import 'package:target_ace/core/config/messages.dart';
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/config/typography.dart';
@@ -82,7 +83,7 @@ class _ProfilePageViewState extends State<ProfilePageView> {
               if (state is ProfileFailure) {
                 return Center(
                   child: Text(
-                    state.error,
+                    state.error ?? AppMessages.errorMessage,
                     style: AppFonts.body(color: AppColors.error),
                   ),
                 );

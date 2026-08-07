@@ -94,7 +94,13 @@ class _BattleArenaPageState extends State<BattleArenaPage> {
                 }
 
                 if (state is BattleArenaFailure) {
-                  return ErrorStateWidget(message: state.errorMessage, errorType: state.errorType);
+                  return ErrorStateWidget(
+                    message: state.errorMessage, 
+                    errorType: state.errorType,
+                    onRetry: () => context.read<BattleArenaBloc>().add(
+                      BattleArenaFetchRequested(isSilent: true),
+                    ),
+                  );
                 }
 
                 if (state is BattleArenaSuccess) {

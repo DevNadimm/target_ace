@@ -12,12 +12,12 @@ class PracticeDashboardCubit extends Cubit<PracticeDashboardState> {
       : _repository = repository,
         super(PracticeDashboardInitial());
 
-  Future<void> loadDashboardData({bool force = false}) async {
+  Future<void> loadDashboardData({bool force = false, bool isSilent = false}) async {
     if (state is PracticeDashboardLoaded) {
       if (!force) return;
       emit((state as PracticeDashboardLoaded).copyWith(isRefreshing: true));
     } else {
-      emit(PracticeDashboardLoading());
+      if (!isSilent) emit(PracticeDashboardLoading());
     }
     try {
       if (force) {
