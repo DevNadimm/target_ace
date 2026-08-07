@@ -99,7 +99,7 @@ class _SpringButtonState extends State<SpringButton> {
 
     // Border for outlined variant or disabled state
     final Border? faceBorder = widget.isOutlined
-        ? Border.all(color: resolvedBorderColor, width: 1.5)
+        ? Border.all(color: resolvedBorderColor, width: 1.0)
         : isDisabled
             ? null // Add side border when disabled
             : null;

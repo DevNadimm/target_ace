@@ -274,7 +274,7 @@ class HistoryDetailBottomSheet extends StatelessWidget {
                               onReviewTap(examId, answersList);
                             }
                           : null,
-                      child: const Text('Review'),
+                      child: const Text('REVIEW'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -292,7 +292,7 @@ class HistoryDetailBottomSheet extends StatelessWidget {
                               );
                             }
                           : null,
-                      child: const Text('Leaderboard'),
+                      child: const Text('LEADERBOARD'),
                     ),
                   ),
                 ],
