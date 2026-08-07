@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -244,10 +244,10 @@ Assalamu Alaikum,
 
 I am using ${AppConfig.appName} app. I need help regarding my subscription / account.
 
-• Name: $userName
-• User ID: $userId
-• Plan: ${plan.isNotEmpty ? plan : 'No Active Plan'}
-• App Version: ${AppConfig.appVersion}
+● Name: $userName
+● User ID: $userId
+● Plan: ${plan.isNotEmpty ? plan : 'No Active Plan'}
+● App Version: ${AppConfig.appVersion}
 
 My issue:
 (Please write here)

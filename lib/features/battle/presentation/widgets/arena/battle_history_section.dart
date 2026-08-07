@@ -75,7 +75,7 @@ class BattleHistorySection extends StatelessWidget {
                 },
                 icon: HugeIcons.strokeRoundedChampion,
                 title: title,
-                subtitle: '$scoreDisplay pts  •  Rank $rank/$totalParticipants',
+                subtitle: '$scoreDisplay pts  ●  Rank $rank/$totalParticipants',
               );
             },
             separatorBuilder: (context, index) => const CustomDivider.dotted(),
@@ -86,3 +86,4 @@ class BattleHistorySection extends StatelessWidget {
     );
   }
 }
+

@@ -303,9 +303,9 @@ Assalamu Alaikum,
 
 I am using ${AppConfig.appName} app. I need help with something.
 
-• Name: $userName
-• Plan: $planName
-• App Version: ${AppConfig.appVersion}
+● Name: $userName
+● Plan: $planName
+● App Version: ${AppConfig.appVersion}
 
 My issue:
 (Please write here)
@@ -380,3 +380,4 @@ Thank you.
     );
   }
 }
+

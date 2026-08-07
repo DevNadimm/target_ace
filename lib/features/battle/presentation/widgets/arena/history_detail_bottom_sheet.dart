@@ -57,7 +57,7 @@ class HistoryDetailBottomSheet extends StatelessWidget {
     String formattedDateTime = 'N/A';
     if (submission.completedAt.isNotEmpty) {
       final dt = DateTime.parse(submission.completedAt).toLocal();
-      formattedDateTime = DateFormat('dd MMM yyyy  •  hh:mm a').format(dt);
+      formattedDateTime = DateFormat('dd MMM yyyy  ●  hh:mm a').format(dt);
     }
 
     final String scoreDisplay = score == score.roundToDouble()
@@ -204,7 +204,7 @@ class HistoryDetailBottomSheet extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               Text(
-                'Rank #$rank out of $totalParticipants participants  •  $totalQuestions questions',
+                'Rank #$rank out of $totalParticipants participants  ●  $totalQuestions questions',
                 style: AppFonts.body(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -332,3 +332,4 @@ class HistoryDetailBottomSheet extends StatelessWidget {
     );
   }
 }
+

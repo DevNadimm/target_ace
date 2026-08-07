@@ -78,7 +78,7 @@ class HelperFunctions {
 
   static String combineInfo(
     List<String?> parts, {
-    String separator = ' • ',
+    String separator = ' ● ',
     String fallback = '',
   }) {
     final filtered = parts.where((part) => part != null && part.trim().isNotEmpty).map((part) => part!.trim()).toList();
@@ -99,4 +99,5 @@ class HelperFunctions {
     }
   }
 }
+
 
