@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
@@ -99,7 +99,7 @@ class _SpringButtonState extends State<SpringButton> {
 
     // Border for outlined variant or disabled state
     final Border? faceBorder = widget.isOutlined
-        ? Border.all(color: resolvedBorderColor, width: 2.0)
+        ? Border.all(color: resolvedBorderColor, width: 1.5)
         : isDisabled
             ? null // Add side border when disabled
             : null;
@@ -123,10 +123,6 @@ class _SpringButtonState extends State<SpringButton> {
                 decoration: BoxDecoration(
                   color: resolvedShadowColor,
                   borderRadius: widget.borderRadius,
-                  // For outlined: the shadow is the border color
-                  border: widget.isOutlined
-                      ? Border.all(color: resolvedBorderColor, width: 2.0)
-                      : null,
                 ),
               ),
             ),
