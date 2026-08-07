@@ -75,7 +75,7 @@ class BattleHistorySection extends StatelessWidget {
                 },
                 icon: HugeIcons.strokeRoundedChampion,
                 title: title,
-                subtitle: '$scoreDisplay pts  â€¢  Rank $rank/$totalParticipants',
+                subtitle: '$scoreDisplay pts  •  Rank $rank/$totalParticipants',
               );
             },
             separatorBuilder: (context, index) => const CustomDivider.dotted(),

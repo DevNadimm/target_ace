@@ -53,11 +53,11 @@ class DateFormatter {
     return DateFormat('dd MMMM, yyyy hh:mm a').format(date);
   }
 
-  /// 20 Sep 2025  â€¢  01:51 AM
+  /// 20 Sep 2025  •  01:51 AM
   static String readableShortWithTime(dynamic value) {
     final date = _parse(value);
     if (date == null) return value?.toString() ?? 'N/A';
-    return '${DateFormat('dd MMM yyyy').format(date)}  â€¢  ${DateFormat('hh:mm a').format(date)}';
+    return '${DateFormat('dd MMM yyyy').format(date)}  •  ${DateFormat('hh:mm a').format(date)}';
   }
 
   static String readableWithTime12(dynamic value) {
@@ -200,10 +200,11 @@ class DateFormatter {
       } else if (diff.inHours < 24) {
         return "Starts in ${diff.inHours} hours";
       } else {
-        return DateFormat('EEE, dd MMM  â€¢  hh:mm a').format(start);
+        return DateFormat('EEE, dd MMM  •  hh:mm a').format(start);
       }
     } catch (_) {
       return startStr;
     }
   }
 }
+

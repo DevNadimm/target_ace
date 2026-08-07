@@ -1,4 +1,4 @@
-import 'package:target_ace/core/config/messages.dart';
+﻿import 'package:target_ace/core/config/messages.dart';
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/config/typography.dart';
@@ -303,9 +303,9 @@ Assalamu Alaikum,
 
 I am using ${AppConfig.appName} app. I need help with something.
 
-â€¢ Name: $userName
-â€¢ Plan: $planName
-â€¢ App Version: ${AppConfig.appVersion}
+• Name: $userName
+• Plan: $planName
+• App Version: ${AppConfig.appVersion}
 
 My issue:
 (Please write here)

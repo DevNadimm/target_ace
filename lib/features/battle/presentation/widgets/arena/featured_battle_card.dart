@@ -143,7 +143,7 @@ class _MindPopHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  '${exam.durationMinutes} Minutes  â€¢  ${(exam.totalQuestions).toInt()} Questions',
+                  '${exam.durationMinutes} Minutes  •  ${(exam.totalQuestions).toInt()} Questions',
                   style: AppFonts.body(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
