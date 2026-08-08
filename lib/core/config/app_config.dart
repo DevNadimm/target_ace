@@ -1,4 +1,6 @@
-﻿class AppConfig {
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+class AppConfig {
   AppConfig._();
 
   static const String appName = "TargetAce";
@@ -8,9 +10,9 @@
   static const bool isPracticeUnderDevelopment = true;
 
   /// Supabase Configuration Placeholders
-  static const String supabaseUrl = "https://pymjlwxuqyxjdjwdkryl.supabase.co";
-  static const String supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bWpsd3h1cXl4amRqd2RrcnlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMzIxMDQsImV4cCI6MjA5OTcwODEwNH0.Wy-lep-A4JgOn8PyXwl0gj9UUSq6mtC5DPQR3vdbnHc";
-  static const String googleWebClientId = "18544964366-df9f7gm7235a1gok16kcmaqcu56im2kp.apps.googleusercontent.com";
+  static String get supabaseUrl => dotenv.env['SUPABASE_URL'] ?? '';
+  static String get supabaseAnonKey => dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+  static String get googleWebClientId => dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '';
 
   /// URLs
   static const String websiteUrl = "https://targetace-web.vercel.app/";
