@@ -75,6 +75,7 @@ import 'package:target_ace/features/battle/domain/usecases/get_leaderboard_cache
 import 'package:target_ace/features/battle/presentation/bloc/battle/battle_bloc.dart';
 import 'package:target_ace/features/battle/presentation/bloc/arena/battle_arena_bloc.dart';
 import 'package:target_ace/features/battle/presentation/bloc/history/battle_history_bloc.dart';
+import 'package:target_ace/features/battle/presentation/bloc/review/battle_review_bloc.dart';
 import 'package:target_ace/features/home/data/datasources/home_remote_datasource.dart';
 import 'package:target_ace/features/home/data/repositories/home_repository_impl.dart';
 import 'package:target_ace/features/home/domain/repository/home_repository.dart';
@@ -311,7 +312,11 @@ void _initBattle() {
     // Repository
     ..registerFactory<BattleRepository>(
       () => BattleRepositoryImpl(sl(), sl()),
-    )
+    );
+  sl.registerFactory(() => BattleHistoryBloc(getUserSubmissions: sl()));
+  sl.registerFactory(() => BattleReviewBloc(sl()));
+
+  sl
     // Use Cases
     ..registerFactory(() => GetBattles(sl()))
     ..registerFactory(() => CheckSubmission(sl()))
@@ -338,12 +343,6 @@ void _initBattle() {
     ..registerFactory(
       () => BattleArenaBloc(
         getBattleArenaData: sl(),
-      ),
-    )
-    ..registerFactory(
-      () => BattleHistoryBloc(
-        getUserSubmissions: sl(),
-        getBattleQuestions: sl(),
       ),
     );
 }

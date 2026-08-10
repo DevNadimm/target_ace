@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:hugeicons/hugeicons.dart';
 import 'package:lottie/lottie.dart';
@@ -9,6 +11,7 @@ import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
+import 'package:target_ace/features/battle/presentation/widgets/live/battle_countdown_timer.dart';
 
 class BattleWaitingRoomView extends StatefulWidget {
   final String examTitle;
@@ -25,13 +28,36 @@ class BattleWaitingRoomView extends StatefulWidget {
 }
 
 class _BattleWaitingRoomViewState extends State<BattleWaitingRoomView>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
+  // Syncing dot + FAB fade
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  // Avatar entrance
+  late AnimationController _avatarEntranceController;
+  late Animation<double> _avatarEntranceAnimation;
+
+  // Dynamic join data pool
+  static const _avatarPool = [
+    (label: 'R', color: Color(0xFF6C63FF)),
+    (label: 'A', color: Color(0xFFFF6584)),
+    (label: 'M', color: Color(0xFF43B89C)),
+    (label: 'S', color: Color(0xFFFF9F43)),
+    (label: 'J', color: Color(0xFF2ED573)),
+    (label: 'K', color: Color(0xFF1E90FF)),
+    (label: 'N', color: Color(0xFFFFA502)),
+    (label: 'T', color: Color(0xFFFF4757)),
+  ];
+  
+  final List<({int id, String label, Color color})> _activeAvatars = [];
+  int _avatarIdCounter = 0;
+  int _poolIndex = 0;
+  Timer? _joinTimer;
 
   @override
   void initState() {
     super.initState();
+
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -39,11 +65,59 @@ class _BattleWaitingRoomViewState extends State<BattleWaitingRoomView>
     _pulseAnimation = Tween<double>(begin: 0.4, end: 1.0).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+
+    _avatarEntranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    )..forward();
+    _avatarEntranceAnimation = CurvedAnimation(
+      parent: _avatarEntranceController,
+      curve: Curves.easeOutBack,
+    );
+
+    // Start dynamic live joining
+    _scheduleNextJoin();
+  }
+
+  void _scheduleNextJoin() {
+    if (!mounted) return;
+    
+    final random = Random();
+    int delayMs;
+    final randValue = random.nextDouble();
+    
+    // Randomize intervals to feel organic
+    if (randValue < 0.1) {
+      // 10% chance for a long pause (10-30s)
+      delayMs = 10000 + random.nextInt(20000);
+    } else if (randValue < 0.35) {
+      // 25% chance for a medium pause (4-8s)
+      delayMs = 4000 + random.nextInt(4000);
+    } else {
+      // 65% chance for a fast burst (0.5-2.5s)
+      delayMs = 500 + random.nextInt(2000);
+    }
+
+    _joinTimer = Timer(Duration(milliseconds: delayMs), () {
+      if (!mounted) return;
+      setState(() {
+        if (_activeAvatars.length >= 4) {
+          _activeAvatars.removeAt(0); // keep max 4 avatars visible
+        }
+        final poolItem = _avatarPool[_poolIndex % _avatarPool.length];
+        _activeAvatars.add((id: _avatarIdCounter++, label: poolItem.label, color: poolItem.color));
+        _poolIndex++;
+      });
+      _avatarEntranceController.forward(from: 0);
+      _scheduleNextJoin();
+    });
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
+    _avatarEntranceController.dispose();
+    _joinTimer?.cancel();
     super.dispose();
   }
 
@@ -177,11 +251,6 @@ class _BattleWaitingRoomViewState extends State<BattleWaitingRoomView>
           child: ValueListenableBuilder<int>(
             valueListenable: widget.secondsNotifier,
             builder: (context, waitingSecondsRemaining, _) {
-              final minutes = (waitingSecondsRemaining / 60).floor();
-              final seconds = waitingSecondsRemaining % 60;
-              final minsStr = minutes.toString().padLeft(2, '0');
-              final secsStr = seconds.toString().padLeft(2, '0');
-
               return LayoutBuilder(
                 builder: (context, constraints) {
                   return SingleChildScrollView(
@@ -227,32 +296,8 @@ class _BattleWaitingRoomViewState extends State<BattleWaitingRoomView>
                             ),
                             const SizedBox(height: 28),
 
-                            // Syncing Live
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                FadeTransition(
-                                  opacity: _pulseAnimation,
-                                  child: Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: const BoxDecoration(
-                                      color: AppColors.textSecondary,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Syncing live... Battle starts automatically',
-                                  style: AppFonts.body(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
+                            // Live joining avatars
+                            _buildLiveJoining(),
                             const SizedBox(height: 32),
 
                             // Countdown label
@@ -268,15 +313,7 @@ class _BattleWaitingRoomViewState extends State<BattleWaitingRoomView>
                             const SizedBox(height: 12),
 
                             // Time cards
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                _buildTimeCard(minsStr, 'MINUTES'),
-                                _buildTimeSeparator(),
-                                _buildTimeCard(secsStr, 'SECONDS'),
-                              ],
-                            ),
+                            BattleCountdownTimer(secondsRemaining: waitingSecondsRemaining),
                           ],
                         ),
                       ),
@@ -291,50 +328,97 @@ class _BattleWaitingRoomViewState extends State<BattleWaitingRoomView>
     );
   }
 
-  Widget _buildTimeCard(String value, String label) {
-    return Column(
+  Widget _buildLiveJoining() {
+    const double avatarSize = 22.0;
+    const double overlap = 8.0;
+    final totalWidth = avatarSize + (_activeAvatars.isEmpty ? 0 : _activeAvatars.length - 1) * (avatarSize - overlap);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        CustomContainer(
-          width: 80,
-          height: 70,
-          padding: EdgeInsets.zero,
-          child: Center(
-            child: Text(
-              value,
-              style: AppFonts.heading(
-                fontSize: 34,
-                fontWeight: FontWeight.w800,
-                color: AppColors.primary,
-              ),
+        // Overlapping avatars
+        if (_activeAvatars.isNotEmpty)
+          SizedBox(
+            width: totalWidth,
+            height: avatarSize + 4, // +4 for border
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: _activeAvatars.asMap().entries.map((entry) {
+                final i = entry.key;
+                final avatar = entry.value;
+                final isNewest = i == _activeAvatars.length - 1;
+
+                Widget circle = Container(
+                  width: avatarSize,
+                  height: avatarSize,
+                  decoration: BoxDecoration(
+                    color: avatar.color,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.background, width: 2),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    avatar.label,
+                    style: AppFonts.body(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                );
+
+                // Animate only the newest avatar pop-in
+                if (isNewest) {
+                  circle = ScaleTransition(
+                    scale: _avatarEntranceAnimation,
+                    child: FadeTransition(
+                      opacity: _avatarEntranceAnimation,
+                      child: circle,
+                    ),
+                  );
+                }
+
+                // Smoothly slide older avatars to the left
+                return AnimatedPositioned(
+                  key: ValueKey(avatar.id),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                  left: i * (avatarSize - overlap),
+                  child: circle,
+                );
+              }).toList(),
             ),
           ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: AppFonts.body(
-            fontSize: 9,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textSecondary,
-            letterSpacing: 1.0,
-          ),
+        if (_activeAvatars.isNotEmpty) const SizedBox(width: 8),
+        // Join count + live badge
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Live red dot
+            FadeTransition(
+              opacity: _pulseAnimation,
+              child: Container(
+                width: 7,
+                height: 7,
+                decoration: const BoxDecoration(
+                  color: AppColors.error,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              ' Joining live',
+              style: AppFonts.body(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
       ],
-    );
-  }
-
-  Widget _buildTimeSeparator() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
-      child: Text(
-        ':',
-        style: AppFonts.heading(
-          fontSize: 34,
-          fontWeight: FontWeight.w800,
-          color: AppColors.textSecondary,
-        ),
-      ),
     );
   }
 }

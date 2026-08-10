@@ -4,11 +4,6 @@ import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
-import 'package:target_ace/core/shared/widgets/app_notifier.dart';
-import 'package:target_ace/core/utils/enums/message_type.dart';
-import 'package:target_ace/core/services/service_locator.dart';
-import 'package:target_ace/features/battle/domain/usecases/get_battle_questions.dart';
-import 'package:target_ace/features/practice/domain/entities/question_entity.dart';
 import 'package:target_ace/features/battle/presentation/bloc/arena/battle_arena_bloc.dart';
 import 'package:target_ace/features/battle/presentation/pages/battle_review_page.dart';
 import 'package:target_ace/features/battle/presentation/widgets/arena/battle_history_section.dart';
@@ -40,43 +35,16 @@ class _BattleArenaPageState extends State<BattleArenaPage> {
   }
 
   Future<void> _navigateToReview(String examId, List<dynamic> answers) async {
-    if (_isFetchingQuestions.value) return;
-    _isFetchingQuestions.value = true;
+    final List<Map<String, dynamic>> userAnswers = answers
+        .map((a) => Map<String, dynamic>.from(a as Map))
+        .toList();
 
-    try {
-      final getBattleQuestions = sl<GetBattleQuestions>();
-      final eitherQuestions = await getBattleQuestions(examId);
-
-      List<QuestionEntity> fetchedQuestions = [];
-      await eitherQuestions.fold(
-        (failure) async => throw Exception(failure.message),
-        (questions) async => fetchedQuestions = questions,
-      );
-      _isFetchingQuestions.value = false;
-
-      if (mounted) {
-        final List<Map<String, dynamic>> userAnswers = answers
-            .map((a) => Map<String, dynamic>.from(a as Map))
-            .toList();
-
-        Navigator.push(
-          context,
-          BattleReviewPage.route(
-            questions: fetchedQuestions,
-            userAnswers: userAnswers,
-          ),
-        );
-      }
-    } catch (e) {
-      _isFetchingQuestions.value = false;
-      if (mounted) {
-        AppNotifier.showSnackBar(
-          context,
-          'Error fetching exam questions: $e',
-          type: MessageType.error,
-        );
-      }
-    }
+    Navigator.of(context).push(
+      BattleReviewPage.route(
+        examId: examId,
+        userAnswers: userAnswers,
+      ),
+    );
   }
 
   bool _hasActiveFeatured(BattleArenaSuccess state) {
@@ -130,6 +98,7 @@ class _BattleArenaPageState extends State<BattleArenaPage> {
                     color: AppColors.primary,
                     backgroundColor: AppColors.card,
                     child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         children: [

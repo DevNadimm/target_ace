@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart' hide BackButton;
+import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/components/back_button.dart';
 import 'package:target_ace/core/config/colors.dart';
@@ -73,7 +73,6 @@ class _PracticeSessionPageViewState extends State<PracticeSessionPageView> {
         ),
         body: GradientBackground(child: BlocBuilder<PracticeSessionCubit, PracticeSessionState>(
           builder: (context, state) {
-            final topics = state.topics;
             final questions = state.questions;
 
             return Column(

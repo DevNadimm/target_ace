@@ -59,4 +59,5 @@ class Assets {
 
   /// -- Animations (Lottie) --------------------------------------------------
   static const String flameAnim = '$_animPath/flame_anim.json';
+  static const String scanDocument = '$_animPath/scan_document.json';
 }

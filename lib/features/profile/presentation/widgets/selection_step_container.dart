@@ -1,6 +1,4 @@
-﻿import 'package:flutter/material.dart';
-import 'package:target_ace/core/config/colors.dart';
-import 'package:target_ace/core/config/typography.dart';
+import 'package:flutter/material.dart';
 import 'package:target_ace/features/profile/presentation/widgets/selection_card.dart';
 import 'package:target_ace/features/profile/presentation/widgets/step_header.dart';
 import 'package:target_ace/core/shared/widgets/inline_error_widget.dart';

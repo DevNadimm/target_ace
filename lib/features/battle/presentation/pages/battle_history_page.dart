@@ -7,9 +7,7 @@ import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/shared/widgets/empty_state_widget.dart';
 import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
-import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/services/service_locator.dart';
-import 'package:target_ace/core/utils/enums/message_type.dart';
 import 'package:target_ace/features/battle/domain/entities/user_submission_entity.dart';
 import 'package:target_ace/features/battle/presentation/pages/battle_review_page.dart';
 import 'package:target_ace/features/battle/presentation/widgets/arena/history_detail_bottom_sheet.dart';
@@ -31,15 +29,41 @@ class BattleHistoryPage extends StatefulWidget {
 }
 
 class _BattleHistoryPageState extends State<BattleHistoryPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      context.read<BattleHistoryBloc>().add(FetchMoreBattleHistoryEvent());
+    }
+  }
+
   void _loadHistory({bool isRefresh = false}) {
     context.read<BattleHistoryBloc>().add(FetchBattleHistoryEvent(isRefresh: isRefresh));
   }
 
   void _navigateToReview(String examId, List<dynamic> answers) {
-    context.read<BattleHistoryBloc>().add(FetchBattleQuestionsEvent(
-          examId: examId,
-          userAnswers: answers,
-        ));
+    final List<Map<String, dynamic>> userAnswers = answers
+        .map((a) => Map<String, dynamic>.from(a as Map))
+        .toList();
+
+    Navigator.of(context).push(
+      BattleReviewPage.route(
+        examId: examId,
+        userAnswers: userAnswers,
+      ),
+    );
   }
 
   void _showHistoryDetailSheet(UserSubmissionEntity sub) {
@@ -59,27 +83,9 @@ class _BattleHistoryPageState extends State<BattleHistoryPage> {
       ),
       body: GradientBackground(
         child: SafeArea(
-          child: BlocConsumer<BattleHistoryBloc, BattleHistoryState>(
-            listenWhen: (previous, current) {
-              return current is BattleHistoryReviewReady ||
-                  current is BattleHistoryReviewError;
-            },
-            listener: (context, state) {
-              if (state is BattleHistoryReviewReady) {
-                Navigator.push(
-                  context,
-                  BattleReviewPage.route(
-                    questions: state.questions,
-                    userAnswers: state.userAnswers.map((a) => Map<String, dynamic>.from(a as Map)).toList(),
-                  ),
-                );
-              } else if (state is BattleHistoryReviewError) {
-                AppNotifier.showSnackBar(context, state.message, type: MessageType.error);
-              }
-            },
+          child: BlocBuilder<BattleHistoryBloc, BattleHistoryState>(
             builder: (context, state) {
               final isLoadingMain = state is BattleHistoryInitial || (state is BattleHistoryLoading);
-              final isFetchingQuestions = state is BattleHistoryReviewLoading;
 
               return Stack(
                 children: [
@@ -115,10 +121,20 @@ class _BattleHistoryPageState extends State<BattleHistoryPage> {
                       backgroundColor: AppColors.card,
                       color: AppColors.primary,
                       child: ListView.builder(
+                        controller: _scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
-                        itemCount: state.submissions.length,
+                        itemCount: state.submissions.length + (state is BattleHistoryLoaded && state.isLoadingMore ? 1 : 0),
                         itemBuilder: (context, index) {
+                          if (index == state.submissions.length) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 24),
+                              child: Loader(
+                                isShowContainer: false,
+                              ),
+                            );
+                          }
+                          
                           final sub = state.submissions[index];
                           return BattleHistoryCard(
                             submission: sub,
@@ -127,13 +143,7 @@ class _BattleHistoryPageState extends State<BattleHistoryPage> {
                         },
                       ),
                     ),
-
-                  if (isFetchingQuestions)
-                    Container(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      child: const Center(child: Loader()),
-                    ),
-                ],
+                 ],
               );
             },
           ),

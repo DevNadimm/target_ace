@@ -105,25 +105,7 @@ class _TicketCardState extends State<_TicketCard>
           child: Stack(
             clipBehavior: Clip.none,
           children: [
-            // ── Dynamic ambient glow behind card ──
-            if (isLive)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(_kCornerRadius),
-                      boxShadow: [
-                        BoxShadow(
-                          color: accent.withValues(alpha: 0.25),
-                          blurRadius: 24,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+
 
             // ── Base card (clipped to ticket shape) ──────────────
             ClipPath(
@@ -172,19 +154,8 @@ class _TicketCardState extends State<_TicketCard>
                         child: Opacity(
                           opacity: (1.0 - slideValue).clamp(0.0, 1.0), // Fade out in Phase 2
                           child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF5F5F7),
-                              // Ambient glow bleeds into right side
-                              gradient: isLive
-                                  ? LinearGradient(
-                                      begin: Alignment.centerLeft,
-                                      end: const Alignment(0.5, 0.0),
-                                      colors: [
-                                        accent.withValues(alpha: 0.08),
-                                        const Color(0xFFF5F5F7),
-                                      ],
-                                    )
-                                  : null,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
                             ),
                             padding: const EdgeInsets.all(16),
                             child: Column(

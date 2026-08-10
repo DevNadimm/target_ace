@@ -58,7 +58,11 @@ class BattleRepositoryImpl implements BattleRepository {
   }
 
   @override
-  Future<Either<Failure, List<QuestionEntity>>> fetchQuestions(String examId) async {
+  Future<Either<Failure, List<QuestionEntity>>> fetchQuestions({
+    required String examId,
+    int? limit,
+    int? offset,
+  }) async {
     try {
       if (!await connectionChecker.isConnected) {
         final cachedJson = await AppPreferences.getCachedExamQuestions(examId);
@@ -68,8 +72,12 @@ class BattleRepositoryImpl implements BattleRepository {
         }
         return left(Failure(type: ErrorType.network));
       }
-      final questions = await remoteDataSource.fetchQuestions(examId);
-      if (questions.isNotEmpty) {
+      final questions = await remoteDataSource.fetchQuestions(
+        examId: examId,
+        limit: limit,
+        offset: offset,
+      );
+      if (questions.isNotEmpty && limit == null) {
         final rawList = questions.map((q) => q.toJson()).toList();
         await AppPreferences.saveCachedExamQuestions(examId, rawList);
       }
@@ -177,18 +185,27 @@ class BattleRepositoryImpl implements BattleRepository {
   }
 
   @override
-  Future<Either<Failure, List<UserSubmissionEntity>>> getUserSubmissions(String userId) async {
-    try {
-      if (!await connectionChecker.isConnected) {
-        return left(Failure(type: ErrorType.network));
+  Future<Either<Failure, List<UserSubmissionEntity>>> getUserSubmissions({
+    required String userId,
+    required int limit,
+    required int offset,
+  }) async {
+    if (await connectionChecker.isConnected) {
+      try {
+        final submissionsData = await remoteDataSource.getUserSubmissions(
+          userId: userId,
+          limit: limit,
+          offset: offset,
+        );
+        final submissions = submissionsData
+            .map((json) => UserSubmissionModel.fromJson(json))
+            .toList();
+        return Right(submissions);
+      } catch (e) {
+        return Left(Failure(message: e.toString()));
       }
-      final submissions = await remoteDataSource.getUserSubmissions(userId);
-      final mapped = submissions.map((s) => UserSubmissionModel.fromJson(s)).toList();
-      return right(mapped);
-    } on ServerException catch (e) {
-      return left(Failure(message: e.message, type: e.type));
-    } catch (e) {
-      return left(Failure(message: e.toString()));
+    } else {
+      return const Left(Failure(type: ErrorType.network));
     }
   }
 

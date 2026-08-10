@@ -121,7 +121,9 @@ class BattleBloc extends Bloc<BattleEvent, BattleState> {
 
       if (isSubCheckFailed) return;
 
-      final questionRes = await _getBattleQuestions(examId);
+      final questionRes = await _getBattleQuestions(
+        GetBattleQuestionsParams(examId: examId, fetchAll: true),
+      );
 
       bool isQuestionsFailed = false;
       final questions = questionRes.fold(

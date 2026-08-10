@@ -7,6 +7,8 @@ class FetchBattleHistoryEvent extends BattleHistoryEvent {
   FetchBattleHistoryEvent({this.isRefresh = false});
 }
 
+class FetchMoreBattleHistoryEvent extends BattleHistoryEvent {}
+
 class FetchBattleQuestionsEvent extends BattleHistoryEvent {
   final String examId;
   final List<dynamic> userAnswers;

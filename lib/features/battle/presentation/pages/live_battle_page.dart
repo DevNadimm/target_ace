@@ -9,6 +9,7 @@ import 'package:target_ace/core/services/service_locator.dart';
 import 'package:target_ace/features/battle/presentation/bloc/battle/battle_bloc.dart';
 import 'package:target_ace/features/battle/presentation/widgets/live/analyzing_battle_results_view.dart';
 import 'package:target_ace/features/battle/presentation/widgets/live/active_battle_view.dart';
+import 'package:target_ace/features/battle/presentation/widgets/live/battle_disqualified_view.dart';
 import 'package:target_ace/features/battle/presentation/widgets/live/battle_scoreboard_view.dart';
 import 'package:target_ace/features/battle/presentation/widgets/live/battle_waiting_room_view.dart';
 
@@ -180,15 +181,20 @@ class _LiveBattlePageState extends State<LiveBattlePage> with WidgetsBindingObse
     }
 
     if (state is BattleScoreboard) {
+      if (state.isDisqualified) {
+        return BattleDisqualifiedView(
+          examTitle: state.examTitle,
+          onExit: () => Navigator.pop(context),
+        );
+      }
       return BattleScoreboardView(
+        examId: state.examId,
         examTitle: state.examTitle,
         score: state.score,
         examRank: state.examRank,
         groupRank: state.groupRank,
         globalRank: state.globalRank,
         leaderboard: state.leaderboard,
-        isDisqualified: state.isDisqualified,
-        questions: state.questions,
         userAnswersList: state.userAnswersList,
         onExit: () => Navigator.pop(context),
       );

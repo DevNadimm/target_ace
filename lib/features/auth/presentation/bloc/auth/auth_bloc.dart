@@ -70,6 +70,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLogout(LogoutRequested event, Emitter<AuthState> emit) async {
+    if (state is LogoutSuccess) return;
+    
     final res = await _doLogout(const NoParams());
     
     res.fold(
@@ -83,6 +85,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onAuthSignedOut(AuthSignedOut event, Emitter<AuthState> emit) async {
+    if (state is LogoutSuccess) return;
+
     final res = await _doLocalLogout(const NoParams());
     
     res.fold(

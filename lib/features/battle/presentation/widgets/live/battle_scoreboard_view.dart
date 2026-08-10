@@ -1,389 +1,482 @@
-﻿import 'package:flutter/material.dart';
-import 'package:target_ace/core/components/custom_container.dart';
-import 'package:target_ace/core/components/custom_divider.dart';
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/spring_button.dart';
+import 'package:target_ace/features/home/presentation/widgets/home_podium_section.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
-import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/features/battle/domain/entities/leaderboard_entry_entity.dart';
-import 'package:target_ace/features/home/presentation/widgets/home_podium_section.dart';
 import 'package:target_ace/features/battle/presentation/pages/battle_review_page.dart';
-import 'package:target_ace/features/practice/domain/entities/question_entity.dart';
 
 class BattleScoreboardView extends StatelessWidget {
+  final String examId;
   final String examTitle;
   final double score;
   final int examRank;
   final int groupRank;
   final int globalRank;
   final List<LeaderboardEntryEntity> leaderboard;
-  final bool isDisqualified;
-  final List<QuestionEntity> questions;
   final List<Map<String, dynamic>> userAnswersList;
   final VoidCallback onExit;
 
   const BattleScoreboardView({
     super.key,
+    required this.examId,
     required this.examTitle,
     required this.score,
     required this.examRank,
     required this.groupRank,
     required this.globalRank,
     required this.leaderboard,
-    required this.isDisqualified,
-    required this.questions,
     required this.userAnswersList,
     required this.onExit,
   });
 
   @override
   Widget build(BuildContext context) {
+    final podiumItems = leaderboard.take(3).toList();
+    final remainingItems = leaderboard.skip(3).toList();
+
     return Scaffold(
-      body: GradientBackground(
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+      backgroundColor: const Color(0xFF0D0F14), // Deep dark base
+      body: Stack(
+        children: [
+          // Background ambient glow
+          Positioned(
+            top: -100,
+            left: -100,
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.primary.withValues(alpha: 0.15),
+                ),
+              ),
+            ),
+          ),
+          
+          SafeArea(
+            bottom: false,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header Details
-                Text(
-                  examTitle,
-                  style: AppFonts.heading(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  isDisqualified 
-                      ? 'You were disqualified from the battle.' 
-                      : 'Battle completed successfully! View your ranks below.',
-                  style: AppFonts.body(
-                    fontSize: 13,
-                    color: isDisqualified ? AppColors.error : AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-
-                // Metrics Container
-                CustomContainer(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Text(
-                        isDisqualified ? 'DISQUALIFIED' : 'YOUR SCORE',
-                        style: AppFonts.body(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: isDisqualified ? AppColors.error : AppColors.primary,
-                          letterSpacing: 1.2,
+                _buildHeader(context),
+                Expanded(
+                  child: CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: [
+                      // Glassmorphic Player Card
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          child: _buildTriumphPlayerCard(),
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        isDisqualified ? '0' : '${score.toStringAsFixed(1)}%',
-                        style: AppFonts.body(
-                          fontSize: 48,
-                          fontWeight: FontWeight.w800,
-                          color: isDisqualified ? AppColors.error : AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const CustomDivider(height: 1),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildMetricColumn('Score', '${score.toStringAsFixed(1)}/100'),
-                          _buildMetricColumn('Exam Rank', '#$examRank'),
-                          _buildMetricColumn('Group Rank', '#$groupRank'),
-                          _buildMetricColumn('Global Rank', '#$globalRank'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 28),
-
-                // HomePodiumSection for Top 3
-                if (leaderboard.isNotEmpty) ...[
-                  Builder(
-                    builder: (context) {
-                      final items = List<LeaderboardEntryEntity?>.filled(3, null);
-                      for (int i = 0; i < leaderboard.length && i < 3; i++) {
-                        items[i] = leaderboard[i];
-                      }
-
-                      final podiumUsers = List<HomePodiumUser?>.generate(3, (index) {
-                        final item = items[index];
-                        if (item == null) return null;
-                        return HomePodiumUser(
-                          name: item.name,
-                          avatarUrl: item.avatarUrl,
-                          score: item.score,
-                          isMe: item.isCurrentUser,
-                        );
-                      });
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: HomePodiumSection(
-                          users: podiumUsers,
-                          scoreSuffix: '/100',
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                ],
-
-                // Battle Leaderboard
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Battle Standings',
-                      style: AppFonts.body(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                CustomContainer(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Builder(
-                        builder: (context) {
-                          final remainingItems = leaderboard.skip(3).toList();
-                          if (remainingItems.isEmpty) {
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 20),
-                                child: Text(
-                                  'No more standings available',
-                                  style: AppFonts.body(color: AppColors.textLight, fontSize: 13),
-                                ),
-                              ),
-                            );
-                          }
-                          return ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: remainingItems.length,
-                            separatorBuilder: (context, index) => const Divider(color: AppColors.divider),
-                            itemBuilder: (context, index) {
-                              final item = remainingItems[index];
-                              final isMe = item.isCurrentUser;
-
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 24,
-                                      height: 24,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.grey.withValues(alpha: 0.15),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          '${item.rank}',
-                                          style: AppFonts.body(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textLight,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        item.name,
-                                        style: AppFonts.body(
-                                          fontSize: 14,
-                                          fontWeight: isMe ? FontWeight.bold : FontWeight.w500,
-                                          color: isMe ? AppColors.primary : AppColors.textPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                    Text(
-                                      '${item.score.round()}/100',
-                                      style: AppFonts.body(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: isMe ? AppColors.primary : AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                      // If current user is not in the top 50, show an anchored card at the bottom of the list
-                      Builder(
-                        builder: (context) {
-                          final int myIndex = leaderboard.indexWhere((u) => u.isCurrentUser);
-                          final bool isOutsideTop50 = myIndex == -1 && examRank > 0;
-
-                          if (isOutsideTop50) {
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Divider(color: AppColors.divider, height: 24),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.35), width: 1.2),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 24,
-                                        height: 24,
-                                        decoration: const BoxDecoration(
-                                          color: AppColors.primary,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            '$examRank',
-                                            style: AppFonts.body(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          'You (Outside Top 50)',
-                                          style: AppFonts.body(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.primary,
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        '${score.round()}/100',
-                                        style: AppFonts.body(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.primary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            );
-                          }
-                          return const SizedBox.shrink();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Review Answers Button
-                if (!isDisqualified && questions.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: SpringButton.outlined(
-                        borderColor: AppColors.primary,
-                        borderRadius: BorderRadius.circular(16),
-                        height: 52.0,
-                        onPressed: () {
-                          Navigator.push(context, BattleReviewPage.route(
-                            questions: questions,
-                            userAnswers: userAnswersList,
-                          ));
-                        },
-                        child: Text(
-                          'Review Answers',
-                          style: AppFonts.body(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                      
+                      // Victory Podium
+                      if (podiumItems.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
+                            child: _buildPodiumSection(podiumItems),
                           ),
                         ),
+                      
+                      // Layered Leaderboard List
+                      if (remainingItems.isNotEmpty)
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final item = remainingItems[index];
+                                return _buildLayeredLeaderboardRow(item);
+                              },
+                              childCount: remainingItems.length,
+                            ),
+                          ),
+                        ),
+                        
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: 120), // Padding for floating CTA
                       ),
-                    ),
-                  ),
-
-                // Exit Button
-                SizedBox(
-                  width: double.infinity,
-                  child: SpringButton(
-                    backgroundColor: AppColors.primary,
-                    onPressed: onExit,
-                    child: Text(
-                      'Back to Home',
-                      style: AppFonts.body(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
+                    ],
                   ),
                 ),
               ],
             ),
+          ),
+          
+          // Floating Action Area
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _buildFloatingActions(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const HugeIcon(icon: HugeIcons.strokeRoundedAiNetwork, color: AppColors.primary, size: 24),
+          const SizedBox(width: 8),
+          Text(
+            'MATCH COMPLETE',
+            style: AppFonts.heading(
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              letterSpacing: 2.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTriumphPlayerCard() {
+    int correct = userAnswersList.where((ans) => ans['is_correct'] == true).length;
+    int wrong = userAnswersList.where((ans) => ans['is_correct'] == false && ans['selected_option'] != null).length;
+    int skipped = userAnswersList.length - correct - wrong;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.03),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          ),
+          child: Column(
+            children: [
+              // Top Stats
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'YOUR SCORE',
+                        style: AppFonts.body(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary, letterSpacing: 1.5),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            '${score.round()}',
+                            style: AppFonts.heading(fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'PTS',
+                            style: AppFonts.body(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  // Glowing Ranks
+                  Row(
+                    children: [
+                      _buildNeonRankBadge('EXAM', examRank, AppColors.primary),
+                      const SizedBox(width: 8),
+                      _buildNeonRankBadge('GROUP', groupRank, AppColors.labelGreen),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              
+              // Dynamic Accuracy Track
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'ACCURACY BREAKDOWN',
+                    style: AppFonts.body(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 1.0),
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      height: 8,
+                      child: Row(
+                        children: [
+                          if (correct > 0) Expanded(flex: correct, child: Container(color: AppColors.labelGreen)),
+                          if (wrong > 0) Expanded(flex: wrong, child: Container(color: AppColors.error)),
+                          if (skipped > 0) Expanded(flex: skipped, child: Container(color: AppColors.grey)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildAccuracyLegend('Correct', correct, AppColors.labelGreen),
+                      _buildAccuracyLegend('Wrong', wrong, AppColors.error),
+                      _buildAccuracyLegend('Skipped', skipped, AppColors.grey),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildMetricColumn(String label, String value) {
-    return Column(
+  Widget _buildNeonRankBadge(String label, int rank, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.15),
+            blurRadius: 10,
+            spreadRadius: 1,
+          )
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: AppFonts.body(fontSize: 9, fontWeight: FontWeight.bold, color: color, letterSpacing: 1.0),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '#$rank',
+            style: AppFonts.heading(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccuracyLegend(String label, int count, Color color) {
+    return Row(
       children: [
-        Text(
-          label,
-          style: AppFonts.body(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(width: 6),
         Text(
-          value,
-          style: AppFonts.body(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
+          '$label $count',
+          style: AppFonts.body(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white70),
         ),
       ],
+    );
+  }
+
+  Widget _buildPodiumSection(List<LeaderboardEntryEntity> topList) {
+    final items = List<LeaderboardEntryEntity?>.filled(3, null);
+    for (int i = 0; i < topList.length && i < 3; i++) {
+      items[i] = topList[i];
+    }
+
+    final podiumUsers = List<HomePodiumUser?>.generate(3, (index) {
+      final item = items[index];
+      if (item == null) return null;
+      return HomePodiumUser(
+        name: item.name,
+        avatarUrl: item.avatarUrl,
+        score: item.score,
+        isMe: item.isCurrentUser,
+      );
+    });
+
+    return HomePodiumSection(
+      users: podiumUsers,
+      scoreSuffix: ' pts',
+    );
+  }
+
+  Widget _buildLayeredLeaderboardRow(LeaderboardEntryEntity item) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: item.isCurrentUser ? AppColors.primary.withValues(alpha: 0.15) : AppColors.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: item.isCurrentUser ? AppColors.primary : AppColors.divider.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 32,
+            child: Text(
+              '#${item.rank}',
+              style: AppFonts.heading(
+                fontSize: 14,
+                fontWeight: item.isCurrentUser ? FontWeight.w900 : FontWeight.w600,
+                color: item.isCurrentUser ? AppColors.primary : AppColors.textSecondary,
+              ),
+            ),
+          ),
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: AppColors.background,
+            backgroundImage: item.avatarUrl.isNotEmpty ? NetworkImage(item.avatarUrl) : null,
+            child: item.avatarUrl.isEmpty
+                ? Text(item.name.isNotEmpty ? item.name[0].toUpperCase() : 'U', style: AppFonts.body(color: AppColors.textSecondary))
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        item.name,
+                        style: AppFonts.body(
+                          fontSize: 14,
+                          fontWeight: item.isCurrentUser ? FontWeight.bold : FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (item.isCurrentUser) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          "YOU",
+                          style: AppFonts.body(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                Text(
+                  '@${item.name.replaceAll(' ', '').toLowerCase()}',
+                  style: AppFonts.body(fontSize: 10, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '${item.score.round()} PTS',
+            style: AppFonts.heading(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: item.isCurrentUser ? AppColors.primary : Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFloatingActions(BuildContext context) {
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFF0D0F14).withValues(alpha: 0.1),
+                const Color(0xFF0D0F14).withValues(alpha: 0.9),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            border: Border(
+              top: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: SpringButton(
+                  backgroundColor: AppColors.primary,
+                  borderRadius: BorderRadius.circular(16),
+                  height: 56.0,
+                  onPressed: () {
+                    Navigator.push(context, BattleReviewPage.route(
+                      examId: examId,
+                      userAnswers: userAnswersList,
+                    ));
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const HugeIcon(icon: HugeIcons.strokeRoundedCrown, color: Colors.white, size: 22),
+                      const SizedBox(width: 8),
+                      Text(
+                        'REVIEW ANSWERS',
+                        style: AppFonts.body(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.0),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'PRO',
+                          style: AppFonts.body(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: SpringButton.outlined(
+                  borderColor: Colors.white.withValues(alpha: 0.2),
+                  onPressed: onExit,
+                  height: 52.0,
+                  child: Text(
+                    'BACK TO HOME',
+                    style: AppFonts.body(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white70, letterSpacing: 1.0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

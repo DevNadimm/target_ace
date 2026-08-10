@@ -1,4 +1,5 @@
-﻿import 'package:target_ace/features/battle/domain/entities/user_submission_entity.dart';
+import 'dart:convert';
+import 'package:target_ace/features/battle/domain/entities/user_submission_entity.dart';
 
 class UserSubmissionModel extends UserSubmissionEntity {
   const UserSubmissionModel({
@@ -28,7 +29,7 @@ class UserSubmissionModel extends UserSubmissionEntity {
       correctCount: json['correct_count'] as int? ?? 0,
       wrongCount: json['wrong_count'] as int? ?? 0,
       unansweredCount: json['unanswered_count'] as int? ?? 0,
-      answers: json['answers'] as List<dynamic>? ?? const [],
+      answers: _parseAnswers(json['answers']),
       rank: (json['rank'] as num?)?.toInt() ?? 0,
       totalParticipants: (json['total_participants'] as num?)?.toInt() ?? 0,
       timeTakenSeconds: (json['time_taken_seconds'] as num?)?.toInt() ?? 0,
@@ -48,5 +49,19 @@ class UserSubmissionModel extends UserSubmissionEntity {
       'unanswered_count': unansweredCount,
       'answers': answers,
     };
+  }
+
+  static List<dynamic> _parseAnswers(dynamic data) {
+    if (data == null) return const [];
+    if (data is List) return data;
+    if (data is String) {
+      try {
+        final decoded = jsonDecode(data);
+        if (decoded is List) return decoded;
+      } catch (_) {
+        return const [];
+      }
+    }
+    return const [];
   }
 }

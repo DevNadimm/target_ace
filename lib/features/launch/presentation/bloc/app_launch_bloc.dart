@@ -6,7 +6,6 @@ import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
 import 'package:target_ace/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:target_ace/features/auth/domain/repository/auth_repository.dart';
-import 'package:target_ace/core/utils/enums/error_type.dart';
 import 'package:target_ace/features/subscription/domain/usecases/check_trial_eligibility.dart';
 
 part 'app_launch_event.dart';

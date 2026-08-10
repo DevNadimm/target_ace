@@ -1,11 +1,13 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/spring_button.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/features/practice/domain/entities/question_entity.dart';
+import 'package:target_ace/features/profile/presentation/widgets/step_progress_bar.dart';
 
 class ActiveBattleView extends StatefulWidget {
   final String examTitle;
@@ -195,12 +197,9 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
                     const SizedBox(height: 12),
 
                     // Progress bar
-                    LinearProgressIndicator(
-                      value: (widget.currentIndex + 1) / widget.questions.length,
-                      backgroundColor: AppColors.divider,
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                      minHeight: 6,
-                      borderRadius: BorderRadius.circular(3),
+                    StepProgressBar(
+                      currentStep: widget.currentIndex,
+                      totalSteps: widget.questions.length,
                     ),
                     const SizedBox(height: 16),
 
@@ -209,6 +208,7 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
                       height: 32,
                       child: ListView.separated(
                         controller: _paletteScrollController,
+                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                         scrollDirection: Axis.horizontal,
                         itemCount: widget.questions.length,
                         separatorBuilder: (_, index) => const SizedBox(width: 6),
@@ -266,22 +266,27 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              currentQuestion.questionText,
-                              style: AppFonts.heading(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
-                                height: 1.4,
+                            CustomContainer(
+                              width: double.infinity,
+                              child: Text(
+                                currentQuestion.questionText,
+                                style: AppFonts.heading(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                  height: 1.4,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 22),
 
                             // Option Cards
                             _buildOptionCard('A', currentQuestion.optionA, widget.selectedOption, widget.onOptionSelected),
                             _buildOptionCard('B', currentQuestion.optionB, widget.selectedOption, widget.onOptionSelected),
-                            _buildOptionCard('C', currentQuestion.optionC, widget.selectedOption, widget.onOptionSelected),
-                            _buildOptionCard('D', currentQuestion.optionD, widget.selectedOption, widget.onOptionSelected),
+                            if (currentQuestion.optionC.isNotEmpty)
+                              _buildOptionCard('C', currentQuestion.optionC, widget.selectedOption, widget.onOptionSelected),
+                            if (currentQuestion.optionD.isNotEmpty)
+                              _buildOptionCard('D', currentQuestion.optionD, widget.selectedOption, widget.onOptionSelected),
                           ],
                         ),
                       ),
@@ -317,51 +322,49 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
   Widget _buildOptionCard(String key, String optionText, String selectedOption, ValueChanged<String> onOptionSelected) {
     final isSelected = selectedOption == key;
 
+    Color borderColor = isSelected ? AppColors.primary : AppColors.inputBorder;
+    Color textColor = isSelected ? AppColors.primary : AppColors.textPrimary;
+    Color circleColor = isSelected ? AppColors.primary : AppColors.black;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: SpringButton(
-        isOutlined: true,
-        backgroundColor: AppColors.card,
-        borderColor: isSelected ? AppColors.primary : AppColors.divider,
-        borderRadius: BorderRadius.circular(16),
-        depth: 3.0,
-        height: 58.0,
-        onPressed: () => onOptionSelected(key),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary : AppColors.divider,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    key,
-                    style: AppFonts.body(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : AppColors.textSecondary,
-                    ),
-                  ),
-                ),
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: CustomContainer(
+        onTap: () => onOptionSelected(key),
+        color: Color.alphaBlend(borderColor.withValues(alpha: 0.1), AppColors.background),
+        borderColor: borderColor,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: circleColor,
+                shape: BoxShape.circle,
               ),
-              const SizedBox(width: 16),
-              Expanded(
+              child: Center(
                 child: Text(
-                  optionText,
+                  key,
                   style: AppFonts.body(
-                    fontSize: 15,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: AppColors.textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected ? Colors.white : AppColors.textSecondary,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                optionText,
+                style: AppFonts.body(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: textColor,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

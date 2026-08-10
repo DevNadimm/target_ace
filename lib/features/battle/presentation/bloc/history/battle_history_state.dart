@@ -12,7 +12,30 @@ class BattleHistoryLoading extends BattleHistoryState {
 }
 
 class BattleHistoryLoaded extends BattleHistoryState {
-  BattleHistoryLoaded({required super.submissions});
+  final int currentPage;
+  final bool hasMore;
+  final bool isLoadingMore;
+
+  BattleHistoryLoaded({
+    required super.submissions,
+    this.currentPage = 1,
+    this.hasMore = false,
+    this.isLoadingMore = false,
+  });
+
+  BattleHistoryLoaded copyWith({
+    List<UserSubmissionEntity>? submissions,
+    int? currentPage,
+    bool? hasMore,
+    bool? isLoadingMore,
+  }) {
+    return BattleHistoryLoaded(
+      submissions: submissions ?? this.submissions,
+      currentPage: currentPage ?? this.currentPage,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 }
 
 class BattleHistoryError extends BattleHistoryState {

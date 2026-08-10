@@ -1,4 +1,4 @@
-﻿import 'package:fpdart/fpdart.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/features/battle/domain/entities/battle_entity.dart';
 import 'package:target_ace/features/battle/domain/entities/battle_submission_entity.dart';
@@ -12,7 +12,11 @@ import 'package:target_ace/features/practice/domain/entities/question_entity.dar
 abstract interface class BattleRepository {
   Future<Either<Failure, List<BattleEntity>>> getBattles(String goalId, String groupId);
   Future<Either<Failure, BattleSubmissionEntity?>> checkSubmission(String examId, String userId);
-  Future<Either<Failure, List<QuestionEntity>>> fetchQuestions(String examId);
+  Future<Either<Failure, List<QuestionEntity>>> fetchQuestions({
+    required String examId,
+    int? limit,
+    int? offset,
+  });
   Future<Either<Failure, void>> submitBattle({
     required String examId,
     required String userId,
@@ -34,7 +38,11 @@ abstract interface class BattleRepository {
     required String userId,
     required String activeGroupId,
   });
-  Future<Either<Failure, List<UserSubmissionEntity>>> getUserSubmissions(String userId);
+  Future<Either<Failure, List<UserSubmissionEntity>>> getUserSubmissions({
+    required String userId,
+    required int limit,
+    required int offset,
+  });
   Future<Either<Failure, List<BattleEntity>>> getGroupBattles(String groupId);
   Future<Either<Failure, BattleArenaDataEntity>> getBattleArenaData({required String userId, required String groupId});
   Future<Either<Failure, BattleLeaderboardDataEntity>> getBattleLeaderboardData(String examId, {String? userId});

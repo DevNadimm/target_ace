@@ -1,4 +1,4 @@
-﻿import 'package:target_ace/core/config/messages.dart';
+import 'package:target_ace/core/config/messages.dart';
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/config/typography.dart';
@@ -22,8 +22,6 @@ import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/utils/enums/message_type.dart';
 import 'package:target_ace/core/utils/helpers/date_formatter.dart';
 import 'package:target_ace/features/auth/presentation/bloc/auth/auth_bloc.dart';
-import 'package:target_ace/features/launch/presentation/bloc/app_launch_bloc.dart';
-import 'package:target_ace/features/launch/presentation/pages/launch_page.dart';
 import 'package:target_ace/features/profile/presentation/bloc/profile/profile_cubit.dart';
 import 'package:target_ace/features/profile/presentation/widgets/inactive_subscription_card.dart';
 import 'package:target_ace/features/profile/presentation/widgets/profile_avatar_header.dart';

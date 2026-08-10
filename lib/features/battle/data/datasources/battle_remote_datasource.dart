@@ -1,5 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/network/base_remote_datasource.dart';
 import 'package:target_ace/features/battle/data/models/battle_model.dart';
 import 'package:target_ace/features/battle/data/models/battle_submission_model.dart';
@@ -10,7 +8,11 @@ abstract interface class BattleRemoteDataSource {
 
   Future<BattleSubmissionModel?> checkSubmission(String examId, String userId);
 
-  Future<List<QuestionModel>> fetchQuestions(String examId);
+  Future<List<QuestionModel>> fetchQuestions({
+    required String examId,
+    int? limit,
+    int? offset,
+  });
 
   Future<void> submitBattle({
     required String examId,
@@ -35,7 +37,11 @@ abstract interface class BattleRemoteDataSource {
     required String activeGroupId,
   });
 
-  Future<List<Map<String, dynamic>>> getUserSubmissions(String userId);
+  Future<List<Map<String, dynamic>>> getUserSubmissions({
+    required String userId,
+    required int limit,
+    required int offset,
+  });
 
   Future<List<BattleModel>> getGroupBattles(String groupId);
 
@@ -109,12 +115,22 @@ class BattleRemoteDataSourceImpl extends BaseRemoteDataSource implements BattleR
   }
 
   @override
-  Future<List<QuestionModel>> fetchQuestions(String examId) async {
+  Future<List<QuestionModel>> fetchQuestions({
+    required String examId,
+    int? limit,
+    int? offset,
+  }) async {
     try {
-      final response = await client
+      dynamic query = client
           .from('exam_questions')
           .select('questions(*)')
           .eq('exam_id', examId);
+          
+      if (limit != null && offset != null) {
+        query = query.range(offset, offset + limit - 1);
+      }
+      
+      final response = await query;
 
       final List<QuestionModel> questions = [];
       for (final eq in response) {
@@ -225,11 +241,19 @@ class BattleRemoteDataSourceImpl extends BaseRemoteDataSource implements BattleR
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getUserSubmissions(String userId) async {
+  Future<List<Map<String, dynamic>>> getUserSubmissions({
+    required String userId,
+    required int limit,
+    required int offset,
+  }) async {
     try {
       final response = await client.rpc(
         'get_user_submissions_with_stats',
-        params: {'p_user_id': userId},
+        params: {
+          'p_user_id': userId,
+          'p_limit': limit,
+          'p_offset': offset,
+        },
       );
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
