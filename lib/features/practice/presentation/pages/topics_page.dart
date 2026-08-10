@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart' hide BackButton;
+import 'package:flutter/material.dart' hide BackButton;
 import 'package:target_ace/core/components/back_button.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
@@ -35,15 +35,32 @@ class TopicsPage extends StatelessWidget {
               )
             : ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: subject.topics.length,
+                itemCount: subject.topics.length + 1,
                 itemBuilder: (context, index) {
-                  final topic = subject.topics[index];
+                  if (index == 0) {
+                    return SubjectCard(
+                      title: 'All Topics',
+                      description: 'Practice questions from all topics in ${subject.name}',
+                      practiced: subject.practicedCount,
+                      total: subject.totalQuestions,
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          PracticeSessionPage.route(
+                            subject: subject,
+                            topicId: null,
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  
+                  final topic = subject.topics[index - 1];
                   return SubjectCard(
                     title: topic.name,
                     description: topic.description,
                     practiced: topic.practicedCount,
                     total: topic.totalQuestions,
-                    image: topic.imageUrl ?? subject.imageUrl,
                     onTap: () async {
                       await Navigator.push(
                         context,

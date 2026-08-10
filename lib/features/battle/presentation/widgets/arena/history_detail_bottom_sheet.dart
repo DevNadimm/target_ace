@@ -267,6 +267,7 @@ class HistoryDetailBottomSheet extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
+                    flex: 1,
                     child: SpringButton(
                       onPressed: examId.isNotEmpty
                           ? () {
@@ -279,7 +280,8 @@ class HistoryDetailBottomSheet extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: SpringButton.outlined(
+                    flex: 1,
+                    child: SpringButton(
                       onPressed: examId.isNotEmpty
                           ? () {
                               Navigator.pop(context);
@@ -292,7 +294,9 @@ class HistoryDetailBottomSheet extends StatelessWidget {
                               );
                             }
                           : null,
-                      child: const Text('LEADERBOARD'),
+                      backgroundColor: AppColors.grey,
+                      shadowColor: AppColors.greyDark,
+                      child: Center(child: Text('LEADERBOARD')),
                     ),
                   ),
                 ],
@@ -332,4 +336,3 @@ class HistoryDetailBottomSheet extends StatelessWidget {
     );
   }
 }
-

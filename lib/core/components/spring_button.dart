@@ -80,7 +80,7 @@ class _SpringButtonState extends State<SpringButton> {
         : (widget.borderColor ?? AppColors.primary);
 
     final Color resolvedFaceColor = isDisabled
-        ? AppColors.cardAlt
+        ? AppColors.grey
         : widget.isOutlined
         ? (widget.backgroundColor ?? AppColors.surface)
         : (widget.backgroundColor ?? AppColors.primary);

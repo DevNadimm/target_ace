@@ -79,6 +79,20 @@ class _BattleArenaPageState extends State<BattleArenaPage> {
     }
   }
 
+  bool _hasActiveFeatured(BattleArenaSuccess state) {
+    final activeExam = state.todayExams.isNotEmpty
+        ? state.todayExams.first
+        : (state.upcomingExams.isNotEmpty ? state.upcomingExams.first : null);
+    if (activeExam == null) return false;
+    if (activeExam.startTime.isNotEmpty) {
+      final endTime = DateTime.parse(activeExam.startTime).toLocal().add(
+        Duration(minutes: activeExam.durationMinutes),
+      );
+      if (DateTime.now().isAfter(endTime)) return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,7 +141,8 @@ class _BattleArenaPageState extends State<BattleArenaPage> {
                               );
                             },
                           ),
-                          const SizedBox(height: 20),
+                          if (_hasActiveFeatured(state))
+                            const SizedBox(height: 20),
                           UpcomingBattlesSection(
                             upcomingExams: state.upcomingExams,
                           ),

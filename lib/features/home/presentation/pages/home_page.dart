@@ -151,15 +151,15 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Target & Active Exam Block
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: HomeActiveExamSection(
-                  exam: data.activeExam,
-                  hasSubmitted: data.hasSubmittedActiveExam,
-                  userGoal: _userGoal,
-                ),
+              HomeActiveExamSection(
+                exam: data.activeExam,
+                hasSubmitted: data.hasSubmittedActiveExam,
+                userGoal: _userGoal,
               ),
-              const SizedBox(height: 20),
+              if (data.activeExam != null &&
+                  !DateTime.now().isAfter(data.activeExam!.startTime
+                      .add(Duration(minutes: data.activeExam!.durationMinutes))))
+                const SizedBox(height: 20),
 
               // Daily Streak Card
               Padding(

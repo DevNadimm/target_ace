@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -54,7 +54,7 @@ class FeaturedBattleCard extends StatelessWidget {
     final bool canEnter = isLiveNow || isWithin15Mins;
 
     if (isNoExamAtAll) {
-      return const _ArenaIdleCard();
+      return const SizedBox.shrink();
     }
 
     return _MindPopHero(
@@ -377,15 +377,15 @@ class _MindPopCountdownState extends State<_MindPopCountdown> {
           child: _displayText.contains(' : ')
               ? _buildTimerRow(_displayText)
               : Text(
-                  _displayText,
-                  style: AppFonts.heading(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w400,
-                    color: widget.primaryColor,
-                    letterSpacing: 2.0,
-                    height: 0,
-                  ),
-                ),
+            _displayText,
+            style: AppFonts.heading(
+              fontSize: 28,
+              fontWeight: FontWeight.w400,
+              color: widget.primaryColor,
+              letterSpacing: 2.0,
+              height: 0,
+            ),
+          ),
         ),
       ],
     );

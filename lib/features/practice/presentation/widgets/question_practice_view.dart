@@ -305,8 +305,8 @@ class _QuestionPracticeViewState extends State<QuestionPracticeView> {
                     flex: 1,
                     child: SpringButton(
                       onPressed: widget.onPrevious,
-                      backgroundColor: AppColors.cardAlt,
-                      shadowColor: AppColors.card,
+                      backgroundColor: AppColors.card,
+                      shadowColor: AppColors.grey,
                       child: Center(
                         child: Text(
                           'PREVIOUS',

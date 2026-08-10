@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/config/colors.dart';
@@ -27,7 +27,7 @@ class ExplanationCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'à¦¬à§à¦¯à¦¾à¦–à§à¦¯à¦¾ (Explanation)',
+                'ব্যাখ্যা (Explanation)',
                 style: AppFonts.body(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
