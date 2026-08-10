@@ -15,8 +15,7 @@ import 'package:target_ace/features/home/presentation/widgets/home_streak_sectio
 import 'package:target_ace/core/services/user_local_datasource.dart';
 
 class HomePage extends StatefulWidget {
-  static Route route() =>
-      MaterialPageRoute(builder: (_) => const HomePage());
+  static Route route() => MaterialPageRoute(builder: (_) => const HomePage());
 
   const HomePage({super.key});
 
