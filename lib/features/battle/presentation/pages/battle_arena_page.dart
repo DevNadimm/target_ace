@@ -6,9 +6,11 @@ import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/features/battle/presentation/bloc/arena/battle_arena_bloc.dart';
 import 'package:target_ace/features/battle/presentation/pages/battle_review_page.dart';
+import 'package:target_ace/features/battle/presentation/pages/live_battle_page.dart';
 import 'package:target_ace/features/battle/presentation/widgets/arena/battle_history_section.dart';
 import 'package:target_ace/features/battle/presentation/widgets/arena/upcoming_battles_section.dart';
 import 'package:target_ace/features/battle/presentation/widgets/arena/featured_battle_card.dart';
+import 'package:target_ace/features/subscription/presentation/widgets/subscription_paywall_bottom_sheet.dart';
 
 class BattleArenaPage extends StatefulWidget {
   static Route route() => MaterialPageRoute(builder: (_) => const BattleArenaPage());
@@ -34,117 +36,135 @@ class _BattleArenaPageState extends State<BattleArenaPage> {
     super.dispose();
   }
 
-  Future<void> _navigateToReview(String examId, List<dynamic> answers) async {
-    final List<Map<String, dynamic>> userAnswers = answers
-        .map((a) => Map<String, dynamic>.from(a as Map))
-        .toList();
-
-    Navigator.of(context).push(
-      BattleReviewPage.route(
-        examId: examId,
-        userAnswers: userAnswers,
-      ),
-    );
+  void _navigateToReview(String examId, List<dynamic> answers) {
+    context.read<BattleArenaBloc>().add(
+          BattleArenaReviewRequested(examId, answers),
+        );
   }
 
   bool _hasActiveFeatured(BattleArenaSuccess state) {
     final activeExam = state.todayExams.isNotEmpty
         ? state.todayExams.first
-        : (state.upcomingExams.isNotEmpty ? state.upcomingExams.first : null);
+        : null;
     if (activeExam == null) return false;
-    if (activeExam.startTime.isNotEmpty) {
-      final endTime = DateTime.parse(activeExam.startTime).toLocal().add(
-        Duration(minutes: activeExam.durationMinutes),
-      );
-      if (DateTime.now().isAfter(endTime)) return false;
-    }
-    return true;
+    
+    // Ignore exams in past for featured section if past duration
+    final endTime = DateTime.parse(activeExam.startTime).toUtc().add(
+      Duration(minutes: activeExam.durationMinutes),
+    );
+    return DateTime.now().toUtc().isBefore(endTime);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Battle Arena')),
-      body: Stack(
-        children: [
-          GradientBackground(
-            child: BlocBuilder<BattleArenaBloc, BattleArenaState>(
-              builder: (context, state) {
-                if (state is BattleArenaLoading || state is BattleArenaInitial) {
-                  return const Center(child: Loader());
-                }
+      body: BlocListener<BattleArenaBloc, BattleArenaState>(
+        listener: (context, state) {
+          if (state is BattleArenaAccessDenied) {
+            SubscriptionPaywallBottomSheet.show(context, status: state.status);
+          } else if (state is BattleArenaReviewAccessGranted) {
+            final List<Map<String, dynamic>> userAnswers = state.answers
+                .map((a) => Map<String, dynamic>.from(a as Map))
+                .toList();
+            Navigator.of(context).push(
+              BattleReviewPage.route(
+                examId: state.examId,
+                userAnswers: userAnswers,
+              ),
+            );
+          } else if (state is BattleArenaEnterAccessGranted) {
+            Navigator.of(context).push(LiveBattlePage.route());
+          }
+        },
+        child: Stack(
+          children: [
+            GradientBackground(
+              child: BlocBuilder<BattleArenaBloc, BattleArenaState>(
+                buildWhen: (previous, current) {
+                  // Only rebuild on states that have UI representation
+                  return current is BattleArenaInitial ||
+                         current is BattleArenaLoading ||
+                         current is BattleArenaFailure ||
+                         current is BattleArenaSuccess;
+                },
+                builder: (context, state) {
+                  if (state is BattleArenaLoading || state is BattleArenaInitial) {
+                    return const Center(child: Loader());
+                  }
 
-                if (state is BattleArenaFailure) {
-                  return ErrorStateWidget(
-                    message: state.errorMessage, 
-                    errorType: state.errorType,
-                    onRetry: () => context.read<BattleArenaBloc>().add(
-                      BattleArenaFetchRequested(isSilent: true),
-                    ),
-                  );
-                }
-
-                if (state is BattleArenaSuccess) {
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      final bloc = context.read<BattleArenaBloc>();
-                      bloc.add(
+                  if (state is BattleArenaFailure) {
+                    return ErrorStateWidget(
+                      message: state.errorMessage,
+                      errorType: state.errorType,
+                      onRetry: () => context.read<BattleArenaBloc>().add(
                         BattleArenaFetchRequested(isSilent: true),
-                      );
-                      await bloc.stream.firstWhere((state) =>
-                          state is BattleArenaSuccess ||
-                          state is BattleArenaFailure);
-                    },
-                    color: AppColors.primary,
-                    backgroundColor: AppColors.card,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          FeaturedBattleCard(
-                            state: state,
-                            onRefresh: () {
-                              context.read<BattleArenaBloc>().add(
-                                BattleArenaFetchRequested(isSilent: true),
-                              );
-                            },
-                          ),
-                          if (_hasActiveFeatured(state))
-                            const SizedBox(height: 20),
-                          UpcomingBattlesSection(
-                            upcomingExams: state.upcomingExams,
-                          ),
-                          const SizedBox(height: 20),
-                          BattleHistorySection(
-                            pastSubmissions: state.pastSubmissions,
-                            onReviewTap: _navigateToReview,
-                          ),
-                        ],
                       ),
-                    ),
-                  );
-                }
+                    );
+                  }
 
-                return const SizedBox.shrink();
+                  if (state is BattleArenaSuccess) {
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        final bloc = context.read<BattleArenaBloc>();
+                        bloc.add(
+                          BattleArenaFetchRequested(isSilent: true),
+                        );
+                        await bloc.stream.firstWhere((s) =>
+                            s is BattleArenaSuccess ||
+                            s is BattleArenaFailure);
+                      },
+                      color: AppColors.primary,
+                      backgroundColor: AppColors.card,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            FeaturedBattleCard(
+                              state: state,
+                              onRefresh: () {
+                                context.read<BattleArenaBloc>().add(
+                                  BattleArenaFetchRequested(isSilent: true),
+                                );
+                              },
+                            ),
+                            if (_hasActiveFeatured(state))
+                              const SizedBox(height: 20),
+                            UpcomingBattlesSection(
+                              upcomingExams: state.upcomingExams,
+                            ),
+                            const SizedBox(height: 20),
+                            BattleHistorySection(
+                              pastSubmissions: state.pastSubmissions,
+                              onReviewTap: _navigateToReview,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+
+            // Loading Overlay
+            ValueListenableBuilder<bool>(
+              valueListenable: _isFetchingQuestions,
+              builder: (context, isLoading, _) {
+                if (!isLoading) return const SizedBox.shrink();
+                return Positioned.fill(
+                  child: Container(
+                    color: Colors.black54,
+                    child: const Center(child: Loader()),
+                  ),
+                );
               },
             ),
-          ),
-
-          // Loading Overlay
-          ValueListenableBuilder<bool>(
-            valueListenable: _isFetchingQuestions,
-            builder: (context, isLoading, _) {
-              if (!isLoading) return const SizedBox.shrink();
-              return Positioned.fill(
-                child: Container(
-                  color: Colors.black54,
-                  child: const Center(child: Loader()),
-                ),
-              );
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

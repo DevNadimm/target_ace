@@ -50,6 +50,7 @@ class BattleBloc extends Bloc<BattleEvent, BattleState> {
     on<BattleForceSubmitRequested>(_onForceSubmit);
     on<BattleDisqualificationRequested>(_onDisqualify);
     on<BattleTimeTicked>(_onTimeTicked);
+    on<BattleReviewRequested>(_onReviewRequested);
   }
 
   @override
@@ -632,5 +633,20 @@ class BattleBloc extends Bloc<BattleEvent, BattleState> {
         userAnswersList: userAnswersList,
       ));
     }
+  }
+
+  Future<void> _onReviewRequested(
+    BattleReviewRequested event,
+    Emitter<BattleState> emit,
+  ) async {
+    final currentState = state;
+    final status = await UserLocalDataSource.getSubscriptionStatus();
+    
+    if (status != 'active' && status != 'trial') {
+      emit(BattleReviewAccessDenied(status));
+    } else {
+      emit(BattleReviewAccessGranted(event.examId, event.answers));
+    }
+    emit(currentState); // Restore UI state
   }
 }

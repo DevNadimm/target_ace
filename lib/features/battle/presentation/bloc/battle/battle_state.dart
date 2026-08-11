@@ -130,3 +130,15 @@ class BattleScoreboard extends BattleState {
     required this.userAnswersList,
   });
 }
+
+// --- Action States ---
+class BattleReviewAccessDenied extends BattleState {
+  final String status;
+  BattleReviewAccessDenied(this.status);
+}
+
+class BattleReviewAccessGranted extends BattleState {
+  final String examId;
+  final List<dynamic> answers;
+  BattleReviewAccessGranted(this.examId, this.answers);
+}

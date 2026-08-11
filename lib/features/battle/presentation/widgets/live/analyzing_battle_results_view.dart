@@ -28,8 +28,7 @@ class AnalyzingBattleResultsView extends StatefulWidget {
   State<AnalyzingBattleResultsView> createState() => _AnalyzingBattleResultsViewState();
 }
 
-class _AnalyzingBattleResultsViewState extends State<AnalyzingBattleResultsView>
-    with TickerProviderStateMixin {
+class _AnalyzingBattleResultsViewState extends State<AnalyzingBattleResultsView> with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
@@ -225,7 +224,7 @@ class _AnalyzingBattleResultsViewState extends State<AnalyzingBattleResultsView>
             children: [
               HugeIcon(
                 icon: HugeIcons.strokeRoundedInformationCircle,
-                color: color,
+                color: AppColors.textPrimary,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -234,7 +233,7 @@ class _AnalyzingBattleResultsViewState extends State<AnalyzingBattleResultsView>
                 style: AppFonts.body(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: color,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],

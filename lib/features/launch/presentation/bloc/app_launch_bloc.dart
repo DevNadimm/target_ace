@@ -177,16 +177,20 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
   }
 
   /// Runs the post-authentication check sequence:
-  /// CheckProfile â†’ CheckNotification â†’ CheckTrial â†’ Home
+  /// CheckProfile → CheckNotification → CheckTrial → Home
   Future<void> _runPostAuthChecks(Emitter<AppLaunchState> emit) async {
-    // â”€â”€ Step 4: Check Profile Completion â”€â”€
+    if (state is AppLaunchShowLogin) return;
+
+    // —– Step 4: Check Profile Completion ––
     final isProfileComplete = await UserLocalDataSource.isProfileComplete();
+    
+    if (state is AppLaunchShowLogin) return;
     if (!isProfileComplete) {
       emit(const AppLaunchShowProfileSetup());
       return;
     }
 
-    // â”€â”€ Step 5: Check Notification Permission â”€â”€
+    // —– Step 5: Check Notification Permission ––
     await _checkNotificationStep(emit);
   }
 
@@ -196,11 +200,13 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
   /// 1. User has NOT been prompted before (user-scoped flag).
   /// 2. OS-level permission is NOT already granted.
   Future<void> _checkNotificationStep(Emitter<AppLaunchState> emit) async {
+    if (state is AppLaunchShowLogin) return;
+
     final hasPrompted =
         await UserLocalDataSource.getHasPromptedNotification();
 
     if (!hasPrompted) {
-      // Also check OS-level permission â€” skip the prompt if already granted.
+      // Also check OS-level permission — skip the prompt if already granted.
       bool isAlreadyGranted = false;
       try {
         final settings =
@@ -210,31 +216,38 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
                 settings.authorizationStatus == AuthorizationStatus.provisional;
       } catch (e) {
         debugPrint('AppLaunchBloc: Failed to get notification settings: $e');
-        // Fail open â€” assume not granted and show the prompt
+        // Fail open — assume not granted and show the prompt
       }
 
       if (isAlreadyGranted) {
-        // OS permission already granted â€” mark as prompted and move on.
+        // OS permission already granted — mark as prompted and move on.
         await UserLocalDataSource.setHasPromptedNotification(true);
       } else {
-        emit(const AppLaunchShowNotificationPermission());
+        if (state is! AppLaunchShowLogin) {
+          emit(const AppLaunchShowNotificationPermission());
+        }
         return;
       }
     }
 
-    // Notification handled â€” proceed to trial check.
+    if (state is AppLaunchShowLogin) return;
+    // Notification handled — proceed to trial check.
     await _checkTrialStep(emit);
   }
 
   /// Checks if the user is eligible for a free trial.
   ///
-  /// Logic: DB-first â€” if the database says the user already has/had a trial,
+  /// Logic: DB-first — if the database says the user already has/had a trial,
   /// skip. Only falls back to error-safe "not eligible" on failure.
   Future<void> _checkTrialStep(Emitter<AppLaunchState> emit) async {
+    if (state is AppLaunchShowLogin) return;
+
     final userId = await UserLocalDataSource.getUserId();
 
     if (userId.isNotEmpty) {
       final hasSkipped = await UserLocalDataSource.getHasSkippedFreeTrial();
+      
+      if (state is AppLaunchShowLogin) return;
       if (hasSkipped) {
         emit(const AppLaunchNavigateHome());
         return;
@@ -245,7 +258,9 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
         final isEligible = res.fold((_) => false, (eligible) => eligible);
 
         if (isEligible) {
-          emit(const AppLaunchShowFreeTrial());
+          if (state is! AppLaunchShowLogin) {
+            emit(const AppLaunchShowFreeTrial());
+          }
           return;
         }
       } catch (e) {
@@ -254,6 +269,8 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
       }
     }
 
-    emit(const AppLaunchNavigateHome());
+    if (state is! AppLaunchShowLogin) {
+      emit(const AppLaunchNavigateHome());
+    }
   }
 }

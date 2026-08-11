@@ -1,4 +1,4 @@
-﻿part of 'battle_bloc.dart';
+part of 'battle_bloc.dart';
 
 abstract class BattleEvent {}
 
@@ -23,4 +23,10 @@ class BattleDisqualificationRequested extends BattleEvent {}
 class BattleTimeTicked extends BattleEvent {
   final int secondsRemaining;
   BattleTimeTicked(this.secondsRemaining);
+}
+
+class BattleReviewRequested extends BattleEvent {
+  final String examId;
+  final List<dynamic> answers;
+  BattleReviewRequested(this.examId, this.answers);
 }

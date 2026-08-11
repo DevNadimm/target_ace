@@ -27,8 +27,7 @@ class BattleWaitingRoomView extends StatefulWidget {
   State<BattleWaitingRoomView> createState() => _BattleWaitingRoomViewState();
 }
 
-class _BattleWaitingRoomViewState extends State<BattleWaitingRoomView>
-    with TickerProviderStateMixin {
+class _BattleWaitingRoomViewState extends State<BattleWaitingRoomView> with TickerProviderStateMixin {
   // Syncing dot + FAB fade
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
@@ -409,7 +408,7 @@ class _BattleWaitingRoomViewState extends State<BattleWaitingRoomView>
             ),
             const SizedBox(width: 4),
             Text(
-              ' Joining live',
+              ' Joining live...',
               style: AppFonts.body(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,

@@ -16,6 +16,8 @@ class BattleArenaBloc extends Bloc<BattleArenaEvent, BattleArenaState> {
   })  : _getBattleArenaData = getBattleArenaData,
         super(BattleArenaInitial()) {
     on<BattleArenaFetchRequested>(_onFetch);
+    on<BattleArenaReviewRequested>(_onReviewRequested);
+    on<BattleArenaEnterRequested>(_onEnterRequested);
   }
 
   Future<void> _onFetch(
@@ -72,5 +74,35 @@ class BattleArenaBloc extends Bloc<BattleArenaEvent, BattleArenaState> {
     } catch (e) {
       emit(BattleArenaFailure(e.toString()));
     }
+  }
+
+  Future<void> _onReviewRequested(
+    BattleArenaReviewRequested event,
+    Emitter<BattleArenaState> emit,
+  ) async {
+    final currentState = state;
+    final status = await UserLocalDataSource.getSubscriptionStatus();
+    
+    if (status != 'active' && status != 'trial') {
+      emit(BattleArenaAccessDenied(status));
+    } else {
+      emit(BattleArenaReviewAccessGranted(event.examId, event.answers));
+    }
+    emit(currentState); // Restore UI state
+  }
+
+  Future<void> _onEnterRequested(
+    BattleArenaEnterRequested event,
+    Emitter<BattleArenaState> emit,
+  ) async {
+    final currentState = state;
+    final status = await UserLocalDataSource.getSubscriptionStatus();
+    
+    if (status != 'active' && status != 'trial') {
+      emit(BattleArenaAccessDenied(status));
+    } else {
+      emit(BattleArenaEnterAccessGranted());
+    }
+    emit(currentState); // Restore UI state
   }
 }

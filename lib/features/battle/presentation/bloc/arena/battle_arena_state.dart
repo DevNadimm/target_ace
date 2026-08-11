@@ -27,3 +27,17 @@ class BattleArenaFailure extends BattleArenaState {
   final ErrorType? errorType;
   BattleArenaFailure([this.errorMessage, this.errorType]);
 }
+
+// --- Action States ---
+class BattleArenaAccessDenied extends BattleArenaState {
+  final String status;
+  BattleArenaAccessDenied(this.status);
+}
+
+class BattleArenaReviewAccessGranted extends BattleArenaState {
+  final String examId;
+  final List<dynamic> answers;
+  BattleArenaReviewAccessGranted(this.examId, this.answers);
+}
+
+class BattleArenaEnterAccessGranted extends BattleArenaState {}

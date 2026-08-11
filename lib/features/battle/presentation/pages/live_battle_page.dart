@@ -12,6 +12,8 @@ import 'package:target_ace/features/battle/presentation/widgets/live/active_batt
 import 'package:target_ace/features/battle/presentation/widgets/live/battle_disqualified_view.dart';
 import 'package:target_ace/features/battle/presentation/widgets/live/battle_scoreboard_view.dart';
 import 'package:target_ace/features/battle/presentation/widgets/live/battle_waiting_room_view.dart';
+import 'package:target_ace/features/battle/presentation/pages/battle_review_page.dart';
+import 'package:target_ace/features/subscription/presentation/widgets/subscription_paywall_bottom_sheet.dart';
 
 class LiveBattlePage extends StatefulWidget {
   static Route route() => MaterialPageRoute(builder: (_) => const LiveBattlePage());
@@ -82,9 +84,23 @@ class _LiveBattlePageState extends State<LiveBattlePage> with WidgetsBindingObse
             _secondsRemainingNotifier.value = state.questionSecondsRemaining;
           } else if (state is BattleAnalyzing) {
             _secondsRemainingNotifier.value = state.analyzingSecondsRemaining;
+          } else if (state is BattleReviewAccessDenied) {
+            SubscriptionPaywallBottomSheet.show(context, status: state.status);
+          } else if (state is BattleReviewAccessGranted) {
+            final List<Map<String, dynamic>> userAnswers = state.answers
+                .map((a) => Map<String, dynamic>.from(a as Map))
+                .toList();
+            Navigator.of(context).push(
+              BattleReviewPage.route(
+                examId: state.examId,
+                userAnswers: userAnswers,
+              ),
+            );
           }
         },
         buildWhen: (previous, current) {
+          // Ignore action states for building
+          if (current is BattleReviewAccessDenied || current is BattleReviewAccessGranted) return false;
           if (previous.runtimeType != current.runtimeType) return true;
           if (previous is BattleActive && current is BattleActive) {
             // selectedOption MUST trigger rebuild so the option UI highlights

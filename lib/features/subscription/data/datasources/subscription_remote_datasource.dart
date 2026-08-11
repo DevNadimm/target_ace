@@ -70,7 +70,7 @@ class SubscriptionRemoteDataSourceImpl extends BaseRemoteDataSource implements S
           .from('profiles')
           .select('is_premium')
           .eq('id', userId)
-          .maybeSingle();
+          .single();
 
       final isPremium = profile?['is_premium'] as bool? ?? false;
       if (isPremium) return false;

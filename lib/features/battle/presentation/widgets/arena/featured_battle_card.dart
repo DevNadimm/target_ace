@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 import 'package:target_ace/core/components/spring_button.dart';
@@ -10,9 +12,6 @@ import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/utils/helpers/helper_functions.dart';
 import 'package:target_ace/features/battle/domain/entities/battle_entity.dart';
 import 'package:target_ace/features/battle/presentation/bloc/arena/battle_arena_bloc.dart';
-import 'package:target_ace/features/battle/presentation/pages/live_battle_page.dart';
-import 'package:target_ace/features/subscription/presentation/widgets/subscription_paywall_bottom_sheet.dart';
-import 'package:target_ace/core/services/user_local_datasource.dart';
 
 class FeaturedBattleCard extends StatelessWidget {
   final BattleArenaSuccess state;
@@ -80,13 +79,9 @@ class _MindPopHero extends StatelessWidget {
   });
 
   Future<void> _onEnter(BuildContext context) async {
-    final status = await UserLocalDataSource.getSubscriptionStatus();
-    if (!context.mounted) return;
-    if (status != 'active' && status != 'trial') {
-      SubscriptionPaywallBottomSheet.show(context, status: status);
-    } else {
-      Navigator.push(context, LiveBattlePage.route());
-    }
+    HapticFeedback.mediumImpact();
+    // Check paywall via BLoC instead of direct local read
+    context.read<BattleArenaBloc>().add(BattleArenaEnterRequested());
   }
 
   @override
@@ -169,47 +164,6 @@ class _MindPopHero extends StatelessWidget {
                   ),
                 ],
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Minimal Idle Card
-class _ArenaIdleCard extends StatelessWidget {
-  const _ArenaIdleCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-      decoration: BoxDecoration(
-        color: AppColors.cardAlt.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            'Arena is Quiet',
-            style: AppFonts.heading(
-              fontSize: 28,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Check back soon.\nNew battles are scheduled daily.',
-            textAlign: TextAlign.center,
-            style: AppFonts.body(
-              fontSize: 15,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
-              height: 1.5,
             ),
           ),
         ],
