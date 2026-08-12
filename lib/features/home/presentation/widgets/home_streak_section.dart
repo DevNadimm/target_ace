@@ -162,8 +162,8 @@ class HomeStreakSection extends StatelessWidget {
                           height: 20,
                           decoration: BoxDecoration(
                             color: isCompleted
-                                ? AppColors.card
-                                : AppColors.background,
+                                ? AppColors.cardAlt
+                                : AppColors.textPrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: isCompleted

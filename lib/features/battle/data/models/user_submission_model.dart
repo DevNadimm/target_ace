@@ -13,6 +13,7 @@ class UserSubmissionModel extends UserSubmissionEntity {
     required super.wrongCount,
     required super.unansweredCount,
     required super.answers,
+    super.isLocked = false,
     super.rank = 0,
     super.totalParticipants = 0,
     super.timeTakenSeconds = 0,
@@ -30,6 +31,7 @@ class UserSubmissionModel extends UserSubmissionEntity {
       wrongCount: json['wrong_count'] as int? ?? 0,
       unansweredCount: json['unanswered_count'] as int? ?? 0,
       answers: _parseAnswers(json['answers']),
+      isLocked: json['is_locked'] as bool? ?? false,
       rank: (json['rank'] as num?)?.toInt() ?? 0,
       totalParticipants: (json['total_participants'] as num?)?.toInt() ?? 0,
       timeTakenSeconds: (json['time_taken_seconds'] as num?)?.toInt() ?? 0,
@@ -48,6 +50,7 @@ class UserSubmissionModel extends UserSubmissionEntity {
       'wrong_count': wrongCount,
       'unanswered_count': unansweredCount,
       'answers': answers,
+      'is_locked': isLocked,
     };
   }
 

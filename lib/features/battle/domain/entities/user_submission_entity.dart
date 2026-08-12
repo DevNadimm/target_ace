@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 
 class UserSubmissionEntity {
   final String submissionId;
@@ -11,6 +11,7 @@ class UserSubmissionEntity {
   final int wrongCount;
   final int unansweredCount;
   final List<dynamic> answers;
+  final bool isLocked;
 
   final int rank;
   final int totalParticipants;
@@ -27,6 +28,7 @@ class UserSubmissionEntity {
     required this.wrongCount,
     required this.unansweredCount,
     required this.answers,
+    this.isLocked = false,
     this.rank = 0,
     this.totalParticipants = 0,
     this.timeTakenSeconds = 0,
@@ -45,6 +47,7 @@ class UserSubmissionEntity {
         other.correctCount == correctCount &&
         other.wrongCount == wrongCount &&
         other.unansweredCount == unansweredCount &&
+        other.isLocked == isLocked &&
         listEquals(other.answers, answers);
   }
 
@@ -59,6 +62,7 @@ class UserSubmissionEntity {
         correctCount.hashCode ^
         wrongCount.hashCode ^
         unansweredCount.hashCode ^
+        isLocked.hashCode ^
         Object.hashAll(answers);
   }
 }

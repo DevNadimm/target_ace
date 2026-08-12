@@ -149,18 +149,13 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Target & Active Exam Block
               HomeActiveExamSection(
                 exam: data.activeExam,
                 hasSubmitted: data.hasSubmittedActiveExam,
                 userGoal: _userGoal,
               ),
-              if (data.activeExam != null &&
-                  !DateTime.now().isAfter(data.activeExam!.startTime
-                      .add(Duration(minutes: data.activeExam!.durationMinutes))))
+              if (data.activeExam != null && !data.hasSubmittedActiveExam && !DateTime.now().isAfter(data.activeExam!.startTime.add(Duration(minutes: data.activeExam!.durationMinutes))))
                 const SizedBox(height: 20),
-
-              // Daily Streak Card
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: HomeStreakSection(
@@ -184,9 +179,9 @@ class _HomePageState extends State<HomePage> {
                           scoreOutOf: data.latestPerformance!.scoreOutOf,
                           accuracy: data.latestPerformance!.accuracy,
                           rank: data.latestPerformance!.rank,
-                          totalParticipants:
-                              data.latestPerformance!.totalParticipants,
+                          totalParticipants: data.latestPerformance!.totalParticipants,
                           timeTaken: data.latestPerformance!.timeTaken,
+                          isLocked: data.latestPerformance!.isLocked,
                         ),
                   onViewAnalysis: () {},
                 ),

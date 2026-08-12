@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/section_header.dart';
@@ -19,6 +20,7 @@ class PerformanceStat {
   /// Optional trend badge, e.g. "+27". Rendered in green with an up arrow
   /// when present â€” used for things like rank movement.
   final String? trend;
+  final bool isLocked;
 
   const PerformanceStat({
     required this.icon,
@@ -26,6 +28,7 @@ class PerformanceStat {
     required this.value,
     this.unit,
     this.trend,
+    this.isLocked = false,
   });
 }
 
@@ -41,6 +44,7 @@ class LatestPerformanceModel {
   final int rank;
   final int totalParticipants;
   final Duration timeTaken;
+  final bool isLocked;
 
   const LatestPerformanceModel({
     required this.examTitle,
@@ -51,6 +55,7 @@ class LatestPerformanceModel {
     required this.rank,
     required this.totalParticipants,
     required this.timeTaken,
+    this.isLocked = false,
   });
 
   factory LatestPerformanceModel.dummy() {
@@ -72,24 +77,28 @@ class LatestPerformanceModel {
       label: 'SCORE',
       value: '${HelperFunctions.padNumber(score)}/$scoreOutOf',
       unit: 'Points',
+      isLocked: isLocked,
     ),
     PerformanceStat(
       icon: HugeIcons.strokeRoundedTarget02,
       label: 'ACCURACY',
       value: '${HelperFunctions.padNumber((accuracy * 100).round())}%',
       unit: 'Correct',
+      isLocked: isLocked,
     ),
     PerformanceStat(
       icon: HugeIcons.strokeRoundedChampion,
       label: 'RANK',
       value: '#${HelperFunctions.padNumber(rank)}',
       unit: 'of ${HelperFunctions.padNumber(totalParticipants)}',
+      isLocked: isLocked,
     ),
     PerformanceStat(
       icon: HugeIcons.strokeRoundedClock01,
       label: 'TIME TAKEN',
       value: _formatDuration(timeTaken),
       unit: 'Duration',
+      isLocked: isLocked,
     ),
   ];
 
@@ -188,17 +197,23 @@ class _StatCell extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            stat.value,
-            style: AppFonts.heading(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-              height: 1.1,
+        ImageFiltered(
+          imageFilter: ImageFilter.blur(
+            sigmaX: stat.isLocked ? 4.0 : 0.0,
+            sigmaY: stat.isLocked ? 4.0 : 0.0,
+          ),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              stat.value,
+              style: AppFonts.heading(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+                height: 1.1,
+              ),
+              maxLines: 1,
             ),
-            maxLines: 1,
           ),
         ),
         if (stat.unit != null) ...[

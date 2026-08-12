@@ -1,4 +1,4 @@
-﻿class HomeEntity {
+class HomeEntity {
   final HomeExamEntity? activeExam;
   final bool hasSubmittedActiveExam;
   final HomeStatsEntity stats;
@@ -127,6 +127,7 @@ class LatestPerformanceEntity {
   final int rank;
   final int totalParticipants;
   final Duration timeTaken;
+  final bool isLocked;
 
   const LatestPerformanceEntity({
     required this.examTitle,
@@ -137,5 +138,6 @@ class LatestPerformanceEntity {
     required this.rank,
     required this.totalParticipants,
     required this.timeTaken,
+    this.isLocked = false,
   });
 }

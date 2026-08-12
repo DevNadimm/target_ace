@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
@@ -68,15 +69,21 @@ class BattleHistoryCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 5),
-                Text(
-                  '$scoreDisplay pts  ●  Rank $rank/$totalParticipants',
-                  style: AppFonts.body(
-                    fontSize: 12.5,
-                    color: AppColors.textSecondary,
-                    height: 1.35,
+                ImageFiltered(
+                  imageFilter: ImageFilter.blur(
+                    sigmaX: submission.isLocked ? 4.0 : 0.0,
+                    sigmaY: submission.isLocked ? 4.0 : 0.0,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  child: Text(
+                    '$scoreDisplay pts  ●  Rank $rank/$totalParticipants',
+                    style: AppFonts.body(
+                      fontSize: 12.5,
+                      color: AppColors.textSecondary,
+                      height: 1.35,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),

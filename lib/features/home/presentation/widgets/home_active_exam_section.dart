@@ -39,7 +39,6 @@ class HomeActiveExamSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ── Skeleton shimmer while loading ──
     if (isLoading) {
       return const _TicketSkeleton();
     }
@@ -49,7 +48,7 @@ class HomeActiveExamSection extends StatelessWidget {
     final isPast = exam != null &&
         now.isAfter(exam.startTime.add(Duration(minutes: exam.durationMinutes)));
 
-    if (exam == null || isPast) {
+    if (exam == null || isPast || hasSubmitted) {
       return const SizedBox.shrink();
     }
 

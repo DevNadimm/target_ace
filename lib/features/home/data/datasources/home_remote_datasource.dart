@@ -148,6 +148,7 @@ class HomeRemoteDataSourceImpl extends BaseRemoteDataSource implements HomeRemot
             final rank = (latestPerfMap['rank'] as num? ?? 1).toInt();
             final totalParticipants = (latestPerfMap['total_participants'] as num? ?? 1).toInt();
             final timeTakenSeconds = (latestPerfMap['time_taken_seconds'] as num? ?? 0).toInt();
+            final isLocked = latestPerfMap['is_locked'] as bool? ?? false;
 
             latestPerformance = LatestPerformanceModel(
               examTitle: examTitle,
@@ -158,6 +159,7 @@ class HomeRemoteDataSourceImpl extends BaseRemoteDataSource implements HomeRemot
               rank: rank > 0 ? rank : 1,
               totalParticipants: totalParticipants > 0 ? totalParticipants : 1,
               timeTaken: Duration(seconds: timeTakenSeconds),
+              isLocked: isLocked,
             );
           }
 

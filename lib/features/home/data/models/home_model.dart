@@ -1,4 +1,4 @@
-﻿import 'package:target_ace/features/home/domain/entities/home_entity.dart';
+import 'package:target_ace/features/home/domain/entities/home_entity.dart';
 
 class HomeModel extends HomeEntity {
   const HomeModel({
@@ -98,5 +98,6 @@ class LatestPerformanceModel extends LatestPerformanceEntity {
     required super.rank,
     required super.totalParticipants,
     required super.timeTaken,
+    super.isLocked = false,
   });
 }

@@ -5,8 +5,10 @@ import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/messages.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
+import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/shared/widgets/empty_state_widget.dart';
 import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
+import 'package:target_ace/core/utils/enums/message_type.dart';
 import 'package:target_ace/core/services/service_locator.dart';
 import 'package:target_ace/features/battle/domain/entities/user_submission_entity.dart';
 import 'package:target_ace/features/battle/presentation/pages/battle_review_page.dart';
@@ -138,7 +140,17 @@ class _BattleHistoryPageState extends State<BattleHistoryPage> {
                           final sub = state.submissions[index];
                           return BattleHistoryCard(
                             submission: sub,
-                            onTap: () => _showHistoryDetailSheet(sub),
+                            onTap: () {
+                              if (sub.isLocked) {
+                                AppNotifier.showSnackBar(
+                                  context,
+                                  'Result is locked until exam ends.',
+                                  type: MessageType.info,
+                                );
+                                return;
+                              }
+                              _showHistoryDetailSheet(sub);
+                            },
                           );
                         },
                       ),

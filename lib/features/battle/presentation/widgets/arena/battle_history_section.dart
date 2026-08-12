@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/app_list_tile.dart';
@@ -5,7 +6,10 @@ import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/custom_divider.dart';
 import 'package:target_ace/core/components/section_header.dart';
 import 'package:target_ace/core/config/colors.dart';
+import 'package:target_ace/core/config/typography.dart';
+import 'package:target_ace/core/shared/widgets/app_notifier.dart';
 import 'package:target_ace/core/shared/widgets/section_empty_state.dart';
+import 'package:target_ace/core/utils/enums/message_type.dart';
 import 'package:target_ace/features/battle/domain/entities/user_submission_entity.dart';
 import 'package:target_ace/features/battle/presentation/pages/battle_history_page.dart';
 import 'package:target_ace/features/battle/presentation/widgets/arena/history_detail_bottom_sheet.dart';
@@ -67,6 +71,14 @@ class BattleHistorySection extends StatelessWidget {
 
               return AppListTile(
                 onTap: () {
+                  if (sub.isLocked) {
+                    AppNotifier.showSnackBar(
+                      context,
+                      'Result is locked until exam ends.',
+                      type: MessageType.info,
+                    );
+                    return;
+                  }
                   HistoryDetailBottomSheet.show(
                     context,
                     submission: sub,
@@ -75,7 +87,22 @@ class BattleHistorySection extends StatelessWidget {
                 },
                 icon: HugeIcons.strokeRoundedChampion,
                 title: title,
-                subtitle: '$scoreDisplay pts  ●  Rank $rank/$totalParticipants',
+                subtitle: null,
+                subtitleWidget: ImageFiltered(
+                  imageFilter: ImageFilter.blur(
+                    sigmaX: sub.isLocked ? 4.0 : 0.0,
+                    sigmaY: sub.isLocked ? 4.0 : 0.0,
+                  ),
+                  child: Text(
+                    '$scoreDisplay pts  ●  Rank $rank/$totalParticipants',
+                    style: AppFonts.body(
+                      fontSize: 12,
+                      color: AppColors.textLight,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               );
             },
             separatorBuilder: (context, index) => const CustomDivider.dotted(),
