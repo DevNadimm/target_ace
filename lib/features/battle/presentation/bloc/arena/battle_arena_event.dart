@@ -4,7 +4,8 @@ abstract class BattleArenaEvent {}
 
 class BattleArenaFetchRequested extends BattleArenaEvent {
   final bool isSilent;
-  BattleArenaFetchRequested({this.isSilent = false});
+  final bool force;
+  BattleArenaFetchRequested({this.isSilent = false, this.force = false});
 }
 
 class BattleArenaReviewRequested extends BattleArenaEvent {

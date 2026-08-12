@@ -114,7 +114,7 @@ class _BattleArenaPageState extends State<BattleArenaPage> {
                       onRefresh: () async {
                         final bloc = context.read<BattleArenaBloc>();
                         bloc.add(
-                          BattleArenaFetchRequested(isSilent: true),
+                          BattleArenaFetchRequested(isSilent: true, force: true),
                         );
                         await bloc.stream.firstWhere((s) =>
                             s is BattleArenaSuccess ||

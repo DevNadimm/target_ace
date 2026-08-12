@@ -9,6 +9,7 @@ part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final GetHome getHome;
+  DateTime _lastFetchTime = DateTime.fromMillisecondsSinceEpoch(0);
 
   HomeBloc({
     required this.getHome,
@@ -20,6 +21,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeFetchRequested event,
     Emitter<HomeState> emit,
   ) async {
+    final now = DateTime.now();
+    if (!event.force && now.difference(_lastFetchTime).inSeconds < 10) {
+      return;
+    }
+    _lastFetchTime = now;
+
     if (!event.isSilent) {
       emit(HomeLoading());
     }

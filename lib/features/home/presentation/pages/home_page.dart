@@ -140,7 +140,7 @@ class _HomePageState extends State<HomePage> {
       final data = state.homeModel;
       return RefreshIndicator(
         onRefresh: () async {
-          context.read<HomeBloc>().add(HomeFetchRequested());
+          context.read<HomeBloc>().add(HomeFetchRequested(force: true));
           await _loadUserGoal();
         },
         child: SingleChildScrollView(

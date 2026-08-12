@@ -10,6 +10,7 @@ part 'battle_arena_state.dart';
 
 class BattleArenaBloc extends Bloc<BattleArenaEvent, BattleArenaState> {
   final GetBattleArenaData _getBattleArenaData;
+  DateTime _lastFetchTime = DateTime.fromMillisecondsSinceEpoch(0);
 
   BattleArenaBloc({
     required GetBattleArenaData getBattleArenaData,
@@ -24,6 +25,12 @@ class BattleArenaBloc extends Bloc<BattleArenaEvent, BattleArenaState> {
     BattleArenaFetchRequested event,
     Emitter<BattleArenaState> emit,
   ) async {
+    final now = DateTime.now();
+    if (!event.force && now.difference(_lastFetchTime).inSeconds < 10) {
+      return;
+    }
+    _lastFetchTime = now;
+
     if (!event.isSilent) {
       emit(BattleArenaLoading());
     }
