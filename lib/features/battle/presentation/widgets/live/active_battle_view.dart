@@ -4,6 +4,7 @@ import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/spring_button.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
+import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/features/practice/domain/entities/question_entity.dart';
@@ -41,6 +42,7 @@ class ActiveBattleView extends StatefulWidget {
 
 class _ActiveBattleViewState extends State<ActiveBattleView> {
   late final ScrollController _paletteScrollController;
+  bool _isForward = true;
 
   @override
   void initState() {
@@ -55,6 +57,7 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
   void didUpdateWidget(covariant ActiveBattleView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.currentIndex != widget.currentIndex) {
+      _isForward = widget.currentIndex > oldWidget.currentIndex;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollToIndex(widget.currentIndex);
       });
@@ -86,10 +89,15 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
   Widget build(BuildContext context) {
     if (widget.questions.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Live Battle')),
-        body: const GradientBackground(
-          child: Center(
-            child: Text('No questions associated with this exam.'),
+        appBar: AppBar(
+          title: const Text('Live Battle'),
+          leading: BackButton(),
+        ),
+        body: GradientBackground(
+          child: SafeArea(
+              child: ErrorStateWidget(
+                message: 'No questions are available for today’s exam yet. Please check back later.',
+              )
           ),
         ),
       );
@@ -272,12 +280,35 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
 
                     // Question text
                     Expanded(
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CustomContainer(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        transitionBuilder: (child, animation) {
+                          final isIncoming = child.key == ValueKey<int>(widget.currentIndex);
+                          final offsetAnimation = Tween<Offset>(
+                            begin: isIncoming
+                                ? Offset(_isForward ? 1.0 : -1.0, 0.0)
+                                : Offset(_isForward ? -1.0 : 1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(animation);
+
+                          return SlideTransition(position: offsetAnimation, child: child);
+                        },
+                        layoutBuilder: (currentChild, previousChildren) {
+                          return Stack(
+                            alignment: Alignment.topCenter,
+                            children: <Widget>[
+                              ...previousChildren,
+                              ?currentChild,
+                            ],
+                          );
+                        },
+                        child: SingleChildScrollView(
+                          key: ValueKey<int>(widget.currentIndex),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CustomContainer(
                               width: double.infinity,
                               child: Text(
                                 currentQuestion.questionText,
@@ -302,12 +333,19 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
                         ),
                       ),
                     ),
-
-                    // Next / Skip / Finish Action Button
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: SizedBox(
-                        width: double.infinity,
+                  ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        border: Border(
+                          top: BorderSide(
+                            color: AppColors.divider.withValues(alpha: 0.6),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: SafeArea(
                         child: SpringButton(
                           onPressed: widget.onSubmit,
                           child: Text(

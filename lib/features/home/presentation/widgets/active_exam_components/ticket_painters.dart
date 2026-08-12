@@ -48,6 +48,110 @@ class _TicketClipper extends CustomClipper<Path> {
   bool shouldReclip(_) => false;
 }
 
+/// Clips the left stub half during ripping — rounded left corners + notch cutout on right edge.
+class _LeftStubClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    const r = _kCornerRadius;
+    const nr = _kNotchRadius;
+    final w = size.width;
+    final h = size.height;
+
+    final path = Path();
+
+    // Top-left rounded corner
+    path.moveTo(r, 0);
+    // Top edge → stop before notch
+    path.lineTo(w - nr, 0);
+    // Top-right notch: quarter circle curving inward
+    path.arcToPoint(
+      Offset(w, nr),
+      radius: const Radius.circular(nr),
+      clockwise: false,
+    );
+    // Right edge going down
+    path.lineTo(w, h - nr);
+    // Bottom-right notch: quarter circle curving inward
+    path.arcToPoint(
+      Offset(w - nr, h),
+      radius: const Radius.circular(nr),
+      clockwise: false,
+    );
+    // Bottom edge going left
+    path.lineTo(r, h);
+    // Bottom-left rounded corner
+    path.arcToPoint(
+      Offset(0, h - r),
+      radius: const Radius.circular(r),
+    );
+    // Left edge going up
+    path.lineTo(0, r);
+    // Top-left rounded corner
+    path.arcToPoint(
+      Offset(r, 0),
+      radius: const Radius.circular(r),
+    );
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(_) => false;
+}
+
+/// Clips the right body half during ripping — rounded right corners + notch cutout on left edge.
+class _RightBodyClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    const r = _kCornerRadius;
+    const nr = _kNotchRadius;
+    final w = size.width;
+    final h = size.height;
+
+    final path = Path();
+
+    // Start below top-left notch
+    path.moveTo(0, nr);
+    // Top-left notch: quarter circle curving inward
+    path.arcToPoint(
+      Offset(nr, 0),
+      radius: const Radius.circular(nr),
+      clockwise: false,
+    );
+    // Top edge
+    path.lineTo(w - r, 0);
+    // Top-right rounded corner
+    path.arcToPoint(
+      Offset(w, r),
+      radius: const Radius.circular(r),
+    );
+    // Right edge going down
+    path.lineTo(w, h - r);
+    // Bottom-right rounded corner
+    path.arcToPoint(
+      Offset(w - r, h),
+      radius: const Radius.circular(r),
+    );
+    // Bottom edge going left
+    path.lineTo(nr, h);
+    // Bottom-left notch: quarter circle curving inward
+    path.arcToPoint(
+      Offset(0, h - nr),
+      radius: const Radius.circular(nr),
+      clockwise: false,
+    );
+    // Left edge back to start
+    path.lineTo(0, nr);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(_) => false;
+}
+
 
 
 

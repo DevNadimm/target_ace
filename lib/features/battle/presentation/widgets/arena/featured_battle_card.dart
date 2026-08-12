@@ -65,7 +65,7 @@ class FeaturedBattleCard extends StatelessWidget {
   }
 }
 
-class _MindPopHero extends StatelessWidget {
+class _MindPopHero extends StatefulWidget {
   final BattleEntity exam;
   final bool isLiveNow;
   final bool canEnter;
@@ -78,6 +78,60 @@ class _MindPopHero extends StatelessWidget {
     required this.onRefresh,
   });
 
+  @override
+  State<_MindPopHero> createState() => _MindPopHeroState();
+}
+
+class _MindPopHeroState extends State<_MindPopHero> {
+  Timer? _periodicTimer;
+  late bool _isLiveNow;
+  late bool _canEnter;
+
+  @override
+  void initState() {
+    super.initState();
+    _isLiveNow = widget.isLiveNow;
+    _canEnter = widget.canEnter;
+    _periodicTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _recalculate();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _MindPopHero old) {
+    super.didUpdateWidget(old);
+    if (old.isLiveNow != widget.isLiveNow || old.canEnter != widget.canEnter) {
+      _recalculate();
+    }
+  }
+
+  @override
+  void dispose() {
+    _periodicTimer?.cancel();
+    super.dispose();
+  }
+
+  void _recalculate() {
+    if (widget.exam.startTime.isEmpty) return;
+    try {
+      final startTime = DateTime.parse(widget.exam.startTime).toLocal();
+      final endTime = startTime.add(Duration(minutes: widget.exam.durationMinutes));
+      final now = DateTime.now();
+
+      final isLive = now.isAfter(startTime) && now.isBefore(endTime);
+      final diff = startTime.difference(now);
+      final isWithin15 = diff.inMinutes <= 15 && diff.inSeconds >= 0;
+      final canEnter = isLive || isWithin15;
+
+      if (mounted && (isLive != _isLiveNow || canEnter != _canEnter)) {
+        setState(() {
+          _isLiveNow = isLive;
+          _canEnter = canEnter;
+        });
+      }
+    } catch (_) {}
+  }
+
   Future<void> _onEnter(BuildContext context) async {
     HapticFeedback.mediumImpact();
     // Check paywall via BLoC instead of direct local read
@@ -86,12 +140,12 @@ class _MindPopHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryColor = isLiveNow
-        ? AppColors.success
+    final Color primaryColor = _isLiveNow
+        ? AppColors.error
         : AppColors.primary;
 
-    final Color accent = isLiveNow ? AppColors.success : AppColors.primary;
-    final Color accentShadow = isLiveNow ? const Color(0xFF047857) : AppColors.primaryDark;
+    final Color accent = _isLiveNow ? AppColors.error : AppColors.primary;
+    final Color accentShadow = _isLiveNow ? AppColors.errorDark : AppColors.primaryDark;
 
     return Container(
       width: double.infinity,
@@ -120,7 +174,7 @@ class _MindPopHero extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  isLiveNow ? 'LIVE NOW' : 'UPCOMING BATTLE',
+                  _isLiveNow ? 'LIVE NOW' : 'UPCOMING BATTLE',
                   style: AppFonts.body(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -130,7 +184,7 @@ class _MindPopHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 38),
                 Text(
-                  exam.title.isNotEmpty ? exam.title : 'Battle Exam',
+                  widget.exam.title.isNotEmpty ? widget.exam.title : 'Battle Exam',
                   textAlign: TextAlign.center,
                   style: AppFonts.heading(
                     fontSize: 28,
@@ -141,7 +195,7 @@ class _MindPopHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  '${exam.durationMinutes} Minutes  ●  ${(exam.totalQuestions).toInt()} Questions',
+                  '${widget.exam.durationMinutes} Minutes  ●  ${(widget.exam.totalQuestions).toInt()} Questions',
                   style: AppFonts.body(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -151,20 +205,20 @@ class _MindPopHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 38),
                 _MindPopCountdown(
-                  startTimeStr: exam.startTime,
-                  durationMins: exam.durationMinutes,
+                  startTimeStr: widget.exam.startTime,
+                  durationMins: widget.exam.durationMinutes,
                   primaryColor: Colors.white,
-                  isLiveNow: isLiveNow,
-                  onTimerFinished: onRefresh,
+                  isLiveNow: _isLiveNow,
+                  onTimerFinished: widget.onRefresh,
                 ),
-                if (canEnter) ...[
+                if (_canEnter) ...[
                   const SizedBox(height: 38),
                   SpringButton(
-                    backgroundColor: canEnter ? accent : const Color(0xFFE0E0E0),
-                    shadowColor: canEnter ? accentShadow : const Color(0xFFBDBDBD),
+                    backgroundColor: _canEnter ? accent : const Color(0xFFE0E0E0),
+                    shadowColor: _canEnter ? accentShadow : const Color(0xFFBDBDBD),
                     onPressed: () => _onEnter(context),
                     child: Text(
-                      isLiveNow ? 'Enter Battle' : 'Enter Waiting Room',
+                      _isLiveNow ? 'Enter Battle' : 'Enter Waiting Room',
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),

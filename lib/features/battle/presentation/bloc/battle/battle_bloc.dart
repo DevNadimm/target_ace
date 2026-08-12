@@ -139,7 +139,7 @@ class BattleBloc extends Bloc<BattleEvent, BattleState> {
       if (isQuestionsFailed) return;
 
       if (questions.isEmpty) {
-        emit(BattleError('No questions found for this exam.'));
+        emit(BattleError('No questions are available for today’s exam yet. Please check back later.'));
         return;
       }
 

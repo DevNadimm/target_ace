@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart' hide BackButton;
+import 'package:target_ace/core/components/back_button.dart';
 import 'package:target_ace/core/config/messages.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
+import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/utils/enums/message_type.dart';
@@ -147,20 +149,14 @@ class _LiveBattlePageState extends State<LiveBattlePage> with WidgetsBindingObse
     if (state is BattleError) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Live Battle Error'),
+          title: const Text('Live Battle'),
+          leading: BackButton(),
         ),
         body: GradientBackground(
           child: SafeArea(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Text(
-                  state.message ?? AppMessages.errorMessage,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-              ),
-            ),
+            child: ErrorStateWidget(
+              message: state.message,
+            )
           ),
         ),
       );
