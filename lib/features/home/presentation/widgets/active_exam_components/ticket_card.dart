@@ -89,7 +89,12 @@ class _TicketCardState extends State<_TicketCard>
       _isNavigating = false;
       return;
     }
-    Navigator.push(context, LiveBattlePage.route());
+    Navigator.push(context, LiveBattlePage.route()).then((_) {
+      if (context.mounted) {
+        context.read<HomeBloc>().add(HomeFetchRequested(isSilent: true));
+        context.read<BattleArenaBloc>().add(BattleArenaFetchRequested(isSilent: true));
+      }
+    });
     // Reset animation after navigation (for when user comes back)
     _navigationTimer = Timer(const Duration(milliseconds: 400), () {
       if (mounted) {

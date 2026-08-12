@@ -8,6 +8,7 @@ import 'package:target_ace/features/battle/presentation/bloc/arena/battle_arena_
 import 'package:target_ace/features/battle/presentation/pages/battle_review_page.dart';
 import 'package:target_ace/features/battle/presentation/pages/live_battle_page.dart';
 import 'package:target_ace/features/battle/presentation/widgets/arena/battle_history_section.dart';
+import 'package:target_ace/features/home/presentation/bloc/home_bloc.dart';
 import 'package:target_ace/features/battle/presentation/widgets/arena/upcoming_battles_section.dart';
 import 'package:target_ace/features/battle/presentation/widgets/arena/featured_battle_card.dart';
 import 'package:target_ace/features/subscription/presentation/widgets/subscription_paywall_bottom_sheet.dart';
@@ -74,7 +75,12 @@ class _BattleArenaPageState extends State<BattleArenaPage> {
               ),
             );
           } else if (state is BattleArenaEnterAccessGranted) {
-            Navigator.of(context).push(LiveBattlePage.route());
+            Navigator.of(context).push(LiveBattlePage.route()).then((_) {
+              if (context.mounted) {
+                context.read<BattleArenaBloc>().add(BattleArenaFetchRequested(isSilent: true));
+                context.read<HomeBloc>().add(HomeFetchRequested(isSilent: true));
+              }
+            });
           }
         },
         child: Stack(
