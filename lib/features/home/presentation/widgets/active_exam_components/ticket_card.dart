@@ -117,10 +117,9 @@ class _TicketCardState extends State<_TicketCard>
                       Transform(
                         alignment: Alignment.bottomRight,
                         // Hinge at the bottom of the tear
-                        transform: Matrix4.identity()
-                          ..translateByDouble(-slideValue * 120,
-                              0.0) // Slide completely apart in Phase 2
-                          ..rotateZ(-zipValue * 0.2),
+                        transform: Matrix4.translationValues(
+                                -slideValue * 120, 0.0, 0.0) // Slide completely apart in Phase 2
+                            ..rotateZ(-zipValue * 0.2),
                         // Zipper opens V-shape in Phase 1
 
                         child: Opacity(
@@ -152,10 +151,9 @@ class _TicketCardState extends State<_TicketCard>
                         child: Transform(
                           alignment: Alignment.bottomLeft,
                           // Hinge at the bottom of the tear
-                          transform: Matrix4.identity()
-                            ..translateByDouble(slideValue * 120,
-                                0.0) // Slide completely apart in Phase 2
-                            ..rotateZ(zipValue * 0.2),
+                          transform: Matrix4.translationValues(
+                                  slideValue * 120, 0.0, 0.0) // Slide completely apart in Phase 2
+                              ..rotateZ(zipValue * 0.2),
                           // Zipper opens V-shape in Phase 1
                           child: Opacity(
                             opacity: (1.0 - slideValue).clamp(0.0, 1.0),
