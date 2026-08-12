@@ -15,13 +15,11 @@ import 'package:target_ace/features/battle/presentation/widgets/live/battle_coun
 class AnalyzingBattleResultsView extends StatefulWidget {
   final String examTitle;
   final ValueNotifier<int> secondsNotifier;
-  final bool isDisqualified;
 
   const AnalyzingBattleResultsView({
     super.key,
     required this.examTitle,
     required this.secondsNotifier,
-    this.isDisqualified = false,
   });
 
   @override
@@ -78,7 +76,7 @@ class _AnalyzingBattleResultsViewState extends State<AnalyzingBattleResultsView>
   }
 
   void _scheduleNextJoin() {
-    if (!mounted || widget.isDisqualified) return;
+    if (!mounted) return;
     
     final random = Random();
     int delayMs;
@@ -207,11 +205,9 @@ class _AnalyzingBattleResultsViewState extends State<AnalyzingBattleResultsView>
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.isDisqualified ? AppColors.error : AppColors.primary;
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isDisqualified ? 'Disqualified' : 'Analyzing Results'),
+        title: const Text('Analyzing Results'),
         automaticallyImplyLeading: false,
       ),
       floatingActionButton: FadeTransition(
@@ -268,7 +264,7 @@ class _AnalyzingBattleResultsViewState extends State<AnalyzingBattleResultsView>
                                   ValueDelegate.colorFilter(
                                     const ['Rectangle', '**'],
                                     value: ColorFilter.mode(
-                                      color,
+                                      AppColors.primary,
                                       BlendMode.srcATop,
                                     ),
                                   ),
@@ -289,33 +285,9 @@ class _AnalyzingBattleResultsViewState extends State<AnalyzingBattleResultsView>
                             ),
                             const SizedBox(height: 12),
 
-                            // Status badge (if disqualified)
-                            if (widget.isDisqualified) ...[
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: AppColors.error.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: AppColors.error.withValues(alpha: 0.4)),
-                                ),
-                                child: Text(
-                                  'DISQUALIFIED',
-                                  style: AppFonts.body(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.error,
-                                    letterSpacing: 1.5,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                            ],
-
                             // Subtitle
                             Text(
-                              widget.isDisqualified
-                                  ? 'You left the app during the exam. Your answers have been submitted. Results will be revealed once the battle concludes.'
-                                  : 'Great effort! Your answers are being processed. Results will be revealed once all participants complete the battle.',
+                              'Great effort! Your answers are being processed. Results will be revealed once all participants complete the battle.',
                               textAlign: TextAlign.center,
                               style: AppFonts.body(
                                 fontSize: 14,
@@ -438,7 +410,7 @@ class _AnalyzingBattleResultsViewState extends State<AnalyzingBattleResultsView>
             ),
             const SizedBox(width: 4),
             Text(
-              widget.isDisqualified ? 'Waiting for battle to end...' : 'Calculating ranks...',
+              'Calculating ranks...',
               style: AppFonts.body(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,

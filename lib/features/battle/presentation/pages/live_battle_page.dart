@@ -189,10 +189,15 @@ class _LiveBattlePageState extends State<LiveBattlePage> with WidgetsBindingObse
     }
 
     if (state is BattleAnalyzing) {
+      if (state.isDisqualified) {
+        return BattleDisqualifiedView(
+          examTitle: state.examTitle,
+          onExit: () => Navigator.pop(context),
+        );
+      }
       return AnalyzingBattleResultsView(
         examTitle: state.examTitle,
         secondsNotifier: _secondsRemainingNotifier,
-        isDisqualified: state.isDisqualified,
       );
     }
 

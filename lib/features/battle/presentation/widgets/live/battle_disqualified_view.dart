@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:target_ace/core/components/custom_container.dart';
+import 'package:lottie/lottie.dart';
+import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/components/spring_button.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
@@ -19,98 +19,61 @@ class BattleDisqualifiedView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(examTitle),
+        automaticallyImplyLeading: false,
+      ),
       body: GradientBackground(
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header Details
-                Text(
-                  examTitle,
-                  style: AppFonts.heading(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Battle terminated.',
-                  style: AppFonts.body(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const Spacer(),
-
-                // Disqualified Container
-                CustomContainer(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Lottie.asset(
+                          Assets.fireAnim,
+                          width: 160,
+                          height: 160,
+                          fit: BoxFit.contain,
                         ),
-                        child: const HugeIcon(
-                          icon: HugeIcons.strokeRoundedAlert02,
-                          color: AppColors.error,
-                          size: 64,
+                        const SizedBox(height: 18),
+                        Text(
+                          'Battle Disqualified',
+                          textAlign: TextAlign.center,
+                          style: AppFonts.heading(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'DISQUALIFIED',
-                        style: AppFonts.heading(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.error,
-                          letterSpacing: 2.0,
+                        const SizedBox(height: 12),
+                        Text(
+                          'You left the app for more than 30 seconds during the exam. As a result, you have been disqualified and awarded 0 points.',
+                          textAlign: TextAlign.center,
+                          style: AppFonts.body(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                            height: 1.4,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'You were disqualified from the battle. Your score has been forfeited and will not appear on the leaderboard.',
-                        style: AppFonts.body(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                          height: 1.5,
+                        const SizedBox(height: 38),
+                        SpringButton(
+                          onPressed: onExit,
+                          child: const Text('Back to Home'),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const Spacer(),
-
-                // Exit Button
-                SizedBox(
-                  width: double.infinity,
-                  child: SpringButton(
-                    backgroundColor: AppColors.primary,
-                    borderRadius: BorderRadius.circular(16),
-                    height: 56.0,
-                    onPressed: onExit,
-                    child: Text(
-                      'Back to Home',
-                      style: AppFonts.body(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

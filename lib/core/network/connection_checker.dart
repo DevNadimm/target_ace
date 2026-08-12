@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 /// Abstract interface for checking internet connectivity at the repository level.
@@ -43,10 +43,14 @@ class ConnectionCheckerImpl implements ConnectionChecker {
       return false;
     }
 
-    // Network interface exists â€” verify actual internet access
+    // Network interface exists — verify actual internet access
     try {
-      final result = await InternetAddress.lookup('google.com').timeout(const Duration(seconds: 3));
-      return result.isNotEmpty && result.first.rawAddress.isNotEmpty;
+      // Use raw IP socket connection to bypass OS DNS caching.
+      // Connecting to Google Public DNS (8.8.8.8) on port 53 (DNS port).
+      // This is the fastest and most reliable way to check actual external route.
+      final socket = await Socket.connect('8.8.8.8', 53, timeout: const Duration(seconds: 3));
+      socket.destroy();
+      return true;
     } catch (_) {
       return false;
     }

@@ -72,7 +72,7 @@ class SubscriptionRemoteDataSourceImpl extends BaseRemoteDataSource implements S
           .eq('id', userId)
           .single();
 
-      final isPremium = profile?['is_premium'] as bool? ?? false;
+      final isPremium = profile['is_premium'] as bool? ?? false;
       if (isPremium) return false;
 
       final hasTrial = await client

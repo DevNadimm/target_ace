@@ -103,112 +103,120 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.examTitle),
-        automaticallyImplyLeading: false, // Block default back arrow
+        automaticallyImplyLeading: false,
       ),
       body: GradientBackground(
         child: SafeArea(
           child: Stack(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                padding: const EdgeInsets.only(top: 8, bottom: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Progress Header & Countdown
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Question ${widget.currentIndex + 1} of ${widget.questions.length}',
-                          style: AppFonts.body(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Question ${widget.currentIndex + 1} of ${widget.questions.length}',
+                            style: AppFonts.body(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                        ),
-                        ValueListenableBuilder<int>(
-                          valueListenable: widget.secondsNotifier,
-                          builder: (context, questionSecondsRemaining, _) {
-                            final minutes = (questionSecondsRemaining ~/ 60).toString().padLeft(2, '0');
-                            final seconds = (questionSecondsRemaining % 60).toString().padLeft(2, '0');
-                            final timeStr = '$minutes:$seconds';
-                            final isTimeLow = questionSecondsRemaining <= 60;
+                          ValueListenableBuilder<int>(
+                            valueListenable: widget.secondsNotifier,
+                            builder: (context, questionSecondsRemaining, _) {
+                              final minutes = (questionSecondsRemaining ~/ 60).toString().padLeft(2, '0');
+                              final seconds = (questionSecondsRemaining % 60).toString().padLeft(2, '0');
+                              final timeStr = '$minutes:$seconds';
+                              final isTimeLow = questionSecondsRemaining <= 60;
 
-                            return Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: isTimeLow 
-                                    ? AppColors.error.withValues(alpha: 0.1) 
-                                    : AppColors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: isTimeLow 
-                                      ? AppColors.error.withValues(alpha: 0.3) 
-                                      : AppColors.primary.withValues(alpha: 0.3),
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isTimeLow
+                                      ? AppColors.error.withValues(alpha: 0.1)
+                                      : AppColors.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: isTimeLow
+                                        ? AppColors.error.withValues(alpha: 0.3)
+                                        : AppColors.primary.withValues(alpha: 0.3),
+                                  ),
                                 ),
-                              ),
-                              child: Row(
-                                children: [
-                                  HugeIcon(
-                                    icon: HugeIcons.strokeRoundedClock01,
-                                    color: isTimeLow ? AppColors.error : AppColors.primary,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    timeStr,
-                                    style: AppFonts.body(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
+                                child: Row(
+                                  children: [
+                                    HugeIcon(
+                                      icon: HugeIcons.strokeRoundedClock01,
                                       color: isTimeLow ? AppColors.error : AppColors.primary,
+                                      size: 16,
                                     ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        ),
-                      ],
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      timeStr,
+                                      style: AppFonts.body(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: isTimeLow ? AppColors.error : AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 12),
 
                     // Compact Live Counters Badge Row
-                    Row(
-                      children: [
-                        _buildStatusBadge(
-                          label: '$answeredCount Ans',
-                          color: AppColors.success,
-                          icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                        ),
-                        const SizedBox(width: 6),
-                        _buildStatusBadge(
-                          label: '$skippedCount Skip',
-                          color: AppColors.warning,
-                          icon: HugeIcons.strokeRoundedAlertCircle,
-                        ),
-                        const SizedBox(width: 6),
-                        _buildStatusBadge(
-                          label: '$unansweredCount Left',
-                          color: AppColors.textSecondary,
-                          icon: HugeIcons.strokeRoundedHelpCircle,
-                        ),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          _buildStatusBadge(
+                            label: '$answeredCount Ans',
+                            color: AppColors.success,
+                            icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                          ),
+                          const SizedBox(width: 6),
+                          _buildStatusBadge(
+                            label: '$skippedCount Skip',
+                            color: AppColors.warning,
+                            icon: HugeIcons.strokeRoundedAlertCircle,
+                          ),
+                          const SizedBox(width: 6),
+                          _buildStatusBadge(
+                            label: '$unansweredCount Left',
+                            color: AppColors.textSecondary,
+                            icon: HugeIcons.strokeRoundedHelpCircle,
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 12),
 
                     // Progress bar
-                    StepProgressBar(
-                      currentStep: widget.currentIndex,
-                      totalSteps: widget.questions.length,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: StepProgressBar(
+                        currentStep: widget.currentIndex,
+                        totalSteps: widget.questions.length,
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
                     // Horizontal Question Palette Bar
                     SizedBox(
                       height: 32,
                       child: ListView.separated(
                         controller: _paletteScrollController,
-                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         scrollDirection: Axis.horizontal,
                         itemCount: widget.questions.length,
                         separatorBuilder: (_, index) => const SizedBox(width: 6),
@@ -218,18 +226,20 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
                           final isSkipped = itemStatus == 'skipped';
                           final isAnswered = itemStatus == 'answered';
 
-                          Color pillColor = AppColors.grey.withValues(alpha: 0.1);
+                          Border border = Border.all(color: AppColors.cardAlt, width: 2);
+                          Color pillColor = AppColors.cardAlt;
                           Color textColor = AppColors.textSecondary;
-                          Border? border;
 
                           if (isCurrent) {
                             border = Border.all(color: AppColors.primary, width: 2);
                             pillColor = AppColors.primary.withValues(alpha: 0.15);
                             textColor = AppColors.primary;
                           } else if (isAnswered) {
+                            border = Border.all(color: AppColors.success, width: 2);
                             pillColor = AppColors.success;
                             textColor = Colors.white;
                           } else if (isSkipped) {
+                            border = Border.all(color: AppColors.warning, width: 2);
                             pillColor = AppColors.warning;
                             textColor = Colors.white;
                           }
@@ -263,6 +273,7 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
                     // Question text
                     Expanded(
                       child: SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -293,14 +304,17 @@ class _ActiveBattleViewState extends State<ActiveBattleView> {
                     ),
 
                     // Next / Skip / Finish Action Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: SpringButton(
-                        onPressed: widget.onSubmit,
-                        child: Text(
-                          widget.selectedOption.isEmpty
-                              ? (widget.currentIndex == widget.questions.length - 1 ? 'Skip & Finish' : 'Skip & Next')
-                              : (widget.currentIndex == widget.questions.length - 1 ? 'Finish Battle' : 'Submit & Next'),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: SpringButton(
+                          onPressed: widget.onSubmit,
+                          child: Text(
+                            widget.selectedOption.isEmpty
+                                ? (widget.currentIndex == widget.questions.length - 1 ? 'Skip & Finish' : 'Skip & Next')
+                                : (widget.currentIndex == widget.questions.length - 1 ? 'Finish Battle' : 'Submit & Next'),
+                          ),
                         ),
                       ),
                     ),

@@ -90,6 +90,9 @@ class _MindPopHero extends StatelessWidget {
         ? AppColors.success
         : AppColors.primary;
 
+    final Color accent = isLiveNow ? AppColors.success : AppColors.primary;
+    final Color accentShadow = isLiveNow ? const Color(0xFF047857) : AppColors.primaryDark;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -157,9 +160,12 @@ class _MindPopHero extends StatelessWidget {
                 if (canEnter) ...[
                   const SizedBox(height: 38),
                   SpringButton(
+                    backgroundColor: canEnter ? accent : const Color(0xFFE0E0E0),
+                    shadowColor: canEnter ? accentShadow : const Color(0xFFBDBDBD),
                     onPressed: () => _onEnter(context),
                     child: Text(
                       isLiveNow ? 'Enter Battle' : 'Enter Waiting Room',
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
                 ],

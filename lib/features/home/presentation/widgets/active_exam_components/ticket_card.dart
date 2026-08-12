@@ -58,10 +58,10 @@ class _TicketCardState extends State<_TicketCard>
     setState(() => _isRipping = true);
     _playRipSound();
     await _ripController.forward();
-    
+
     // Ektu time niye
     await Future.delayed(const Duration(milliseconds: 600));
-    
+
     if (!context.mounted) return;
     Navigator.push(context, LiveBattlePage.route());
     // Reset animation after navigation (for when user comes back)
@@ -84,8 +84,7 @@ class _TicketCardState extends State<_TicketCard>
     final canAct = canEnter && !widget.hasSubmitted;
 
     final Color accent = isLive ? AppColors.success : AppColors.primary;
-    final Color accentShadow =
-        isLive ? const Color(0xFF047857) : AppColors.primaryDark;
+    final Color accentShadow = isLive ? const Color(0xFF047857) : AppColors.primaryDark;
 
     final String ctaLabel = widget.hasSubmitted
         ? 'Submitted'
@@ -104,176 +103,180 @@ class _TicketCardState extends State<_TicketCard>
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Stack(
             clipBehavior: Clip.none,
-          children: [
+            children: [
 
 
-            // ── Base card (clipped to ticket shape) ──────────────
-            ClipPath(
-              clipper: _TicketClipper(),
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ── LEFT STUB: rips to the LEFT ───────────────
-                    Transform(
-                      alignment: Alignment.bottomRight, // Hinge at the bottom of the tear
-                      transform: Matrix4.identity()
-                        ..translate(-slideValue * 120, 0.0) // Slide completely apart in Phase 2
-                        ..rotateZ(-zipValue * 0.2), // Zipper opens V-shape in Phase 1
-
-                      child: Opacity(
-                        opacity: (1.0 - slideValue).clamp(0.0, 1.0), // Fade out in Phase 2
-                        child: Container(
-                          width: _kStubWidth,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                accent,
-                                accent.withValues(alpha: 0.80),
-                              ],
-                            ),
-                          ),
-                          child: _CountdownStub(
-                            startTime: widget.exam.startTime,
-                            durationMinutes: widget.exam.durationMinutes,
-                            isLive: isLive,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // ── RIGHT BODY: rips to the RIGHT ─────────────
-                    Expanded(
-                      child: Transform(
-                        alignment: Alignment.bottomLeft, // Hinge at the bottom of the tear
+              // ── Base card (clipped to ticket shape) ──────────────
+              ClipPath(
+                clipper: _TicketClipper(),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // ── LEFT STUB: rips to the LEFT ───────────────
+                      Transform(
+                        alignment: Alignment.bottomRight,
+                        // Hinge at the bottom of the tear
                         transform: Matrix4.identity()
-                          ..translate(slideValue * 120, 0.0) // Slide completely apart in Phase 2
-                          ..rotateZ(zipValue * 0.2), // Zipper opens V-shape in Phase 1
+                          ..translateByDouble(-slideValue * 120,
+                              0.0) // Slide completely apart in Phase 2
+                          ..rotateZ(-zipValue * 0.2),
+                        // Zipper opens V-shape in Phase 1
+
                         child: Opacity(
-                          opacity: (1.0 - slideValue).clamp(0.0, 1.0), // Fade out in Phase 2
+                          opacity: (1.0 - slideValue).clamp(0.0, 1.0),
+                          // Fade out in Phase 2
                           child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
+                            width: _kStubWidth,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  accent,
+                                  accent.withValues(alpha: 0.80),
+                                ],
+                              ),
                             ),
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Status label
-                                if (isLive)
-                                  _PulseText(
-                                    text: '● LIVE NOW',
-                                    style: AppFonts.body(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      color: accent,
-                                      letterSpacing: 1.5,
+                            child: _CountdownStub(
+                              startTime: widget.exam.startTime,
+                              durationMinutes: widget.exam.durationMinutes,
+                              isLive: isLive,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // ── RIGHT BODY: rips to the RIGHT ─────────────
+                      Expanded(
+                        child: Transform(
+                          alignment: Alignment.bottomLeft,
+                          // Hinge at the bottom of the tear
+                          transform: Matrix4.identity()
+                            ..translateByDouble(slideValue * 120,
+                                0.0) // Slide completely apart in Phase 2
+                            ..rotateZ(zipValue * 0.2),
+                          // Zipper opens V-shape in Phase 1
+                          child: Opacity(
+                            opacity: (1.0 - slideValue).clamp(0.0, 1.0),
+                            // Fade out in Phase 2
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                              ),
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Status label
+                                  if (isLive)
+                                    _PulseText(
+                                      text: '● LIVE NOW',
+                                      style: AppFonts.body(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                        color: accent,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    )
+                                  else
+                                    Text(
+                                      'UPCOMING BATTLE',
+                                      style: AppFonts.body(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: accent,
+                                        letterSpacing: 1.5,
+                                      ),
                                     ),
-                                  )
-                                else
+
+                                  const SizedBox(height: 8),
+
+                                  // Title
                                   Text(
-                                    'UPCOMING BATTLE',
-                                    style: AppFonts.body(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      color: accent,
-                                      letterSpacing: 1.5,
+                                    widget.exam.title,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppFonts.heading(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black87,
+                                      height: 1.25,
                                     ),
                                   ),
 
-                                const SizedBox(height: 8),
+                                  const SizedBox(height: 8),
 
-                                // Title
-                                Text(
-                                  widget.exam.title,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppFonts.heading(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.black87,
-                                    height: 1.25,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 8),
-
-                                // Meta
-                                Text(
-                                  '${widget.exam.durationMinutes} min  ·  ${widget.exam.totalQuestions} questions',
-                                  style: AppFonts.body(
-                                    fontSize: 11,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-
-                                const Spacer(),
-
-                                const SizedBox(height: 16),
-
-                                // CTA
-                                SpringButton(
-                                  height: 42,
-                                  depth: canAct ? 3 : 0,
-                                  backgroundColor:
-                                      canAct ? accent : const Color(0xFFE0E0E0),
-                                  shadowColor: canAct
-                                      ? accentShadow
-                                      : const Color(0xFFBDBDBD),
-                                  onPressed:
-                                      canAct ? () => _onEnter(context) : null,
-                                  child: Text(
-                                    ctaLabel,
+                                  // Meta
+                                  Text(
+                                    '${widget.exam
+                                        .durationMinutes} min  ·  ${widget.exam
+                                        .totalQuestions} questions',
                                     style: AppFonts.body(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                      color: canAct
-                                          ? Colors.white
-                                          : Colors.black38,
+                                      fontSize: 11,
+                                      color: Colors.black54,
                                     ),
                                   ),
-                                ),
-                              ],
+
+                                  const Spacer(),
+
+                                  const SizedBox(height: 16),
+
+                                  // CTA
+                                  SpringButton(
+                                    height: 39,
+                                    depth: canAct ? 3 : 0,
+                                    backgroundColor:
+                                    canAct ? accent : const Color(0xFFE0E0E0),
+                                    shadowColor: canAct
+                                        ? accentShadow
+                                        : const Color(0xFFBDBDBD),
+                                    onPressed:
+                                    canAct ? () => _onEnter(context) : null,
+                                    child: Text(
+                                      ctaLabel,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            // ── "COMPLETED" stamp overlay ──────────────────────────
-            if (widget.hasSubmitted)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: ClipPath(
-                    clipper: _TicketClipper(),
-                    child: Center(
-                      child: Transform.rotate(
-                        angle: -0.18, // slight tilt
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: AppColors.success.withValues(alpha: 0.7),
-                              width: 2.5,
+              // ── "COMPLETED" stamp overlay ──────────────────────────
+              if (widget.hasSubmitted)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: ClipPath(
+                      clipper: _TicketClipper(),
+                      child: Center(
+                        child: Transform.rotate(
+                          angle: -0.18, // slight tilt
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 6,
                             ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'COMPLETED',
-                            style: AppFonts.body(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.success.withValues(alpha: 0.6),
-                              letterSpacing: 3.0,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: AppColors.success.withValues(alpha: 0.7),
+                                width: 2.5,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              'COMPLETED',
+                              style: AppFonts.body(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.success.withValues(alpha: 0.6),
+                                letterSpacing: 3.0,
+                              ),
                             ),
                           ),
                         ),
@@ -281,51 +284,50 @@ class _TicketCardState extends State<_TicketCard>
                     ),
                   ),
                 ),
-              ),
 
-            // ── Dashed tear-line (drawn over the card) ───────────
-            if (!_isRipping)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: CustomPaint(
-                    painter: _TearLinePainter(),
+              // ── Dashed tear-line (drawn over the card) ───────────
+              if (!_isRipping)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: _TearLinePainter(),
+                    ),
                   ),
                 ),
-              ),
 
-            // ── Notch circles (use background color to "bite" in) ─
-            if (!_isRipping) ...[
-              // Top notch
-              Positioned(
-                left: _kStubWidth - _kNotchRadius,
-                top: -_kNotchRadius,
-                child: Container(
-                  width: _kNotchRadius * 2,
-                  height: _kNotchRadius * 2,
-                  decoration: const BoxDecoration(
-                    color: AppColors.background,
-                    shape: BoxShape.circle,
+              // ── Notch circles (use background color to "bite" in) ─
+              if (!_isRipping) ...[
+                // Top notch
+                Positioned(
+                  left: _kStubWidth - _kNotchRadius,
+                  top: -_kNotchRadius,
+                  child: Container(
+                    width: _kNotchRadius * 2,
+                    height: _kNotchRadius * 2,
+                    decoration: const BoxDecoration(
+                      color: AppColors.background,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
-              ),
-              // Bottom notch
-              Positioned(
-                left: _kStubWidth - _kNotchRadius,
-                bottom: -_kNotchRadius,
-                child: Container(
-                  width: _kNotchRadius * 2,
-                  height: _kNotchRadius * 2,
-                  decoration: const BoxDecoration(
-                    color: AppColors.background,
-                    shape: BoxShape.circle,
+                // Bottom notch
+                Positioned(
+                  left: _kStubWidth - _kNotchRadius,
+                  bottom: -_kNotchRadius,
+                  child: Container(
+                    width: _kNotchRadius * 2,
+                    height: _kNotchRadius * 2,
+                    decoration: const BoxDecoration(
+                      color: AppColors.background,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
-        ),
-      );
-    },
+          ),
+        );
+      },
     );
   }
 }

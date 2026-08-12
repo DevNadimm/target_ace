@@ -306,6 +306,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         }
 
         if (_isLastStep) {
+          if (!mounted) return;
           _submitData(context);
         } else {
           _advanceStep();
@@ -611,7 +612,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                                       alignment: Alignment.topCenter,
                                       children: <Widget>[
                                         ...previousChildren,
-                                        if (currentChild != null) currentChild,
+                                        ?currentChild,
                                       ],
                                     );
                                   },

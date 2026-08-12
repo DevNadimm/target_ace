@@ -13,7 +13,6 @@ import 'package:target_ace/core/services/user_local_datasource.dart';
 import 'package:shimmer/shimmer.dart';
 
 part 'active_exam_components/ticket_skeleton.dart';
-part 'active_exam_components/idle_card.dart';
 part 'active_exam_components/ticket_card.dart';
 part 'active_exam_components/pulse_text.dart';
 part 'active_exam_components/countdown_stub.dart';
