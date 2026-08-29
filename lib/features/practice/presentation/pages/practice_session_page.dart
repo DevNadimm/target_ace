@@ -16,6 +16,7 @@ import 'package:target_ace/features/practice/domain/entities/subject_entity.dart
 import 'package:target_ace/features/practice/presentation/bloc/session/practice_session_cubit.dart';
 import 'package:target_ace/features/practice/presentation/widgets/question_practice_view.dart';
 import 'package:target_ace/features/practice/presentation/widgets/report_error_bottom_sheet.dart';
+import 'package:target_ace/features/practice/presentation/pages/practice_result_page.dart';
 
 class PracticeSessionPage extends StatelessWidget {
   final SubjectEntity subject;
@@ -71,9 +72,27 @@ class _PracticeSessionPageViewState extends State<PracticeSessionPageView> {
           leading: const BackButton(),
           title: Text(widget.subject.name),
         ),
-        body: GradientBackground(child: BlocBuilder<PracticeSessionCubit, PracticeSessionState>(
-          builder: (context, state) {
-            final questions = state.questions;
+        body: GradientBackground(
+          child: BlocConsumer<PracticeSessionCubit, PracticeSessionState>(
+            listener: (context, state) {
+              if (state.status == PracticeSessionStatus.completed) {
+                final cubit = context.read<PracticeSessionCubit>();
+                // Navigate to result page
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider.value(
+                      value: cubit,
+                      child: PracticeResultPage(
+                        subject: widget.subject,
+                      ),
+                    ),
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              final questions = state.questions;
 
             return Column(
               children: [

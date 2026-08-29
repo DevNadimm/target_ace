@@ -30,3 +30,5 @@ class BattleReviewRequested extends BattleEvent {
   final List<dynamic> answers;
   BattleReviewRequested(this.examId, this.answers);
 }
+
+class BattleScoreboardRefreshRequested extends BattleEvent {}

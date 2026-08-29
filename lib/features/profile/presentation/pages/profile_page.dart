@@ -327,6 +327,13 @@ Thank you.
                             value: 'Read',
                             onTap: () => _launchURL(AppConfig.privacyUrl),
                           ),
+                          const CustomDivider.dotted(),
+                          InfoRow(
+                            icon: HugeIcons.strokeRoundedDelete02,
+                            label: 'Delete Account',
+                            value: 'Delete',
+                            onTap: () => _onDeleteAccount(context),
+                          ),
                         ],
                       ),
                     ),
@@ -373,6 +380,26 @@ Thank you.
           globalContext.read<AuthBloc>().add(LogoutRequested());
         } else {
           context.read<AuthBloc>().add(LogoutRequested());
+        }
+      },
+    );
+  }
+
+  void _onDeleteAccount(BuildContext context) {
+    debugPrint("Show Delete Account Confirmation Dialog");
+    AppConfirmationDialog.show(
+      context,
+      title: 'Delete Account',
+      message: 'Are you sure you want to permanently delete your account? All your exam history, bookmarks, and subscriptions will be permanently erased. This action cannot be undone.',
+      confirmText: 'Delete Permanently',
+      isDestructive: true,
+      onConfirm: () {
+        debugPrint("Delete account confirmed. Dispatching DeleteAccountRequested to AuthBloc.");
+        final globalContext = navigatorKey.currentContext;
+        if (globalContext != null) {
+          globalContext.read<AuthBloc>().add(DeleteAccountRequested());
+        } else {
+          context.read<AuthBloc>().add(DeleteAccountRequested());
         }
       },
     );

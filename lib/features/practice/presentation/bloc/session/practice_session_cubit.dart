@@ -9,6 +9,8 @@ part 'practice_session_state.dart';
 class PracticeSessionCubit extends Cubit<PracticeSessionState> {
   final PracticeRepository _repository;
   final List<Map<String, dynamic>> _pendingAttempts = [];
+  final List<Map<String, dynamic>> _sessionAttempts = [];
+  DateTime? _sessionStartTime;
 
   PracticeSessionCubit({
     required PracticeRepository repository,
@@ -16,6 +18,10 @@ class PracticeSessionCubit extends Cubit<PracticeSessionState> {
         super(const PracticeSessionState());
 
   Future<void> loadSession({required String subjectId, String? topicId}) async {
+    _sessionStartTime = DateTime.now();
+    _sessionAttempts.clear();
+    _pendingAttempts.clear();
+
     emit(state.copyWith(
       status: PracticeSessionStatus.loading,
       selectedTopicId: topicId,
@@ -117,13 +123,22 @@ class PracticeSessionCubit extends Cubit<PracticeSessionState> {
     final q = state.currentQuestion;
     if (q != null) {
       final isCorrect = option.toUpperCase() == q.correctOption.toUpperCase();
-      _pendingAttempts.add({
+      final attempt = {
         'question_id': q.id,
         'subject_id': q.subjectId,
         'topic_id': q.topicId,
         'selected_option': option,
         'is_correct': isCorrect,
-      });
+      };
+      _pendingAttempts.add(attempt);
+      
+      // Update session attempt if already exists (shouldn't happen since option is locked, but just in case)
+      final existingIdx = _sessionAttempts.indexWhere((a) => a['question_id'] == q.id);
+      if (existingIdx >= 0) {
+        _sessionAttempts[existingIdx] = attempt;
+      } else {
+        _sessionAttempts.add(attempt);
+      }
     }
   }
 
@@ -177,6 +192,12 @@ class PracticeSessionCubit extends Cubit<PracticeSessionState> {
         selectedOption: null,
         bookmarkedIds: state.bookmarkedIds,
       ));
+    } else {
+      // Completed session
+      syncProgress();
+      emit(state.copyWith(
+        status: PracticeSessionStatus.completed,
+      ));
     }
   }
 
@@ -202,5 +223,31 @@ class PracticeSessionCubit extends Cubit<PracticeSessionState> {
       },
       (_) {},
     );
+  }
+
+  // Session Results Data
+  int get totalSessionQuestions => state.questions.length;
+  int get correctAnswersCount => _sessionAttempts.where((a) => a['is_correct'] == true).length;
+  int get wrongAnswersCount => _sessionAttempts.where((a) => a['is_correct'] == false).length;
+  int get attemptedQuestionsCount => _sessionAttempts.length;
+  double get sessionAccuracy => attemptedQuestionsCount == 0 ? 0 : (correctAnswersCount / attemptedQuestionsCount) * 100;
+  
+  Duration get sessionDuration {
+    if (_sessionStartTime == null) return Duration.zero;
+    return DateTime.now().difference(_sessionStartTime!);
+  }
+
+  List<Map<String, dynamic>> get sessionAttempts => List.unmodifiable(_sessionAttempts);
+
+  void resetSession() {
+    _sessionStartTime = DateTime.now();
+    _sessionAttempts.clear();
+    _pendingAttempts.clear();
+    
+    emit(state.copyWith(
+      status: PracticeSessionStatus.loaded,
+      currentIndex: 0,
+      selectedOption: null,
+    ));
   }
 }

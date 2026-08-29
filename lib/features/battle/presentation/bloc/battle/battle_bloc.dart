@@ -51,6 +51,7 @@ class BattleBloc extends Bloc<BattleEvent, BattleState> {
     on<BattleDisqualificationRequested>(_onDisqualify);
     on<BattleTimeTicked>(_onTimeTicked);
     on<BattleReviewRequested>(_onReviewRequested);
+    on<BattleScoreboardRefreshRequested>(_onScoreboardRefresh);
   }
 
   @override
@@ -648,5 +649,23 @@ class BattleBloc extends Bloc<BattleEvent, BattleState> {
       emit(BattleReviewAccessGranted(event.examId, event.answers));
     }
     emit(currentState); // Restore UI state
+  }
+
+  Future<void> _onScoreboardRefresh(
+    BattleScoreboardRefreshRequested event,
+    Emitter<BattleState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! BattleScoreboard) return;
+
+    await _loadLeaderboardAndResults(
+      emit: emit,
+      examId: currentState.examId,
+      examTitle: currentState.examTitle,
+      score: currentState.score,
+      isDisqualified: currentState.isDisqualified,
+      questions: currentState.questions,
+      userAnswersList: currentState.userAnswersList,
+    );
   }
 }

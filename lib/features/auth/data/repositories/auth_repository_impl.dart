@@ -111,6 +111,23 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, void>> deleteAccount() async {
+    try {
+      // Run FCM unsubscribe asynchronously
+      notificationService.handleLogout().catchError((_) {});
+      
+      await remoteDataSource.deleteAccount();
+      await UserLocalDataSource.clear();
+      await AppPreferences.clearAll();
+      return right(null);
+    } on ServerException catch (e) {
+      return left(Failure(message: e.message, type: e.type));
+    } catch (e) {
+      return left(Failure(message: e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> syncProfile() async {
     try {
       final user = remoteDataSource.currentUser;

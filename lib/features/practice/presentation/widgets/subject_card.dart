@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:target_ace/core/components/custom_cached_image.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/config/colors.dart';
 import 'package:target_ace/core/config/typography.dart';
+import 'package:target_ace/core/shared/widgets/fade_wave_animation.dart';
 
 class SubjectCard extends StatefulWidget {
   final String title;
@@ -10,6 +11,7 @@ class SubjectCard extends StatefulWidget {
   final int practiced;
   final int total;
   final String? image;
+  final bool isRefreshing;
   final VoidCallback onTap;
 
   const SubjectCard({
@@ -19,6 +21,7 @@ class SubjectCard extends StatefulWidget {
     this.practiced = 0,
     this.total = 0,
     this.image,
+    this.isRefreshing = false,
     required this.onTap,
   });
 
@@ -75,24 +78,38 @@ class _SubjectCardState extends State<SubjectCard> {
                   ),
                   const SizedBox(height: 8),
                 ],
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: widget.total > 0 ? widget.practiced / widget.total : 0.0,
-                    backgroundColor: AppColors.divider,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppColors.primary,
-                    ),
-                    minHeight: 4,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${widget.practiced} / ${widget.total} questions',
-                  style: AppFonts.body(
-                    fontSize: 10,
-                    color: AppColors.textSecondary,
-                  ),
+                Builder(
+                  builder: (context) {
+                    Widget progressSection = Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: widget.total > 0 ? widget.practiced / widget.total : 0.0,
+                            backgroundColor: AppColors.divider,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                            minHeight: 4,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${widget.practiced} / ${widget.total} questions',
+                          style: AppFonts.body(
+                            fontSize: 10,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    );
+
+                    if (widget.isRefreshing) {
+                      return FadeWaveAnimation(child: progressSection);
+                    }
+                    return progressSection;
+                  }
                 ),
               ],
             ),

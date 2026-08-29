@@ -6,4 +6,6 @@ class GoogleSignInRequested extends AuthEvent {}
 
 class LogoutRequested extends AuthEvent {}
 
+class DeleteAccountRequested extends AuthEvent {}
+
 class AuthSignedOut extends AuthEvent {}

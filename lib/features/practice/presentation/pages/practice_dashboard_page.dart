@@ -352,10 +352,10 @@ class _PracticeDashboardViewState extends State<PracticeDashboardView> {
                       ),
                       const CustomDivider.dotted(),
                       _PracticeModeTile(
-                        icon: HugeIcons.strokeRoundedTarget02,
+                        icon: HugeIcons.strokeRoundedMagicWand01,
                         title: "Random Quiz",
                         subtitle: "Solve random questions from all subjects",
-                        color: AppColors.accentDark,
+                        color: AppColors.success,
                         onTap: () {
                           AppNotifier.showSnackBar(
                             context,

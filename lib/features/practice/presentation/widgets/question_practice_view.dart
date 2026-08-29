@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/spring_button.dart';
@@ -319,12 +319,10 @@ class _QuestionPracticeViewState extends State<QuestionPracticeView> {
                 Expanded(
                   flex: widget.currentIndex > 0 ? 1 : 1,
                   child: SpringButton(
-                    onPressed: widget.currentIndex < widget.questions.length - 1
-                        ? widget.onNext
-                        : null,
+                    onPressed: widget.onNext,
                     child: Center(
                       child: Text(
-                        'CONTINUE',
+                        widget.currentIndex < widget.questions.length - 1 ? 'CONTINUE' : 'FINISH PRACTICE',
                       ),
                     ),
                   ),

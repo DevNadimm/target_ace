@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       ],
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is LogoutSuccess) {
+          if (state is LogoutSuccess || state is AccountDeletedSuccess) {
             context.read<AppLaunchBloc>().add(const OnboardingCompleted());
             navigatorKey.currentState?.pushAndRemoveUntil(
               LaunchPage.route(),

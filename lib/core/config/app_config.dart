@@ -7,7 +7,7 @@ class AppConfig {
   static const String appVersion = "1.0.0";
   static const String appSubtitle = "Live. Battle. Exams.";
   static const bool isDevelopment = true;
-  static const bool isPracticeUnderDevelopment = true;
+  static const bool isPracticeUnderDevelopment = false;
 
   /// Supabase Configuration Placeholders
   static String get supabaseUrl => dotenv.env['SUPABASE_URL'] ?? '';

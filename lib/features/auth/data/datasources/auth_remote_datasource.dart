@@ -20,6 +20,9 @@ abstract interface class AuthRemoteDataSource {
   /// Performs local cleanup only (no remote call to Supabase)
   Future<void> clearLocalSession();
   
+  /// Permanently deletes user account from server
+  Future<void> deleteAccount();
+  
   Future<Map<String, dynamic>> fetchProfile(String userId);
   Future<SubscriptionModel?> fetchSubscription();
   Future<void> saveFcmToken(String userId);
@@ -100,6 +103,16 @@ class AuthRemoteDataSourceImpl extends BaseRemoteDataSource implements AuthRemot
       await clearLocalSession();
     } catch (e) {
       throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    try {
+      await client.rpc('delete_user_account');
+      await clearLocalSession();
+    } catch (e) {
+      handleException(e);
     }
   }
 

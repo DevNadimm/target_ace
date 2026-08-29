@@ -8,6 +8,7 @@ import 'package:target_ace/features/auth/domain/entities/auth_result.dart';
 import 'package:target_ace/features/auth/domain/usecases/do_google_sign_in.dart';
 import 'package:target_ace/features/auth/domain/usecases/do_logout.dart';
 import 'package:target_ace/features/auth/domain/usecases/do_local_logout.dart';
+import 'package:target_ace/features/auth/domain/usecases/do_delete_account.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -16,6 +17,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final DoGoogleSignIn _doGoogleSignIn;
   final DoLogout _doLogout;
   final DoLocalLogout _doLocalLogout;
+  final DoDeleteAccount _doDeleteAccount;
   final AppUserCubit _appUserCubit;
   final supabase.SupabaseClient _supabaseClient;
   StreamSubscription<supabase.AuthState>? _authStateSubscription;
@@ -24,16 +26,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required DoGoogleSignIn doGoogleSignIn,
     required DoLogout doLogout,
     required DoLocalLogout doLocalLogout,
+    required DoDeleteAccount doDeleteAccount,
     required AppUserCubit appUserCubit,
     required supabase.SupabaseClient supabaseClient,
   })  : _doGoogleSignIn = doGoogleSignIn,
         _doLogout = doLogout,
         _doLocalLogout = doLocalLogout,
+        _doDeleteAccount = doDeleteAccount,
         _appUserCubit = appUserCubit,
         _supabaseClient = supabaseClient,
         super(AuthInitial()) {
     on<GoogleSignInRequested>(_onGoogleSignIn);
     on<LogoutRequested>(_onLogout);
+    on<DeleteAccountRequested>(_onDeleteAccount);
     on<AuthSignedOut>(_onAuthSignedOut);
 
     _authStateSubscription = _supabaseClient.auth.onAuthStateChange.listen((data) {
@@ -70,7 +75,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLogout(LogoutRequested event, Emitter<AuthState> emit) async {
-    if (state is LogoutSuccess) return;
+    if (state is LogoutSuccess || state is AccountDeletedSuccess) return;
     
     final res = await _doLogout(const NoParams());
     
@@ -84,8 +89,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
+  Future<void> _onDeleteAccount(DeleteAccountRequested event, Emitter<AuthState> emit) async {
+    if (state is LogoutSuccess || state is AccountDeletedSuccess) return;
+    emit(AuthLoading());
+
+    final res = await _doDeleteAccount(const NoParams());
+
+    res.fold(
+      (failure) => emit(AuthFailure(ErrorType.server, failure.message)),
+      (_) {
+        // Clear global user state in cubit
+        _appUserCubit.logout();
+        emit(AccountDeletedSuccess());
+      },
+    );
+  }
+
   Future<void> _onAuthSignedOut(AuthSignedOut event, Emitter<AuthState> emit) async {
-    if (state is LogoutSuccess) return;
+    if (state is LogoutSuccess || state is AccountDeletedSuccess) return;
 
     final res = await _doLocalLogout(const NoParams());
     

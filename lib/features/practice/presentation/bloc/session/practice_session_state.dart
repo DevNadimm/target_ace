@@ -1,6 +1,6 @@
 part of 'practice_session_cubit.dart';
 
-enum PracticeSessionStatus { initial, loading, loaded, failure }
+enum PracticeSessionStatus { initial, loading, loaded, failure, completed }
 
 class PracticeSessionState {
   final PracticeSessionStatus status;

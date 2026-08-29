@@ -127,8 +127,8 @@ class PracticeRemoteDataSourceImpl extends BaseRemoteDataSource implements Pract
     try {
       final userId = client.auth.currentUser?.id;
       final response = await client.rpc('get_practice_summary', params: {
-        'target_user_id': userId,
-        'target_group_id': groupId,
+        'p_user_id': userId,
+        'p_group_id': groupId,
       });
       return Map<String, dynamic>.from(response as Map);
     } catch (e) {
