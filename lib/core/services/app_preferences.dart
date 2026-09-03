@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:target_ace/core/config/preference_keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -59,11 +59,34 @@ class AppPreferences {
     final firstTime = prefs.getBool(PreferenceKeys.isFirstTime) ?? true;
     final language = prefs.getString(PreferenceKeys.selectedLanguage);
     
+    // Preserve user-scoped keys (format: {uuid}_suffix) so returning users
+    // aren't re-prompted for notification permission or free trial.
+    final uuidPattern = RegExp(
+      r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_',
+      caseSensitive: false,
+    );
+    final userScopedEntries = <String, Object>{};
+    for (final key in prefs.getKeys()) {
+      if (uuidPattern.hasMatch(key)) {
+        final value = prefs.get(key);
+        if (value != null) userScopedEntries[key] = value;
+      }
+    }
+
     await prefs.clear();
     
     await prefs.setBool(PreferenceKeys.isFirstTime, firstTime);
     if (language != null) {
       await prefs.setString(PreferenceKeys.selectedLanguage, language);
+    }
+
+    // Restore user-scoped keys
+    for (final entry in userScopedEntries.entries) {
+      if (entry.value is bool) {
+        await prefs.setBool(entry.key, entry.value as bool);
+      } else if (entry.value is String) {
+        await prefs.setString(entry.key, entry.value as String);
+      }
     }
   }
 
@@ -98,9 +121,9 @@ class AppPreferences {
     }
   }
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ---------------------------------------------
   // FCM Topics Local Sync Cache
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ---------------------------------------------
   static const String _syncedTopicsKey = 'synced_topics';
 
   static Future<List<String>> getSyncedTopics() async {

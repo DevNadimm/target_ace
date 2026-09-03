@@ -506,17 +506,17 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             );
             if (!context.mounted) return;
             if (Navigator.canPop(context) && widget.customSteps != null) {
-              // In-app profile edit â€” pop back to the previous page.
+              // In-app profile edit -- pop back to the previous page.
               Navigator.pop(context, true);
             } else if (widget.customSteps != null) {
-              // In-app edit with no previous route â€” go to main navigation.
+              // In-app edit with no previous route -- go to main navigation.
               Navigator.pushAndRemoveUntil(
                 context,
                 MainNavigationPage.route(),
                 (_) => false,
               );
             } else {
-              // Launch flow â€” notify the coordinator.
+              // Launch flow -- notify the coordinator.
               context.read<AppLaunchBloc>().add(const ProfileSetupCompleted());
             }
           } else if (state is ProfileSetupFailure) {

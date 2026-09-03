@@ -20,9 +20,15 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<AppLaunchBloc>()..add(const AppLaunchStarted())),
       ],
       child: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
+        listenWhen: (previous, current) =>
+            (current is LogoutSuccess || current is AccountDeletedSuccess) &&
+            previous.runtimeType != current.runtimeType,
+        listener: (context, state) async {
           if (state is LogoutSuccess || state is AccountDeletedSuccess) {
-            context.read<AppLaunchBloc>().add(const OnboardingCompleted());
+            context.read<AppLaunchBloc>().add(const AppLaunchLoggedOut());
+            // Yield to the event loop so AppLaunchBloc updates its state to AppLaunchShowLogin
+            // before LaunchPage builds its first frame.
+            await Future.delayed(Duration.zero);
             navigatorKey.currentState?.pushAndRemoveUntil(
               LaunchPage.route(),
               (_) => false,

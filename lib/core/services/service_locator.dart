@@ -133,7 +133,7 @@ Future<void> _registerCore() async {
         authRemoteDataSource: sl<AuthRemoteDataSource>(),
       ));
 
-  // â”€â”€ Clean Architecture Core â”€â”€
+  // -- Clean Architecture Core --
 
   // Connectivity (for ConnectionChecker)
   sl.registerFactory(() => Connectivity());
@@ -143,10 +143,10 @@ Future<void> _registerCore() async {
     () => ConnectionCheckerImpl(sl()),
   );
 
-  // AppUserCubit (global auth state â€” single instance)
+  // AppUserCubit (global auth state -- single instance)
   sl.registerLazySingleton(() => AppUserCubit());
 
-  // â”€â”€ Launch Coordinator â”€â”€
+  // -- Launch Coordinator --
   sl.registerLazySingleton(
     () => AppLaunchBloc(
       authRemoteDataSource: sl(),
@@ -160,11 +160,11 @@ Future<void> _registerCore() async {
 void _initAuth() {
   sl
     // Datasource
-    ..registerFactory<AuthRemoteDataSource>(
+    ..registerLazySingleton<AuthRemoteDataSource>(
       () => AuthRemoteDataSourceImpl(sl(), sl(), sl()),
     )
     // Repository
-    ..registerFactory<AuthRepository>(
+    ..registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(sl(), sl(), sl()),
     )
     // Use Cases

@@ -126,7 +126,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     }
   }
 
-  // â”€â”€â”€ Legacy Compatibility for GroupSwitchCubit â”€â”€â”€
+  // -- Legacy Compatibility for GroupSwitchCubit --
   // Since other features use this directly from ProfileRepo, we keep this method inside the implementation class
   // to avoid breaking existing code. Once we migrate GroupSwitch, this will go away.
   @override

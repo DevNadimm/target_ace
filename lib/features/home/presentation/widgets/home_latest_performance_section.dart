@@ -18,7 +18,7 @@ class PerformanceStat {
   final String? unit;
 
   /// Optional trend badge, e.g. "+27". Rendered in green with an up arrow
-  /// when present â€” used for things like rank movement.
+  /// when present -- used for things like rank movement.
   final String? trend;
   final bool isLocked;
 
@@ -32,7 +32,7 @@ class PerformanceStat {
   });
 }
 
-/// Everything the card needs to render â€” exam context + the four stats.
+/// Everything the card needs to render -- exam context + the four stats.
 /// Swap [LatestPerformanceModel.dummy] for real data once the repo/bloc
 /// wiring for this section is in.
 class LatestPerformanceModel {
@@ -109,7 +109,7 @@ class LatestPerformanceModel {
   }
 }
 
-/// "Latest Performance" section â€” mirrors the visual language of
+/// "Latest Performance" section -- mirrors the visual language of
 /// [HomeActiveExamSection] / [HomeStreakSection]: same [CustomContainer] shell, same
 /// dotted-divider + label-row header pattern as the leaderboard preview,
 /// with a 4-up stat grid below.

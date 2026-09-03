@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/config/app_config.dart';
 import 'package:target_ace/core/config/assets.dart';
@@ -16,7 +16,7 @@ import 'package:target_ace/features/profile/presentation/bloc/setup/profile_setu
 import 'package:target_ace/features/profile/presentation/pages/profile_setup_page.dart';
 import 'package:target_ace/features/subscription/presentation/pages/free_trial_offer_page.dart';
 
-/// Root launch page â€” the single entry point for the entire app.
+/// Root launch page -- the single entry point for the entire app.
 ///
 /// Replaces the old `SplashPage`. Hosts a [BlocListener] that reacts to
 /// [AppLaunchState] emissions and renders the appropriate screen.
@@ -77,12 +77,15 @@ class LaunchPage extends StatelessWidget {
       // Terminal states are handled by the listener, but render splash
       // as a fallback to prevent frame-level blank screens.
       AppLaunchNavigateHome() => const _SplashView(key: ValueKey('splash')),
-      AppLaunchError() => const LoginPage(key: ValueKey('login_error')),
+      AppLaunchError(message: final msg) => _ErrorRetryView(
+          key: const ValueKey('error'),
+          message: msg,
+        ),
     };
   }
 }
 
-/// Splash screen UI â€” shown during [AppLaunchInitializing].
+/// Splash screen UI -- shown during [AppLaunchInitializing].
 ///
 /// Preserves the exact same visual design from the old `SplashPage`:
 /// centered logo, app name, subtitle, and a loading indicator.
@@ -134,6 +137,90 @@ class _SplashView extends StatelessWidget {
                 isShowContainer: false,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Error screen with retry -- shown when the launch flow encounters an
+/// unrecoverable error (e.g. offline with no cached profile).
+class _ErrorRetryView extends StatelessWidget {
+  final String message;
+
+  const _ErrorRetryView({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GradientBackground(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.cloud_off_rounded,
+                    size: 40,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Something went wrong',
+                  style: AppFonts.heading(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: AppFonts.body(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      context
+                          .read<AppLaunchBloc>()
+                          .add(const AppLaunchStarted(skipDelay: true));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(
+                      'RETRY',
+                      style: AppFonts.body(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

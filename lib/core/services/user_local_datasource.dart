@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:target_ace/core/common/models/cached_user_model.dart';
@@ -14,9 +14,9 @@ class UserLocalDataSource {
   static const String _kCachedUser = 'cached_user';
   static Future<void>? _activeWriteLock;
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ---------------------------------------------
   // Primary CRUD
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ---------------------------------------------
 
   /// Save the entire user model as a single JSON string.
   static Future<void> saveUser(CachedUserModel user) async {
@@ -64,9 +64,9 @@ class UserLocalDataSource {
     }
   }
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ---------------------------------------------
   // Convenience Getters (read from the JSON blob)
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ---------------------------------------------
 
   static Future<String> getUserId() async {
     final user = await readUser();
@@ -178,7 +178,7 @@ class UserLocalDataSource {
   }
 
   /// Subscription start date is not stored in CachedUserEntity.
-  /// Returns null for backward compatibility â€” callers display '' if null.
+  /// Returns null for backward compatibility -- callers display '' if null.
   static Future<String?> getSubscriptionStartDate() async {
     return null;
   }

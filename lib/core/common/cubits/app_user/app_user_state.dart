@@ -1,4 +1,4 @@
-﻿part of 'app_user_cubit.dart';
+part of 'app_user_cubit.dart';
 
 /// States for [AppUserCubit].
 ///
@@ -7,7 +7,7 @@ sealed class AppUserState {
   const AppUserState();
 }
 
-/// Initial state â€” no user is logged in.
+/// Initial state -- no user is logged in.
 final class AppUserInitial extends AppUserState {
   const AppUserInitial();
 }

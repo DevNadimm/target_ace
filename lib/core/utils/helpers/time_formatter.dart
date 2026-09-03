@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TimeFormatter {
@@ -20,7 +20,7 @@ class TimeFormatter {
     }
   }
 
-  /// "8:00 AM" â†’ "08:00"
+  /// "8:00 AM" -> "08:00"
   static String to24Hour(String time12h) {
     final date = _parse12h(time12h);
     if (date == null) return time12h;
@@ -28,7 +28,7 @@ class TimeFormatter {
     return DateFormat('HH:mm').format(date);
   }
 
-  /// "13:45" â†’ "1:45 PM"
+  /// "13:45" -> "1:45 PM"
   static String to12Hour(String time24h) {
     final date = _parse24h(time24h);
     if (date == null) return time24h;
@@ -38,9 +38,9 @@ class TimeFormatter {
 }
 
 extension TimeOfDayX on TimeOfDay {
-  /// TimeOfDay â†’ "HH:mm" string.
+  /// TimeOfDay -> "HH:mm" string.
   /// Matches shiftStart / shiftEnd format in EmployeeModel.
-  /// e.g. TimeOfDay(hour: 9, minute: 5) â†’ "09:05"
+  /// e.g. TimeOfDay(hour: 9, minute: 5) -> "09:05"
   String toHHmm() {
     final h = hour.toString().padLeft(2, '0');
     final m = minute.toString().padLeft(2, '0');

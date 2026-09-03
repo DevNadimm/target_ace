@@ -1,4 +1,4 @@
-﻿part of 'app_launch_bloc.dart';
+part of 'app_launch_bloc.dart';
 
 /// Events that drive the app launch state machine.
 ///
@@ -17,6 +17,11 @@ final class AppLaunchStarted extends AppLaunchEvent {
 /// Emitted by [OnboardingPage] when the user finishes onboarding.
 final class OnboardingCompleted extends AppLaunchEvent {
   const OnboardingCompleted();
+}
+
+/// Emitted when the user logs out or deletes their account to reset coordinator to login screen.
+final class AppLaunchLoggedOut extends AppLaunchEvent {
+  const AppLaunchLoggedOut();
 }
 
 /// Emitted by [LoginPage] when authentication succeeds.

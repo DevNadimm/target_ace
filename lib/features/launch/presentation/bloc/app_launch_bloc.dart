@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:target_ace/core/error/failure.dart';
 import 'package:target_ace/core/network/connection_checker.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
 import 'package:target_ace/core/services/user_local_datasource.dart';
@@ -15,8 +19,8 @@ part 'app_launch_state.dart';
 ///
 /// Implements a deterministic state machine:
 /// ```
-/// Initializing â†’ CheckOnboarding â†’ CheckAuth â†’ SyncProfile
-///   â†’ CheckProfile â†’ CheckNotification â†’ CheckTrial â†’ Home
+/// Initializing -> CheckOnboarding -> CheckAuth -> SyncProfile
+///   -> CheckProfile -> CheckNotification -> CheckTrial -> Home
 /// ```
 ///
 /// **Key invariants**:
@@ -43,45 +47,50 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
         super(const AppLaunchInitializing()) {
     on<AppLaunchStarted>(_onAppLaunchStarted);
     on<OnboardingCompleted>(_onOnboardingCompleted);
+    on<AppLaunchLoggedOut>(_onAppLaunchLoggedOut);
     on<LoginCompleted>(_onLoginCompleted);
     on<ProfileSetupCompleted>(_onProfileSetupCompleted);
     on<NotificationPermissionHandled>(_onNotificationPermissionHandled);
     on<FreeTrialHandled>(_onFreeTrialHandled);
   }
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // --------------------------------------------------
   // Event Handlers
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // --------------------------------------------------
 
   /// Entry point: runs the full state machine from the top.
   Future<void> _onAppLaunchStarted(
     AppLaunchStarted event,
     Emitter<AppLaunchState> emit,
   ) async {
+    emit(const AppLaunchInitializing());
     try {
       // Brief splash delay for brand impression
       if (!event.skipDelay) {
         await Future.delayed(const Duration(milliseconds: 1500));
       }
 
-      // â”€â”€ Step 1: Check Onboarding â”€â”€
+      // -- Step 1: Check Onboarding --
       final isFirstTime = await AppPreferences.isFirstTime();
       if (isFirstTime) {
         emit(const AppLaunchShowOnboarding());
         return;
       }
 
-      // â”€â”€ Step 2: Check Auth Session â”€â”€
+      // -- Step 2: Check Auth Session --
       final session = _authRemoteDataSource.currentSession;
       if (session == null) {
         emit(const AppLaunchShowLogin());
         return;
       }
 
-      // â”€â”€ Step 3: Sync Profile (with offline resilience) â”€â”€
+      // -- Step 3: Sync Profile (with offline resilience) --
       await _syncProfileWithFallback(emit);
 
-      // â”€â”€ Step 4â€“6: Run remaining checks â”€â”€
+      // If sync emitted an error (e.g. offline + no cache), stop here.
+      if (state is AppLaunchError) return;
+
+      // -- Step 4-6: Run remaining checks --
       await _runPostAuthChecks(emit);
     } catch (e) {
       debugPrint('AppLaunchBloc._onAppLaunchStarted error: $e');
@@ -89,7 +98,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     }
   }
 
-  /// Onboarding done â†’ show login.
+  /// Onboarding done -> show login.
   Future<void> _onOnboardingCompleted(
     OnboardingCompleted event,
     Emitter<AppLaunchState> emit,
@@ -97,7 +106,15 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     emit(const AppLaunchShowLogin());
   }
 
-  /// Login succeeded â†’ sync profile â†’ run post-auth checks.
+  /// User logged out or deleted account -> reset state directly to login.
+  Future<void> _onAppLaunchLoggedOut(
+    AppLaunchLoggedOut event,
+    Emitter<AppLaunchState> emit,
+  ) async {
+    emit(const AppLaunchShowLogin());
+  }
+
+  /// Login succeeded -> sync profile -> run post-auth checks.
   Future<void> _onLoginCompleted(
     LoginCompleted event,
     Emitter<AppLaunchState> emit,
@@ -112,7 +129,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     }
   }
 
-  /// Profile setup saved â†’ check notification â†’ check trial â†’ home.
+  /// Profile setup saved -> check notification -> check trial -> home.
   Future<void> _onProfileSetupCompleted(
     ProfileSetupCompleted event,
     Emitter<AppLaunchState> emit,
@@ -125,7 +142,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     }
   }
 
-  /// Notification permission handled â†’ check trial â†’ home.
+  /// Notification permission handled -> check trial -> home.
   Future<void> _onNotificationPermissionHandled(
     NotificationPermissionHandled event,
     Emitter<AppLaunchState> emit,
@@ -138,7 +155,7 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     }
   }
 
-  /// Free trial handled â†’ navigate home.
+  /// Free trial handled -> navigate home.
   Future<void> _onFreeTrialHandled(
     FreeTrialHandled event,
     Emitter<AppLaunchState> emit,
@@ -146,67 +163,79 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
     emit(const AppLaunchNavigateHome());
   }
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // --------------------------------------------------
   // Internal State Machine Steps
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // ————————————————————————————————————————————————
+  // --------------------------------------------------
 
   /// Syncs profile from Supabase DB. Falls back to cached data if offline.
+  ///
+  /// For cached users: awaits sync with a 4-second timeout so navigation
+  /// decisions always use the freshest available data.
+  /// For uncached users: must sync or fail with an error state.
   Future<void> _syncProfileWithFallback(Emitter<AppLaunchState> emit) async {
     final isProfileLocallyCached = await UserLocalDataSource.isProfileComplete();
 
     if (isProfileLocallyCached) {
-      // Profile exists locally — sync in background, don't block the user.
-      _authRepository.syncProfile().then((either) {
-        either.fold(
-          (failure) => debugPrint('AppLaunchBloc: Background sync failed: ${failure.message}'),
-          (_) => debugPrint(
-              'AppLaunchBloc: Background sync completed successfully.'),
+      // Profile exists locally -- sync with timeout so we don't block forever,
+      // but still get fresh data before making navigation decisions.
+      try {
+        await _authRepository.syncProfile().timeout(
+          const Duration(seconds: 4),
+          onTimeout: () {
+            debugPrint('AppLaunchBloc: Profile sync timed out, using cached data.');
+            return left(Failure(message: 'Sync timeout'));
+          },
         );
-      }).catchError((error) {
-        debugPrint('AppLaunchBloc: Background sync unhandled error: $error');
-      });
+      } catch (e) {
+        debugPrint('AppLaunchBloc: Profile sync failed, using cached data: $e');
+      }
     } else {
-      // No local data — must sync now.
+      // No local data -- must sync now.
       final isOnline = await _connectionChecker.isConnected;
       if (isOnline) {
         await _authRepository.syncProfile();
       }
-      // If offline with no cached data, profile check will catch it below.
+    }
+
+    // Safety check: if after sync attempt there's still no cached user,
+    // we cannot proceed (offline + no cache). Show error instead of
+    // falling through to a broken Profile Setup screen.
+    final hasUser = await UserLocalDataSource.readUser();
+    if (hasUser == null) {
+      emit(const AppLaunchError(
+        'Unable to load your profile. Please check your internet connection and restart the app.',
+      ));
+      return;
     }
   }
 
   /// Runs the post-authentication check sequence:
-  /// CheckProfile → CheckNotification → CheckTrial → Home
+  /// CheckProfile -> CheckNotification -> CheckTrial -> Home
   Future<void> _runPostAuthChecks(Emitter<AppLaunchState> emit) async {
-    if (state is AppLaunchShowLogin) return;
+    if (_authRemoteDataSource.currentSession == null) return;
 
-    // —– Step 4: Check Profile Completion ––
+    // -- Step 4: Check Profile Completion --
     final isProfileComplete = await UserLocalDataSource.isProfileComplete();
     
-    if (state is AppLaunchShowLogin) return;
+    if (_authRemoteDataSource.currentSession == null) return;
     if (!isProfileComplete) {
       emit(const AppLaunchShowProfileSetup());
       return;
     }
 
-    // —– Step 5: Check Notification Permission ––
+    // -- Step 5: Check Notification Permission --
     await _checkNotificationStep(emit);
   }
 
   /// Checks if notification permission prompt is needed.
-  ///
-  /// Criteria for showing the permission page:
-  /// 1. User has NOT been prompted before (user-scoped flag).
-  /// 2. OS-level permission is NOT already granted.
   Future<void> _checkNotificationStep(Emitter<AppLaunchState> emit) async {
-    if (state is AppLaunchShowLogin) return;
+    if (_authRemoteDataSource.currentSession == null) return;
 
     final hasPrompted =
         await UserLocalDataSource.getHasPromptedNotification();
 
     if (!hasPrompted) {
-      // Also check OS-level permission — skip the prompt if already granted.
+      // Also check OS-level permission -- skip the prompt if already granted.
       bool isAlreadyGranted = false;
       try {
         final settings =
@@ -216,38 +245,31 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
                 settings.authorizationStatus == AuthorizationStatus.provisional;
       } catch (e) {
         debugPrint('AppLaunchBloc: Failed to get notification settings: $e');
-        // Fail open — assume not granted and show the prompt
       }
 
       if (isAlreadyGranted) {
-        // OS permission already granted — mark as prompted and move on.
         await UserLocalDataSource.setHasPromptedNotification(true);
       } else {
-        if (state is! AppLaunchShowLogin) {
-          emit(const AppLaunchShowNotificationPermission());
-        }
+        emit(const AppLaunchShowNotificationPermission());
         return;
       }
     }
 
-    if (state is AppLaunchShowLogin) return;
-    // Notification handled — proceed to trial check.
+    if (_authRemoteDataSource.currentSession == null) return;
+    // Notification handled -- proceed to trial check.
     await _checkTrialStep(emit);
   }
 
   /// Checks if the user is eligible for a free trial.
-  ///
-  /// Logic: DB-first — if the database says the user already has/had a trial,
-  /// skip. Only falls back to error-safe "not eligible" on failure.
   Future<void> _checkTrialStep(Emitter<AppLaunchState> emit) async {
-    if (state is AppLaunchShowLogin) return;
+    if (_authRemoteDataSource.currentSession == null) return;
 
     final userId = await UserLocalDataSource.getUserId();
 
     if (userId.isNotEmpty) {
       final hasSkipped = await UserLocalDataSource.getHasSkippedFreeTrial();
       
-      if (state is AppLaunchShowLogin) return;
+      if (_authRemoteDataSource.currentSession == null) return;
       if (hasSkipped) {
         emit(const AppLaunchNavigateHome());
         return;
@@ -258,19 +280,15 @@ class AppLaunchBloc extends Bloc<AppLaunchEvent, AppLaunchState> {
         final isEligible = res.fold((_) => false, (eligible) => eligible);
 
         if (isEligible) {
-          if (state is! AppLaunchShowLogin) {
-            emit(const AppLaunchShowFreeTrial());
-          }
+          emit(const AppLaunchShowFreeTrial());
           return;
         }
       } catch (e) {
-        // On error, fail open â€” skip the trial page, go to home.
+        // On error, fail open -- skip the trial page, go to home.
         debugPrint('AppLaunchBloc: Trial eligibility check failed: $e');
       }
     }
 
-    if (state is! AppLaunchShowLogin) {
-      emit(const AppLaunchNavigateHome());
-    }
+    emit(const AppLaunchNavigateHome());
   }
 }

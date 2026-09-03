@@ -35,7 +35,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final supabaseUser = remoteDataSource.currentUser!;
       final subscription = profile['subscription'] as Map<String, dynamic>?;
 
-      // Build and save unified cached user â€” single write
+      // Build and save unified cached user -- single write
       final cachedUser = CachedUserModel.fromRpcPayload(
         profile: profile,
         subscription: subscription,
@@ -138,7 +138,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final profile = await remoteDataSource.fetchProfile(user.id);
       final subscription = profile['subscription'] as Map<String, dynamic>?;
 
-      // Build and save unified cached user â€” single write
+      // Build and save unified cached user -- single write
       final cachedUser = CachedUserModel.fromRpcPayload(
         profile: profile,
         subscription: subscription,

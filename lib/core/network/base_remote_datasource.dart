@@ -44,10 +44,19 @@ abstract class BaseRemoteDataSource {
 
     if (e is PostgrestException) {
       if (e.code == 'PGRST301' || e.code == '401' || e.message.contains('User profile not found')) {
-        // Infrastructure synchronization: The server rejected the session.
-        // We call signOut() to sync the SDK state, which will eventually
-        // emit AuthChangeEvent.signedOut.
-        client.auth.signOut();
+        // Only sign out the SDK session for genuine authentication rejections
+        // (expired JWT, invalid/revoked token). Do NOT sign out for other
+        // Postgres errors that happen to hit this branch (e.g. missing profile row).
+        final msg = e.message.toLowerCase();
+        final isAuthRejection = msg.contains('jwt') ||
+            msg.contains('expired') ||
+            msg.contains('invalid') ||
+            msg.contains('token') ||
+            msg.contains('not authorized') ||
+            e.code == '401';
+        if (isAuthRejection) {
+          client.auth.signOut();
+        }
         
         throw ServerException(
           message: e.message,

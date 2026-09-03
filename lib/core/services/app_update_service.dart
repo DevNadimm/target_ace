@@ -1,4 +1,4 @@
-﻿// import 'package:in_app_update/in_app_update.dart';
+// import 'package:in_app_update/in_app_update.dart';
 // import 'package:flutter/material.dart';
 //
 // class AppUpdateService {
@@ -10,19 +10,19 @@
 //
 //       if (info.updateAvailability == UpdateAvailability.updateAvailable) {
 //
-//         // âœ… Flexible update (non-critical)
+//         // Flexible update (non-critical)
 //         await InAppUpdate.startFlexibleUpdate();
 //         await InAppUpdate.completeFlexibleUpdate();
 //
-//         // âš ï¸ OR Immediate update (critical)
+//         // OR Immediate update (critical)
 //         await InAppUpdate.performImmediateUpdate();
 //
-//         debugPrint("âœ… Update completed successfully!");
+//         debugPrint("[OK] Update completed successfully!");
 //       } else {
-//         debugPrint("â„¹ï¸ No update available.");
+//         debugPrint("[INFO] No update available.");
 //       }
 //     } catch (e) {
-//       debugPrint("âŒ Failed to check for update: $e");
+//       debugPrint("[ERR] Failed to check for update: $e");
 //     }
 //   }
 // }

@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:target_ace/core/config/api_endpoints.dart';
@@ -7,7 +7,9 @@ import 'package:target_ace/core/error/server_exception.dart';
 import 'package:target_ace/core/logger/app_logger.dart';
 import 'package:target_ace/core/logger/dio_logger_interceptor.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
+import 'package:target_ace/core/services/service_locator.dart';
 import 'package:target_ace/core/utils/enums/error_type.dart';
+import 'package:target_ace/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:target_ace/features/auth/presentation/pages/login_page.dart';
 import 'package:target_ace/main.dart';
 
@@ -29,7 +31,7 @@ class DioService {
     _dio.interceptors.addAll([DioLoggerInterceptor(), _authErrorInterceptor()]);
   }
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ----------------------------------------------------------------------------
 
   /// Call once at app startup to restore saved token.
   Future<void> initAuthToken([String? token]) async {
@@ -44,30 +46,33 @@ class DioService {
 
   void clearAuthToken() => _dio.options.headers.remove('Authorization');
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ----------------------------------------------------------------------------
 
   InterceptorsWrapper _authErrorInterceptor() {
     return InterceptorsWrapper(
       onError: (DioException e, ErrorInterceptorHandler handler) async {
         if (e.response?.statusCode == 401) {
-          AppLogger.w('401 Unauthorized â€” clearing session & redirecting.');
+          AppLogger.w('401 Unauthorized -- clearing session & redirecting.');
           clearAuthToken();
-          await AppPreferences.clearAll();
-          navigatorKey.currentState?.pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const LoginPage()), (_) => false,
-          );
+          try {
+            sl<AuthBloc>().add(AuthSignedOut());
+          } catch (_) {
+            navigatorKey.currentState?.pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const LoginPage()), (_) => false,
+            );
+          }
         }
         handler.next(e);
       },
     );
   }
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ----------------------------------------------------------------------------
 
   /// Priority:
-  ///   1. Backend message  â†’ preserves ErrorType from status code
-  ///   2. DioExceptionType â†’ maps to network / server / etc.
-  ///   3. fallbackMessage  â†’ caller-supplied
+  ///   1. Backend message  -> preserves ErrorType from status code
+  ///   2. DioExceptionType -> maps to network / server / etc.
+  ///   3. fallbackMessage  -> caller-supplied
   ///   4. Generic message
   ServerException _handleError(DioException e, {String? fallbackMessage}) {
     final statusCode = e.response?.statusCode;
@@ -76,7 +81,7 @@ class DioService {
     // don't get mislabeled as ErrorType.server on a 404, etc.
     final errorType = _errorTypeFromStatus(statusCode);
 
-    // 1. Try backend message â€” keeps correct ErrorType from status code
+    // 1. Try backend message -- keeps correct ErrorType from status code
     final backendMessage = _extractBackendMessage(e.response?.data);
     if (backendMessage != null) {
       return ServerException(message: backendMessage, type: errorType, statusCode: statusCode);
@@ -118,7 +123,7 @@ class DioService {
     };
   }
 
-  /// Maps HTTP status code Ã¢â€ â€™ ErrorType.
+  /// Maps HTTP status code -> ErrorType.
   ErrorType _errorTypeFromStatus(int? statusCode) {
     if (statusCode == null) return ErrorType.unknown;
     return switch (statusCode) {
@@ -129,7 +134,7 @@ class DioService {
     };
   }
 
-  /// Maps HTTP status code Ã¢â€ â€™ user-facing message.
+  /// Maps HTTP status code -> user-facing message.
   String _messageFromStatus(int? statusCode) {
     if (statusCode == null) return AppMessages.errorMessage;
     return switch (statusCode) {
@@ -166,7 +171,7 @@ class DioService {
     return null;
   }
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Bot-Protection Detection Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+  // --- Bot-Protection Detection ----------------------------------------------
 
   /// Imunify360 / WAF bot-protection returns HTTP 200 with a plain-text or
   /// JSON body containing a specific message. We detect it here so callers
@@ -186,7 +191,7 @@ class DioService {
     return lower.contains('imunify360') || lower.contains('bot-protection') || lower.contains('access denied by imunify');
   }
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Core Executor Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+  // --- Core Executor ---------------------------------------------------------
 
   Future<Response> _execute(
     Future<Response> Function() call, {
@@ -214,13 +219,13 @@ class DioService {
     }
   }
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ HTTP Methods Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+  // --- HTTP Methods ----------------------------------------------------------
 
   Future<Response> getRequest(
     String endpoint, {
     Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers, // Ã¢Å“â€¦ per-request headers
-    CancelToken? cancelToken, // Ã¢Å“â€¦ cancellation support
+    Map<String, dynamic>? headers, // per-request headers
+    CancelToken? cancelToken, // cancellation support
     String? errorMessage,
   }) => _execute(
     () => _dio.get(
@@ -298,7 +303,7 @@ class DioService {
     errorMessage: errorMessage,
   );
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Multipart Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+  // --- Multipart -------------------------------------------------------------
 
   Future<Response> postMultipart(String endpoint, {
     File? file,

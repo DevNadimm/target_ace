@@ -37,7 +37,7 @@ class HomePodiumSection extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        // â”€â”€ Rank 2 (Left) â”€â”€
+        // -- Rank 2 (Left) --
         Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -103,7 +103,7 @@ class HomePodiumSection extends StatelessWidget {
         ),
         const SizedBox(width: 8),
 
-        // â”€â”€ Rank 1 (Center) â”€â”€
+        // -- Rank 1 (Center) --
         Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -169,7 +169,7 @@ class HomePodiumSection extends StatelessWidget {
         ),
         const SizedBox(width: 8),
 
-        // â”€â”€ Rank 3 (Right) â”€â”€
+        // -- Rank 3 (Right) --
         Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,

@@ -45,7 +45,7 @@ class MainNavigationPageState extends State<MainNavigationPage> {
     }
   }
 
-  /// Lazily built pages â€” only initialized when the user first visits the tab.
+  /// Lazily built pages -- only initialized when the user first visits the tab.
   final Map<int, Widget> _builtPages = {};
 
   @override

@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +43,7 @@ mixin NetworkMonitorMixin<T extends StatefulWidget> on State<T> {
       return;
     }
 
-    /// Network available â†’ verify internet
+    /// Network available -> verify internet
     await _verifyInternet();
 
     /// Start periodic ping
