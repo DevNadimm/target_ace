@@ -14,7 +14,8 @@ class PracticeSubjectsLoading extends PracticeSubjectsState {
 
 class PracticeSubjectsLoaded extends PracticeSubjectsState {
   final List<SubjectEntity> subjects;
-  const PracticeSubjectsLoaded(this.subjects);
+  final bool isRefreshing;
+  const PracticeSubjectsLoaded(this.subjects, {this.isRefreshing = false});
 }
 
 class PracticeSubjectsFailure extends PracticeSubjectsState {

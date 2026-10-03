@@ -87,7 +87,13 @@ class _LiveBattlePageState extends State<LiveBattlePage> with WidgetsBindingObse
           } else if (state is BattleAnalyzing) {
             _secondsRemainingNotifier.value = state.analyzingSecondsRemaining;
           } else if (state is BattleReviewAccessDenied) {
-            SubscriptionPaywallBottomSheet.show(context, status: state.status);
+            SubscriptionPaywallBottomSheet.show(
+              context, 
+              status: state.status,
+              customTitle: 'Live Battle Access',
+              customDescription: 'Live daily battles require an active TargetAce membership. Verify your account status to join the arena.',
+              customButtonText: 'Activate Membership',
+            );
           } else if (state is BattleReviewAccessGranted) {
             final List<Map<String, dynamic>> userAnswers = state.answers
                 .map((a) => Map<String, dynamic>.from(a as Map))

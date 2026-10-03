@@ -3,10 +3,12 @@ import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/components/back_button.dart';
 import 'package:target_ace/core/config/colors.dart';
-import 'package:target_ace/core/config/typography.dart';
+
 import 'package:target_ace/core/services/service_locator.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
+import 'package:target_ace/core/shared/widgets/empty_state_widget.dart';
+import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
 import 'package:target_ace/features/practice/domain/entities/subject_entity.dart';
 
 import 'package:target_ace/features/practice/presentation/bloc/subjects/practice_subjects_cubit.dart';
@@ -60,7 +62,7 @@ class _SubjectsPageViewState extends State<SubjectsPageView> {
     _loadData();
   }
 
-  Future<void> _loadData() async {
+  Future<void> _loadData({bool isRefresh = false}) async {
     final userGoal = await UserLocalDataSource.getUserGoal();
     if (userGoal.isEmpty) {
       debugPrint(
@@ -71,6 +73,7 @@ class _SubjectsPageViewState extends State<SubjectsPageView> {
     if (mounted) {
       context.read<PracticeSubjectsCubit>().fetchSubjects(
         userGoal.toLowerCase(),
+        isRefresh: isRefresh,
       );
     }
   }
@@ -93,46 +96,80 @@ class _SubjectsPageViewState extends State<SubjectsPageView> {
             }
 
             if (state is PracticeSubjectsFailure) {
-              return Center(
-                child: Text(
-                  state.error ?? AppMessages.errorMessage,
-                  style: AppFonts.body(color: AppColors.error),
+              return RefreshIndicator(
+                onRefresh: () => _loadData(isRefresh: true),
+                color: AppColors.primary,
+                backgroundColor: AppColors.card,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: ErrorStateWidget(
+                        message: state.error ?? AppMessages.errorMessage,
+                        onRetry: _loadData,
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
 
             final subjectsData = (state as PracticeSubjectsLoaded).subjects;
+            final isRefreshing = state.isRefreshing;
             final List<SubjectEntity> subjects = subjectsData;
 
             if (subjects.isEmpty) {
-              return Center(
-                child: Text(
-                  'No subjects found.',
-                  style: AppFonts.body(color: AppColors.textSecondary),
+              return RefreshIndicator(
+                onRefresh: () => _loadData(isRefresh: true),
+                color: AppColors.primary,
+                backgroundColor: AppColors.card,
+                child: const CustomScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: EmptyStateWidget(
+                        isCenter: true,
+                        title: 'No Subjects Found',
+                        message: 'There are no subjects available right now.',
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: subjects.length,
-              itemBuilder: (context, index) {
-                final subject = subjects[index];
+            return RefreshIndicator(
+              onRefresh: () => _loadData(isRefresh: true),
+              color: AppColors.primary,
+              backgroundColor: AppColors.card,
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                itemCount: subjects.length,
+                itemBuilder: (context, index) {
+                  final subject = subjects[index];
 
-                return SubjectCard(
-                  title: subject.name,
-                  description: subject.description,
-                  practiced: subject.practicedCount,
-                  total: subject.totalQuestions,
-                  image: subject.imageUrl,
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      TopicsPage.route(subject: subject),
-                    );
-                  },
-                );
-              },
+                  return SubjectCard(
+                    title: subject.name,
+                    description: subject.description,
+                    practiced: subject.practicedCount,
+                    total: subject.totalQuestions,
+                    image: subject.imageUrl,
+                    isRefreshing: isRefreshing,
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        TopicsPage.route(subject: subject),
+                      );
+                      if (mounted) {
+                        _loadData(isRefresh: true);
+                      }
+                    },
+                  );
+                },
+              ),
             );
           },
         ),

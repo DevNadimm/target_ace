@@ -26,7 +26,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
         return left(Failure(type: ErrorType.network));
       }
       final subjectsData = await remoteDataSource.getSubjects(groupId);
-      final subjects = subjectsData.map((e) => SubjectModel.fromJson(e)).toList();
+      final subjects = subjectsData.map((e) => SubjectModel.fromJson(e) as SubjectEntity).toList();
       return right(subjects);
     } on ServerException catch (e) {
       return left(Failure(message: e.message, type: e.type));

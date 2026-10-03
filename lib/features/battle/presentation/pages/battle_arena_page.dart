@@ -63,7 +63,13 @@ class _BattleArenaPageState extends State<BattleArenaPage> {
       body: BlocListener<BattleArenaBloc, BattleArenaState>(
         listener: (context, state) {
           if (state is BattleArenaAccessDenied) {
-            SubscriptionPaywallBottomSheet.show(context, status: state.status);
+            SubscriptionPaywallBottomSheet.show(
+              context, 
+              status: state.status,
+              customTitle: 'Live Battle Access',
+              customDescription: 'Live daily battles require an active TargetAce membership. Verify your account status to join the arena.',
+              customButtonText: 'Activate Membership',
+            );
           } else if (state is BattleArenaReviewAccessGranted) {
             final List<Map<String, dynamic>> userAnswers = state.answers
                 .map((a) => Map<String, dynamic>.from(a as Map))
@@ -124,7 +130,7 @@ class _BattleArenaPageState extends State<BattleArenaPage> {
                       backgroundColor: AppColors.card,
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                         child: Column(
                           children: [
                             FeaturedBattleCard(

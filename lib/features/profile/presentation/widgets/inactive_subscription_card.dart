@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/spring_button.dart';
 import 'package:target_ace/core/config/colors.dart';
@@ -12,28 +12,25 @@ class InactiveSubscriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String title = 'Get Premium Access';
-    String description = 'Claim 7-day Free Trial or upgrade to unlock unlimited live battles and full analytics.';
-    String buttonText = 'CLAIM FREE TRIAL / UPGRADE';
+    String title = 'Premium Membership';
+    String description = 'Unlock exclusive features and take your preparation to the next level with a premium membership.';
+    String buttonText = 'VIEW MEMBERSHIP STATUS';
 
     if (status == 'expired') {
-      title = 'Subscription Expired';
-      description = 'Renew your plan to resume live battles and full platform analytics.';
-      buttonText = 'RENEW NOW';
+      title = 'Membership Inactive';
+      description = 'Your membership is currently inactive. Verify your account status to resume.';
+      buttonText = 'CHECK STATUS';
     } else if (status == 'pending_verification' || status == 'pending') {
       title = 'Verification Pending';
-      description = 'Your payment is under review. Access will unlock once approved.';
+      description = 'Your account is being reviewed. Status will update once approved.';
       buttonText = 'CHECK STATUS';
     } else if (status == 'cancelled') {
-      title = 'Plan Cancelled';
-      description = 'Reactivate your premium subscription anytime to unlock full battle access.';
-      buttonText = 'REACTIVATE';
+      title = 'Membership Cancelled';
+      description = 'Your membership was cancelled. Contact support or check your account status anytime.';
+      buttonText = 'CHECK STATUS';
     }
 
     return CustomContainer(
-      onTap: () {
-        Navigator.push(context, SubscriptionActivationPage.route());
-      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

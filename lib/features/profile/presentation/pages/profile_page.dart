@@ -136,7 +136,7 @@ class _ProfilePageViewState extends State<ProfilePageView> {
                 },
                 child: SingleChildScrollView(
                   key: ValueKey(data.hashCode),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -344,7 +344,6 @@ Thank you.
                       shadowColor: AppColors.error.withAlpha(120),
                       child: const Text('Log Out', style: TextStyle(color: AppColors.white)),
                     ),
-                    const SizedBox(height: 24),
                   ],
                 ),
                 ),

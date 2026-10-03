@@ -142,7 +142,7 @@ class _LeaderboardPageViewState extends State<_LeaderboardPageView> {
           child: SizedBox(height: 16),
         ),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
@@ -211,9 +211,6 @@ class _LeaderboardPageViewState extends State<_LeaderboardPageView> {
               childCount: remainingItems.length,
             ),
           ),
-        ),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 80),
         ),
       ],
     );

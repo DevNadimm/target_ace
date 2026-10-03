@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/features/practice/domain/entities/topic_entity.dart';
 import 'package:target_ace/features/practice/domain/entities/question_entity.dart';
 import 'package:target_ace/features/practice/domain/repository/practice_repository.dart';
+import 'package:target_ace/core/services/user_local_datasource.dart';
 
 part 'practice_session_state.dart';
 
@@ -157,10 +158,23 @@ class PracticeSessionCubit extends Cubit<PracticeSessionState> {
     );
   }
 
-  Future<void> toggleBookmark(String questionId) async {
+  Future<String> toggleBookmark(String questionId) async {
+    final isAdding = !state.bookmarkedIds.contains(questionId);
+    
+    if (isAdding) {
+      final subStatus = await UserLocalDataSource.getSubscriptionStatus();
+      if (subStatus != 'active' && subStatus != 'trial') {
+        final res = await _repository.getBookmarkedQuestionIds();
+        final count = res.fold((_) => 0, (ids) => ids.length);
+        if (count >= 10) {
+          return 'PAYWALL_$subStatus';
+        }
+      }
+    }
+
     final res = await _repository.toggleBookmark(questionId);
-    res.fold(
-      (_) {},
+    return res.fold(
+      (failure) => 'ERROR_${failure.message}',
       (isBookmarked) {
         final newSet = Set<String>.from(state.bookmarkedIds);
         if (isBookmarked) {
@@ -177,6 +191,7 @@ class PracticeSessionCubit extends Cubit<PracticeSessionState> {
           selectedOption: state.selectedOption,
           bookmarkedIds: newSet,
         ));
+        return isBookmarked ? 'ADDED' : 'REMOVED';
       },
     );
   }

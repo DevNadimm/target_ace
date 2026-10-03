@@ -1,10 +1,8 @@
-﻿import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:target_ace/core/services/access_token_generator.dart';
 import 'package:target_ace/core/services/app_preferences.dart';
-import 'package:target_ace/core/services/dio_service.dart';
 import 'package:target_ace/features/home/presentation/pages/main_navigation_page.dart';
 import 'package:target_ace/features/notification/domain/usecases/store_fcm_token.dart';
 import 'package:target_ace/core/services/service_locator.dart';
@@ -294,27 +292,5 @@ class NotificationService {
     } catch (e) {
       debugPrint("Failed to handle FCM logout: $e");
     }
-  }
-
-  Future<void> sendFcmNotification({
-    required String title,
-    required String body,
-    required String token,
-  }) async {
-    final accessToken = await AccessTokenGenerator.generateAccessToken();
-    final dioService = DioService(baseUrl: "https://fcm.googleapis.com");
-    await dioService.initAuthToken(accessToken);
-    final data = {
-      "message": {
-        "token": token,
-        "notification": {"title": title, "body": body},
-        "data": {"type": "notification"},
-      },
-    };
-
-    dioService.postRequest(
-      "/v1/projects/targetace-app/messages:send",
-      data: data,
-    );
   }
 }

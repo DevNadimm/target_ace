@@ -306,7 +306,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         }
 
         if (_isLastStep) {
-          if (!mounted) return;
+          if (!context.mounted) return;
           _submitData(context);
         } else {
           _advanceStep();

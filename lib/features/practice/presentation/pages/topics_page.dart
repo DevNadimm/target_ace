@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:target_ace/core/components/back_button.dart';
 import 'package:target_ace/core/config/colors.dart';
-import 'package:target_ace/core/config/typography.dart';
+
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
+import 'package:target_ace/core/shared/widgets/empty_state_widget.dart';
 import 'package:target_ace/features/practice/domain/entities/subject_entity.dart';
 import 'package:target_ace/features/practice/presentation/widgets/subject_card.dart';
 import 'package:target_ace/features/practice/presentation/pages/practice_session_page.dart';
@@ -71,14 +72,35 @@ class _TopicsPageState extends State<TopicsPage> {
         title: Text(_subject.name),
       ),
       body: GradientBackground(
-        child: _subject.topics.isEmpty
-            ? Center(
-                child: Text(
-                  'No topics found.',
-                  style: AppFonts.body(color: AppColors.textSecondary),
+        child: Builder(
+          builder: (context) {
+            if (_subject.topics.isEmpty) {
+              return RefreshIndicator(
+                onRefresh: _refreshData,
+                color: AppColors.primary,
+                backgroundColor: AppColors.card,
+                child: const CustomScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: EmptyStateWidget(
+                        isCenter: true,
+                        title: 'No Topics Found',
+                        message: 'There are no topics available for this subject yet.',
+                      ),
+                    ),
+                  ],
                 ),
-              )
-            : ListView.builder(
+              );
+            }
+
+            return RefreshIndicator(
+              onRefresh: _refreshData,
+              color: AppColors.primary,
+              backgroundColor: AppColors.card,
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
                 itemCount: _subject.topics.length + 1,
                 itemBuilder: (context, index) {
@@ -122,6 +144,9 @@ class _TopicsPageState extends State<TopicsPage> {
                   );
                 },
               ),
+            );
+          },
+        ),
       ),
     );
   }

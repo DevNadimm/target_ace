@@ -1,26 +1,36 @@
 {
   "project_info": {
-    "project_number": "1098525514115",
-    "project_id": "targetace-app",
-    "storage_bucket": "targetace-app.firebasestorage.app"
+    "project_number": "18544964366",
+    "project_id": "targetace-502609",
+    "storage_bucket": "targetace-502609.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1098525514115:android:33b4b13614bda180617eb6",
+        "mobilesdk_app_id": "1:18544964366:android:577e4f76b956cac55b5d5f",
         "android_client_info": {
           "package_name": "com.targetace.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "18544964366-df9f7gm7235a1gok16kcmaqcu56im2kp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyCDIXkXp_Gi_03xMey8d_giyyJUZlYuLX4"
+          "current_key": "AIzaSyC-7qXEf-WYKsI8K116CcElY8wA_TNGZLI"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "18544964366-df9f7gm7235a1gok16kcmaqcu56im2kp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

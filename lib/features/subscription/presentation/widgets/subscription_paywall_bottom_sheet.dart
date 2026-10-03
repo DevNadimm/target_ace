@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:target_ace/core/components/custom_container.dart';
 import 'package:target_ace/core/components/spring_button.dart';
@@ -8,51 +8,78 @@ import 'package:target_ace/features/subscription/presentation/pages/subscription
 
 class SubscriptionPaywallBottomSheet extends StatelessWidget {
   final String status;
+  final String? customTitle;
+  final String? customDescription;
+  final String? customButtonText;
 
   const SubscriptionPaywallBottomSheet({
     super.key,
     required this.status,
+    this.customTitle,
+    this.customDescription,
+    this.customButtonText,
   });
 
-  static Future<void> show(BuildContext context, {required String status}) {
+  static Future<void> show(
+    BuildContext context, {
+    required String status,
+    String? customTitle,
+    String? customDescription,
+    String? customButtonText,
+  }) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => SubscriptionPaywallBottomSheet(status: status),
+      builder: (context) => SubscriptionPaywallBottomSheet(
+        status: status,
+        customTitle: customTitle,
+        customDescription: customDescription,
+        customButtonText: customButtonText,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    String badgeTag = 'PREMIUM ACCESS';
-    String title = 'Unlock Battle Arena';
-    String description = 'Subscribe to compete in live daily battles, track global rankings, and access full exam analytics.';
-    String buttonText = 'View Subscription Plans';
+    String badgeTag = 'PREMIUM MEMBERSHIP';
+    String title = 'Unlock Premium Access';
+    String description = 'This feature requires an active TargetAce membership. Verify your account status to gain full access.';
+    String buttonText = 'Check Membership Status';
     dynamic iconData = HugeIcons.strokeRoundedDiamond02;
     Color accentColor = AppColors.primary;
 
     if (status == 'expired') {
-      badgeTag = 'MEMBERSHIP EXPIRED';
-      title = 'Renew Your Subscription';
-      description = 'Your previous plan has ended. Renew now to resume live battles and full platform access.';
-      buttonText = 'Renew Subscription';
+      badgeTag = 'MEMBERSHIP INACTIVE';
+      title = 'Membership Inactive';
+      description = 'Your previous membership has ended. Verify your account status to resume live battles and full platform access.';
+      buttonText = 'Check Status';
       iconData = HugeIcons.strokeRoundedAlertSquare;
       accentColor = AppColors.error;
     } else if (status == 'pending_verification' || status == 'pending') {
       badgeTag = 'VERIFICATION IN PROGRESS';
-      title = 'Payment Under Review';
-      description = 'Your payment details are being verified. Your access will be automatically unlocked once confirmed.';
-      buttonText = 'Check Verification Status';
+      title = 'Account Under Review';
+      description = 'Your account details are being verified. Your access will be automatically unlocked once confirmed.';
+      buttonText = 'Check Status';
       iconData = HugeIcons.strokeRoundedClock01;
       accentColor = AppColors.accentYellow;
     } else if (status == 'cancelled') {
       badgeTag = 'PLAN CANCELLED';
-      title = 'Reactivate Membership';
-      description = 'Your subscription was cancelled. Reactivate your plan anytime to rejoin the arena.';
-      buttonText = 'Reactivate Plan';
+      title = 'Membership Cancelled';
+      description = 'Your membership was cancelled. Contact support or check your account status to reactivate.';
+      buttonText = 'Check Status';
       iconData = HugeIcons.strokeRoundedCancel01;
       accentColor = AppColors.error;
+    }
+
+    if (customTitle?.isNotEmpty ?? false) {
+      title = customTitle!;
+    }
+    if (customDescription?.isNotEmpty ?? false) {
+      description = customDescription!;
+    }
+    if (customButtonText?.isNotEmpty ?? false) {
+      buttonText = customButtonText!;
     }
 
     return Container(

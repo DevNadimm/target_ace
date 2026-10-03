@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -55,15 +55,6 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
     }
   }
 
-  Future<void> _openWebsite() async {
-    final uri = Uri.parse(AppConfig.subscriptionPlanUrl);
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      debugPrint('Could not launch subscription URL: $e');
-    }
-  }
-
   Future<void> _launchURL(String urlString) async {
     final uri = Uri.parse(urlString);
     try {
@@ -106,37 +97,29 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
           final status = state.subscription.status;
           if (status != 'active' && status != 'trial' && status != 'pending_verification' && status != 'pending') {
             if (status == 'expired') {
-              inlineError = 'Your subscription has expired. Please renew your plan.';
+              inlineError = 'Your membership is currently inactive. Tap below to refresh your status or contact support for assistance.';
             } else {
-              inlineError = 'No active subscription found. Please subscribe to gain full access.';
+              inlineError = 'No active membership found. Please check back shortly or contact support if you need assistance.';
             }
           }
         }
 
-        String headerTitle = 'Premium Access';
-        String headerSubtext = 'Visit our website to choose a plan, claim your 7-day Free Trial, or complete your subscription.';
-        String mainButtonText = 'Visit Website to Subscribe';
-        VoidCallback mainButtonAction = _openWebsite;
+        String headerTitle = 'Premium Membership';
+        String headerSubtext = 'Unlock exclusive features and content with an active TargetAce membership. Check your account status below.';
         bool isPendingStatus = false;
 
         if (state is SubscriptionLoaded) {
           final status = state.subscription.status;
           if (status == 'expired') {
-            headerTitle = 'Renew Your Subscription';
-            headerSubtext = 'Your subscription has ended. Renew now on our website to continue live battles and full analytics.';
-            mainButtonText = 'Renew Subscription on Website';
-            mainButtonAction = _openWebsite;
+            headerTitle = 'Membership Inactive';
+            headerSubtext = 'Your membership is currently inactive. Refresh your account status to check for updates, or reach out to support for help.';
           } else if (status == 'pending_verification' || status == 'pending') {
-            headerTitle = 'Payment Under Review';
-            headerSubtext = 'Your payment details are currently being verified by admin. Verification usually completes within 2 to 24 hours.';
-            mainButtonText = 'Check Verification Status';
-            mainButtonAction = _checkActivationStatus;
+            headerTitle = 'Account Under Review';
+            headerSubtext = 'Your account details are currently being verified. Verification usually completes within 2 to 24 hours. Your access will unlock automatically once confirmed.';
             isPendingStatus = true;
           } else if (status == 'cancelled') {
-            headerTitle = 'Reactivate Plan';
-            headerSubtext = 'Your subscription was cancelled. Visit our website anytime to reactivate your plan.';
-            mainButtonText = 'Reactivate Plan on Website';
-            mainButtonAction = _openWebsite;
+            headerTitle = 'Membership Cancelled';
+            headerSubtext = 'Your membership was cancelled. Contact support or check your account status for any updates.';
           }
         }
 
@@ -190,7 +173,7 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                       ),
                       const SizedBox(height: 22),
                       Text(
-                        'Subscription Information',
+                        'How to Activate',
                         style: AppFonts.body(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -203,22 +186,23 @@ class _SubscriptionActivationPageState extends State<SubscriptionActivationPage>
                         child: Column(
                           children: [
                             InfoRow(
-                              icon: HugeIcons.strokeRoundedSmartPhone01,
-                              label: 'bKash & Nagad accepted',
-                              value: 'Pay easily with local mobile banking',
+                              icon: HugeIcons.strokeRoundedGlobe02,
+                              label: 'Visit ${Uri.parse(AppConfig.websiteUrl).host}',
+                              value: 'Open our website on your browser',
+                              onTap: () => _launchURL(AppConfig.websiteUrl),
                             ),
                             const CustomDivider.dotted(),
                             InfoRow(
-                              icon: HugeIcons.strokeRoundedClock01,
-                              label: 'Activated within 24 hours',
-                              value: 'Your account goes live after payment review',
+                              icon: HugeIcons.strokeRoundedCheckmarkSquare02,
+                              label: 'Choose your plan',
+                              value: 'Select a preparation plan and complete activation',
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Support & Legal',
+                        'Support',
                         style: AppFonts.body(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -258,20 +242,6 @@ Thank you.
                                 _launchURL(AppConfig.supportWhatsAppUrl(message));
                               },
                             ),
-                            const CustomDivider.dotted(),
-                            InfoRow(
-                              icon: HugeIcons.strokeRoundedLegalDocument01,
-                              label: 'Terms & Conditions',
-                              value: 'Read our terms of service',
-                              onTap: () => _launchURL(AppConfig.termsUrl),
-                            ),
-                            const CustomDivider.dotted(),
-                            InfoRow(
-                              icon: HugeIcons.strokeRoundedShield02,
-                              label: 'Privacy Policy',
-                              value: 'Read our privacy policy',
-                              onTap: () => _launchURL(AppConfig.privacyUrl),
-                            ),
                           ],
                         ),
                       ),
@@ -279,21 +249,18 @@ Thank you.
                       const SizedBox(height: 32),
                       SpringButton(
                         width: double.infinity,
-                        onPressed: mainButtonAction,
-                        child: Text(mainButtonText),
+                        onPressed: _checkActivationStatus,
+                        child: Text('CHECK ACTIVATION STATUS'),
                       ),
                       if (!isPendingStatus) ...[
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 14),
                         Center(
-                          child: TextButton(
-                            onPressed: _checkActivationStatus,
-                            child: Text(
-                              'Already Subscribed? Check Status',
-                              style: AppFonts.body(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryLight,
-                              ),
+                          child: Text(
+                            'Status updates automatically when you return to the app.',
+                            textAlign: TextAlign.center,
+                            style: AppFonts.body(
+                              fontSize: 12,
+                              color: AppColors.textLight,
                             ),
                           ),
                         ),

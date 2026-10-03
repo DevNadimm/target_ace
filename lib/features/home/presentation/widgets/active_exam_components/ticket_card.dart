@@ -72,7 +72,13 @@ class _TicketCardState extends State<_TicketCard>
       return;
     }
     if (status != 'active' && status != 'trial') {
-      SubscriptionPaywallBottomSheet.show(context, status: status);
+      SubscriptionPaywallBottomSheet.show(
+        context, 
+        status: status,
+        customTitle: 'Live Battle Access',
+        customDescription: 'Live daily battles require an active TargetAce membership. Verify your account status to join the arena.',
+        customButtonText: 'Activate Membership',
+      );
       _isNavigating = false;
       return;
     }

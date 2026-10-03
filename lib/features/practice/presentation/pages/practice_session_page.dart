@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart' hide BackButton;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:target_ace/core/components/back_button.dart';
-import 'package:target_ace/core/config/colors.dart';
-import 'package:target_ace/core/config/typography.dart';
 import 'package:target_ace/core/services/service_locator.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:target_ace/core/components/custom_container.dart';
-import 'package:target_ace/core/config/assets.dart';
 import 'package:target_ace/core/shared/widgets/empty_state_widget.dart';
+import 'package:target_ace/core/shared/widgets/error_state_widget.dart';
 import 'package:target_ace/core/shared/widgets/gradient_background.dart';
 import 'package:target_ace/core/shared/widgets/loader.dart';
 import 'package:target_ace/core/shared/widgets/app_notifier.dart';
@@ -16,6 +12,7 @@ import 'package:target_ace/features/practice/domain/entities/subject_entity.dart
 import 'package:target_ace/features/practice/presentation/bloc/session/practice_session_cubit.dart';
 import 'package:target_ace/features/practice/presentation/widgets/question_practice_view.dart';
 import 'package:target_ace/features/practice/presentation/widgets/report_error_bottom_sheet.dart';
+import 'package:target_ace/features/subscription/presentation/widgets/subscription_paywall_bottom_sheet.dart';
 import 'package:target_ace/features/practice/presentation/pages/practice_result_page.dart';
 
 class PracticeSessionPage extends StatelessWidget {
@@ -37,14 +34,15 @@ class PracticeSessionPage extends StatelessWidget {
         subjectId: subject.id,
         topicId: topicId,
       ),
-      child: PracticeSessionPageView(subject: subject),
+      child: PracticeSessionPageView(subject: subject, topicId: topicId),
     );
   }
 }
 
 class PracticeSessionPageView extends StatefulWidget {
   final SubjectEntity subject;
-  const PracticeSessionPageView({super.key, required this.subject});
+  final String? topicId;
+  const PracticeSessionPageView({super.key, required this.subject, this.topicId});
 
   @override
   State<PracticeSessionPageView> createState() => _PracticeSessionPageViewState();
@@ -107,35 +105,23 @@ class _PracticeSessionPageViewState extends State<PracticeSessionPageView> {
 
                       // Failure State
                       if (state.status == PracticeSessionStatus.failure && questions.isEmpty) {
-                        return Center(
-                          child: Text(
-                            state.errorMessage ?? 'An error occurred',
-                            style: AppFonts.body(color: AppColors.error),
-                          ),
+                        return ErrorStateWidget(
+                          message: state.errorMessage ?? 'An error occurred',
+                          onRetry: () {
+                            context.read<PracticeSessionCubit>().loadSession(
+                              subjectId: widget.subject.id,
+                              topicId: widget.topicId,
+                            );
+                          },
                         );
                       }
 
                       // Empty Questions State (Centered)
                       if (questions.isEmpty) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: CustomContainer(
-                              child: EmptyStateWidget(
-                                isCenter: false, // Prevent full height stretch
-                                icon: SvgPicture.asset(
-                                  Assets.archiveOutlined,
-                                  colorFilter: const ColorFilter.mode(
-                                    AppColors.primaryLight,
-                                    BlendMode.srcIn,
-                                  ),
-                                  height: 70,
-                                ),
-                                title: 'No Questions Available',
-                                message: 'No practice questions have been uploaded for this chapter yet. Please try another chapter.',
-                              ),
-                            ),
-                          ),
+                        return const EmptyStateWidget(
+                          isCenter: true,
+                          title: 'No Questions Available',
+                          message: 'No practice questions have been uploaded for this topic yet. Please try another one.',
                         );
                       }
 
@@ -151,10 +137,29 @@ class _PracticeSessionPageViewState extends State<PracticeSessionPageView> {
                             onOptionSelected: (option) {
                               context.read<PracticeSessionCubit>().selectOption(option);
                             },
-                            onToggleBookmark: () {
+                            onToggleBookmark: () async {
                               final q = state.currentQuestion;
                               if (q != null) {
-                                context.read<PracticeSessionCubit>().toggleBookmark(q.id);
+                                final result = await context.read<PracticeSessionCubit>().toggleBookmark(q.id);
+                                if (!context.mounted) return;
+                                
+                                if (result.startsWith('PAYWALL_')) {
+                                  final status = result.replaceFirst('PAYWALL_', '');
+                                  SubscriptionPaywallBottomSheet.show(
+                                    context, 
+                                    status: status,
+                                    customTitle: 'Bookmark Limit Reached',
+                                    customDescription: 'You have reached the free limit of 10 bookmarks. An active TargetAce membership is required to save unlimited questions.',
+                                    customButtonText: 'Activate Membership',
+                                  );
+                                } else if (result == 'ADDED') {
+                                  AppNotifier.showSnackBar(context, 'Question bookmarked successfully!', type: MessageType.success);
+                                } else if (result == 'REMOVED') {
+                                  AppNotifier.showSnackBar(context, 'Bookmark removed.', type: MessageType.info);
+                                } else if (result.startsWith('ERROR_')) {
+                                  final msg = result.replaceFirst('ERROR_', '');
+                                  AppNotifier.showSnackBar(context, msg.isNotEmpty ? msg : 'Failed to update bookmark', type: MessageType.error);
+                                }
                               }
                             },
                             onReportError: () {

@@ -47,3 +47,6 @@ app.*.map.json
 # Environment variables
 .env
 
+# Firebase / Google Service Account Keys
+**/service_account_key.dart
+**/service_account_key.json

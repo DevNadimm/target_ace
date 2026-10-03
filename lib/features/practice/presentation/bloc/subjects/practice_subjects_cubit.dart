@@ -13,13 +13,17 @@ class PracticeSubjectsCubit extends Cubit<PracticeSubjectsState> {
   })  : _getSubjects = getSubjects,
         super(const PracticeSubjectsInitial());
 
-  Future<void> fetchSubjects(String groupId) async {
-    emit(const PracticeSubjectsLoading());
+  Future<void> fetchSubjects(String groupId, {bool isRefresh = false}) async {
+    if (isRefresh && state is PracticeSubjectsLoaded) {
+      emit(PracticeSubjectsLoaded((state as PracticeSubjectsLoaded).subjects, isRefreshing: true));
+    } else {
+      emit(const PracticeSubjectsLoading());
+    }
     final res = await _getSubjects(groupId);
 
     res.fold(
       (failure) => emit(PracticeSubjectsFailure(failure.message, failure.type)),
-      (subjects) => emit(PracticeSubjectsLoaded(subjects)),
+      (subjects) => emit(PracticeSubjectsLoaded(subjects, isRefreshing: false)),
     );
   }
 }

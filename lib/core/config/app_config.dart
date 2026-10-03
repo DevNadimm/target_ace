@@ -16,7 +16,6 @@ class AppConfig {
 
   /// URLs
   static const String websiteUrl = "https://targetace-web.vercel.app/";
-  static const String subscriptionPlanUrl = "$websiteUrl/en#pricing";
   static const String termsUrl = "$websiteUrl/en/terms";
   static const String privacyUrl = "$websiteUrl/en/privacy";
 
